@@ -1,0 +1,903 @@
+/* ---------- base ---------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+body {
+  font-family: monospace, sans-serif;
+  background-color: #0F1A32;
+  color: white;
+  line-height: 1.6;
+}
+
+/* headings are Bebas Neue */
+.label,
+#incident-count,
+#death-count,
+h1, h2, h3, h4,
+nav, .scroll-icon, .year-label, #year-value {
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.section {
+  padding: 4em 2em;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* the small-window notice, hidden by default */
+.minsize {
+  display: none;
+}
+
+/* shown under 1200px wide or 600px tall, where the sequence does not fit */
+@media only screen and (max-width: 1199px), only screen and (max-height: 599px) {
+  .minsize {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    text-align: center;
+    padding: 20px;
+  }
+
+  body {
+    overflow: hidden;
+  }
+}
+
+#main-nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #050E23;
+  z-index: 20;
+  display: flex;
+  justify-content: center; /* centre the contents */
+  align-items: center;
+  padding: 1em 0;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 40px;
+}
+
+.nav-title {
+  margin-right: 60px;         
+}
+
+.nav-content {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#details,
+#epilogue,
+#viz-section {
+  background-color: #0F1A32; /* the page background */
+  z-index: 10;
+  position: relative;
+}
+
+#viz-section {
+  scroll-margin-top: 60px;
+}
+
+
+#ripple-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  background: linear-gradient(to bottom,
+    rgba(15, 26, 50, 0.6),   /* lighter at the top */
+    rgba(10, 18, 35, 0.8),
+    rgba(5, 14, 35, 0.92),
+    rgba(5, 14, 35, 1.0)     /* exactly #050E23 */
+  );}
+
+#ripple-background.hidden {
+  opacity: 0;
+}
+
+#ripple-bg-wrapper {
+  position: relative;
+  z-index: 0;
+  background: linear-gradient(to bottom,
+    rgba(15, 26, 50, 0.5),   /* top: light, semi-transparent */
+    rgba(10, 20, 40, 0.6),
+    rgba(5, 14, 35, 0.6),
+    rgba(5, 14, 35, 0.7),
+    rgba(5, 14, 35, 1.0)     /* bottom: opaque, meeting the nav */
+  );
+}
+
+
+
+/* ---------- cover ---------- */
+#cover {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#cover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.cover-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* centred */
+  z-index: 2;
+  text-align: center;
+  background: none;
+  padding: 0;
+}
+
+.cover-content h1 {
+  font-size: 64px;
+  margin-bottom: -15px; /* tighter leading */
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1.5s ease forwards;
+}
+
+.cover-content h2 {
+  font-size: 28px;
+  margin-top: 0px;     /* sits against the title above */
+  color: white;
+  opacity: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.65px;
+  transform: translateY(20px);
+  animation: fadeInUp 1.5s ease forwards;
+  animation-delay: 0.1s;
+}
+
+/* keyframes */
+@keyframes fadeInUp {
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- intro ---------- */
+#intro {
+  position: relative;
+  overflow: hidden;
+  /* min-height: 240vh; */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 100px 0 340px;
+}
+
+#intro .content {
+  width: 100%;
+  max-width: 820px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  color: white;
+  font-family: monospace;
+  padding:0 20px;
+  padding-left: 60px;
+  gap: 400px;
+  height: 100%;
+}
+
+#cover,
+#intro {
+  background: transparent;
+}
+
+
+/* ----- intro reveal ----- */
+.intro .content {
+  font-size: 14px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+
+/* added on scroll */
+.intro .content.revealed {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+
+/* each intro paragraph starts here */
+.intro-step {
+  margin-top: 50px;
+  margin-bottom: 90px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease;
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+
+.intro-step.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#lampedusa_shade_dark {
+  width: 100%;
+  max-width: 600px;
+  margin: 40px auto 0;
+  display: block;
+  opacity: 0;
+  transform: translateX(-10px) translateY(40px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+#lampedusa_shade_dark.visible {
+  opacity: 1;
+  transform: translateX(-10px) translateY(15px);
+}
+
+/* ---------- nav ---------- */
+#main-nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: #050E23;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1em 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+#main-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* inner container */
+.nav-content {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* each link starts here */
+.nav-link {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: white;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    color 0.5s ease;
+  transition-delay:
+    0.5s,           /* opacity */
+    0.5s,           /* transform */
+    0s;             /* color */
+}
+
+
+/* reveal */
+.nav-link.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#main-nav.sticky-top {
+  position: sticky;
+  top: 0;
+  bottom: auto;
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 0 0px 0px rgba(0,0,0,0);
+  transition: all 0.8s ease;
+}
+
+/* hover */
+.nav-link:hover {
+  color: #fbc900;
+}
+
+/* ---------- the animated sequence ---------- */
+.layout {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 90vh;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 40px 60px 0;
+  box-sizing: border-box;
+  max-width: 1440px;
+  margin: -105px auto 0;
+}
+
+#left {
+  width: 200px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 55px;
+  margin-left: 55px;
+}
+
+#right {
+  width: 200px;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 55px;
+  margin-right: 55px;
+}
+
+#viz {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  text-align: center;
+}
+
+.label,
+#incident-count,
+#death-count,
+h1, h2, h3, h4 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+
+.label {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+#incident-count,
+#death-count {
+  font-size: 48px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 2px;
+  text-align: right;
+}
+
+/* .viz-section is the positioning context for the bar below */
+.viz {
+  position: relative; /* so the year bar can sit at its foot */
+}
+
+/* ---- year bar wrapper, against the bottom of the animation ---- */
+.year-progress-wrapper {
+  position: absolute;
+  bottom: 15px;
+  left: 150px;
+  right: 150px;
+  height: 32px;
+  z-index: 10;
+}
+
+/* ---- the white bar ---- */
+#year-progress-bar {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 10;
+}
+
+#year-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background-color: white;
+  opacity: 0.7;
+  transition: width 0.1s linear;
+}
+
+#year-progress-fill.fade-out {
+  transition: opacity 1s ease;
+  opacity: 0;
+}
+
+/* ---- year labels ---- */
+#year-pop-labels {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+  letter-spacing: -0.5px;
+}
+
+.year-pop {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: bold;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.year-pop.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.year-pop.inactive {
+  opacity: 0.2;
+  visibility: visible;
+}
+
+.year-pop.active {
+  opacity: 0.8;
+  visibility: visible;
+}
+
+
+#lampedusa-intro {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 999;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.island-wrapper {
+  position: relative;
+
+
+  opacity: 0;
+  transform: scale(1);
+  transform-origin: center center;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.island-wrapper svg {
+  width: 300px; /* enlarged */
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.island-wrapper.show {
+  opacity: 1;
+}
+
+.island-wrapper.shrink {
+  transform: scale(0.5) translateY(10px);
+  opacity: 0;
+}
+
+.lampedusa-label {
+  position: absolute;
+  top: calc(50% + 55px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  color: white;
+  opacity: 0;
+  transition: opacity 1s ease;
+  letter-spacing: 1.5px;
+}
+
+.lampedusa-label.show {
+  opacity: 1;
+}
+
+#incident-count,
+#death-count,
+#left .label,
+#right .label,
+#year-progress-bar,
+#year-pop-labels {
+  opacity: 0; /* hidden until the script fades it in */
+}
+
+
+/* ---------- scrollytelling ---------- */
+#lampedusa-context {
+  background-color: #0F1A32;
+  margin-top: 250px;     /* space above */
+  margin-bottom: 250px;  /* space below */
+  padding: 40px 0;       /* vertical padding */
+  position: relative;
+  z-index: 0;
+}
+
+#details h2,
+#reflection h2,
+.scrolly-step h2 {
+  font-size: 2em;
+  margin-bottom: 0.6em;
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  letter-spacing: 1px;
+  color: white;
+}
+
+#death-chart-container {
+  margin-bottom: 40px; 
+}
+
+#details {
+  scroll-margin-top: -80px; /* set against the nav bar height */
+}
+
+
+#details p,
+#reflection p {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.scrolly-text {
+  flex: 0 0 60%;
+}
+
+.scrolly-graphic {
+  flex: 0 0 40%;
+}
+
+
+.scrolly-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 40px;
+}
+
+.scrolly-container {
+  display: flex;
+  width: 100%;
+}
+
+.scrolly-text {
+  display: flex;
+  flex-direction: column;
+  gap: 240px; /* the paragraphs need room to take turns */
+  padding-right: 60px; /* keeps the text off the frame beside it */
+  max-width: 720px;
+}
+
+
+
+.scrolly-step {
+  font-size: 14px;
+  line-height: 1.7;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.scrolly-step {
+  display: flex;
+  flex-direction: column;
+}
+
+.scrolly-step.active {
+  opacity: 1;
+}
+
+.scrolly-graphic {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 5vw;
+  width: 40vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+
+.scrolly-graphic.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+.scrolly-graphic img {
+  width: auto;    
+  height: auto;
+  max-width: 300px;  
+  max-height: 300px; 
+  transition: opacity 0.4s ease;
+  opacity: 0;
+  display: block;
+  margin: 0 auto;
+}
+
+
+.scrolly-graphic img.loaded {
+  opacity: 1;
+}
+
+.fade-img {
+  position: absolute;
+  max-width: 350px;
+  max-height: 350px;
+  width: auto;
+  height: auto;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  display: block;
+}
+
+.fade-img.visible {
+  opacity: 1;
+}
+
+
+
+/* ---------- responsive ---------- */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    padding: 2em;
+  }
+  #left, #right {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 1em;
+  }
+  #viz {
+    width: 100%;
+  }
+  .cover-content h1 {
+    font-size: 2.5em;
+  }
+  .cover-content p {
+    font-size: 1.2em;
+  }
+  .nav-inner {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}
+
+#death-chart-container {
+  margin-top: 60px;
+}
+
+.chart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 120px auto;
+  top: 120px;
+  max-width: 1000px;
+}
+svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* ---------- ending ---------- */
+.epilogue-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 80px;
+  gap: 40px;
+}
+
+.epilogue-text {
+  flex: 1;
+  color: white;
+  font-size: 14px;
+  font-family: monospace;
+  line-height: 1.8;
+}
+
+.epilogue-text p {
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1.2s ease;
+}
+
+.epilogue-text p.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.epilogue-image {
+  flex: 1;
+  text-align: right;
+  scale: 1.5;
+}
+
+.epilogue-image img {
+  width: 100%;
+  max-width: 500px;
+  filter: brightness(0.9) contrast(1.2);
+}
+
+
+#footer-credit {
+  text-align: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.3); /* semi-transparent white */
+  padding: -20px 0 20px;
+  letter-spacing: 1px;
+}
+
+#trends-section {
+  background-color: #0F1A32;
+  padding: 120px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+#year-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: auto;
+  grid-gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  justify-items: center;
+  align-items: center;
+}
+
+/* the last row of three is centred */
+#year-grid canvas:nth-child(n+9) {
+  grid-column: span 1;
+  justify-self: center;
+}
+
+.year-canvas {
+  width: 200px;   /* fixed, so every canvas draws at the same size */
+  height: 200px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  display: block;
+}
+
+/* isotype, drafted and set aside */
+.isotype-title {
+  text-align: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: white;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+.isotype-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 80px;
+}
+
+.isotype-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}
+
+.isotype-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 12px); /* ten per row */
+  gap: 3px;
+  margin-bottom: 12px;
+}
+
+.isotype-block {
+  width: 12px;
+  height: 12px;
+  background-color: currentColor;
+  border-radius: 1px;
+  transition: transform 0.2s ease;
+}
+
+.isotype-block:hover {
+  transform: scale(1.3);
+}
+
+.isotype-label {
+  font-family: monospace;
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+#trends-section {
+  scroll-margin-top: -50px;  /* matches the nav bar height */
+}
+
+

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Ripples into Silence</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- shown when the window is too small for the piece -->
+  <div class="minsize">
+    <div>
+      <p>Please resize your browser.</p>
+      <p>This website works best on browsers at least 1200px by 600px.</p>
+    </div>
+  </div>
+  <div id="ripple-background"></div>
+  <!-- the opening: the island outline, then the cross -->
+  <div id="lampedusa-intro">
+    <div class="island-wrapper">
+      <!-- inline, so CSS can animate it -->
+      <svg viewBox="0 0 149 51" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M42.4451 2.27248L48.1929 7.1393C48.1929 7.1393 56.5935 7.57992 58.362 7.1393C60.1305 6.69869 75.1632 7.58003 75.1632 7.58003L90.1958 9.35034L96.3857 11.1197L101.691 9.79261L106.113 8.02261L108.766 2.27032L111.861 0.5L115.84 3.59744L129.988 6.2526L141.484 8.90746L144.579 12.0052L149 14.6597L146.789 16.4319L141.484 17.7597L138.389 22.1842L140.157 27.0517L142.368 33.6891L147.231 37.2288L148.558 42.9817L147.674 49.6189H140.599L130.43 50.0593L118.493 50.5L114.955 45.1897L113.187 41.2074L110.092 37.6674L107.881 39.4374L106.555 46.96L103.902 49.1723L100.807 47.4026L87.9852 41.2074L84.0058 37.6674L71.184 30.5877L68.0889 26.1625L58.8041 25.7221L55.267 27.0498L52.1721 30.1469L49.0771 29.7068L47.7507 23.0694H41.5608L29.6232 19.9719L21.2226 18.6442L17.6854 19.9719L15.0326 21.7416H11.4956L8.4006 19.9719L3.09501 18.2016L0 14.6616L1.32643 10.2374L6.63202 5.81218L10.6113 2.71444L19.0118 0.502162H32.7181L42.4451 2.27248Z"
+          fill="#FBC900" />
+      </svg>
+    </div>
+    <div class="lampedusa-label">LAMPEDUSA</div>
+  </div>
+  <div id="ripple-bg-wrapper">
+    <!-- 1. cover -->
+    <section id="cover" class="fullscreen cover">
+      <!-- <img src="./images/lampedusa_cover.png" alt="Opening Cover" id="cover-image" /> -->
+      <div class="cover-content">
+        <h1>Ripples into Silence</h1>
+        <h2>Lives That Vanished Within Sight of Lampedusa</h2>
+      </div>
+    </section>
+
+    <!-- 2. intro -->
+    <section id="intro" class="section intro">
+      <div class="content">
+        <p class="intro-step">
+          The central Mediterranean has been a crossing point and a graveyard for years.<br>
+          Each journey begins with hope, but not all end in safety.
+        </p>
+        <p class="intro-step">
+          Near the island of Lampedusa, the sea carries thousands of untold stories.<br>
+          In 2013, one tragedy alone claimed over 360 lives just offshore.
+        </p>
+        <p class="intro-step">
+          More than a decade has passed since that day.<br>
+          Yet boats still arrive — and others still vanish.
+        </p>
+        <p class="intro-step">
+          Some disappear far from help.<br>
+          Others make it close, within sight of land, before fading like ripples on the sea.
+        </p>
+        <p class="intro-step final">
+          What can these scattered traces tell us?<br>
+          And what stories lie just beneath the surface?
+        </p>
+      </div>
+      <!-- <img src="./images/lampedusa_shade_dark.png" alt="lampedusa_shade_dark" id="lampedusa_shade_dark" /> -->
+    </section>
+  </div>
+
+  <!-- 3. nav -->
+  <nav id="main-nav" class="nav">
+    <div class="nav-inner">
+      <a href="#cover" class="nav-link nav-title">RIPPLES INTO SILENCE</a> <!-- title -->
+      <div class="nav-content">
+        <a href="#intro" class="nav-link">Intro</a>
+        <a href="#viz-section" class="nav-link">Outlines</a>
+        <a href="#details" class="nav-link">Trends</a>
+        <!-- <a href="#contrast-section" class="nav-link">Contrast</a> -->
+        <a href="#epilogue" class="nav-link">Ending</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 4. the animated sequence -->
+  <section id="viz-section" class="section viz">
+    <div class="layout">
+      <div id="left">
+        <div class="label">TOTAL INCIDENTS</div>
+        <div id="incident-count">0</div>
+      </div>
+      <div id="viz"></div>
+      <div id="right">
+        <div class="label">DEAD & MISSING</div>
+        <div id="death-count">0</div>
+      </div>
+    </div>
+
+    <div class="year-progress-wrapper">
+      <div class="year-progress-bar" id="year-progress-bar">
+        <div id="year-progress-fill"></div>
+      </div>
+      <div id="year-pop-labels"></div>
+    </div>
+  </section>
+
+  <!-- 5. scrollytelling: distance, the island, the corridor -->
+  <section id="lampedusa-context" class="section scrolly-section">
+    <div class="scrolly-container">
+      <!-- text -->
+      <div class="scrolly-text">
+        <div class="scrolly-step" data-img="img-distance"> <!-- first -->
+          <h2>Only 50 Kilometers Away</h2>
+          <p>
+            From 2014 to 2024, 94 incidents occurred in the waters surrounding Lampedusa. 703 people died or went
+            missing—right on the edge of Europe. Each one of them had made it within just 50 kilometers of land. Close
+            enough to see the island. Close enough to hope. But not close enough to survive.
+          </p>
+        </div>
+
+        <div class="scrolly-step" data-img="img-130"> <!-- second -->
+          <h2>Why Lampedusa?</h2>
+          <p>
+            Lampedusa may be small, but it is Italy's southernmost point—a remote island closer to Africa than to the
+            European mainland. Just 130 kilometers from Tunisia, it lies at the very edge of Europe's southern border.
+            For migrants crossing the central Mediterranean, it is often the first piece of land they can realistically
+            reach. Its location makes it a gateway to Europe, but also a magnet for risk. For many, it represents a
+            narrow window of hope: a reachable destination, a possible future. And that's why so many attempt the
+            crossing, despite the dangers.
+          </p>
+        </div>
+
+        <div class="scrolly-step" data-img="img-corridor"> <!-- third -->
+          <h2>The Tunisian Corridor: A Deadly Shortcut</h2>
+          <p>
+            The route from Sfax, Tunisia to Lampedusa has become so heavily used that it now has a name:
+            The Tunisian Corridor. At just 50 kilometers wide, it is one of the shortest crossings in the central
+            Mediterranean—and one of the deadliest.
+            Over the past decade, this narrow stretch has claimed hundreds of lives.
+            Not because of distance, but because of the lack of rescue, infrastructure, and safe alternatives.
+
+            This isn't a single disaster.
+            It's a persistent pattern, year after year.
+            What follows is a closer look at the toll this corridor has taken—from 2014 to 2024.
+          </p>
+        </div>
+      </div>
+
+      <!-- the frame it swaps -->
+      <div class="scrolly-graphic">
+        <img id="scrolly-image-back" class="fade-img" src="" alt="" />
+        <img id="scrolly-image-front" class="fade-img" src="./assets/img-distance.svg" alt="Lampedusa Overview" />
+      </div>
+    </div>
+  </section>
+  <!-- 6. per-year grid, drafted and set aside -->
+  <!-- <section id="trends-section">
+    <div id="year-grid">
+      one canvas per year, four four three; ids have to match the script -->
+      <!-- <canvas class="year-canvas" data-year="2014"></canvas>
+      <canvas class="year-canvas" data-year="2015"></canvas>
+      <canvas class="year-canvas" data-year="2016"></canvas>
+      <canvas class="year-canvas" data-year="2017"></canvas>
+
+      <canvas class="year-canvas" data-year="2018"></canvas>
+      <canvas class="year-canvas" data-year="2019"></canvas>
+      <canvas class="year-canvas" data-year="2020"></canvas>
+      <canvas class="year-canvas" data-year="2021"></canvas>
+
+      <canvas class="year-canvas" data-year="2022"></canvas>
+      <canvas class="year-canvas" data-year="2023"></canvas>
+      <canvas class="year-canvas" data-year="2024"></canvas>
+    </div> -->
+  <!-- </section> -->
+
+    <!-- 7. the eleven year chart -->
+    <section id="details" class="section">
+      <section class="section" id="chart-section">
+      </section>
+      <div class="content">
+        <h2>A Decade of Lives Lost</h2>
+        <p>From 2014 to 2024, the number of deaths near Lampedusa increased from 85 to 206, showing an overall upward trend over the decade. While 2017 saw a temporary decline, numbers began to rise again from 2018 onward. In recent years, increased departures from Tunisia, coupled with limited rescue capacity and shifting EU policies, have led to more frequent and deadlier incidents. The year 2024 marked the highest toll on record, underscoring the growing desperation—and danger—faced by those attempting to reach Europe. These were not distant tragedies. Many happened within sight of land, a reminder of how close hope can be, and how easily it can vanish.</p>
+        <div id="death-chart-container"></div>
+        <div class="content">
+          <h2>Even 206 Lives Matter</h2>
+          <p>In 2024, more than 45,000 migrants reached Lampedusa. But 206 never made it. Most lost their lives to drowning; others to engine failure, exhaustion, or illness during the journey. The number may seem small in contrast—but each of those 206 was a person with a future, a family, and a reason to hope. They were lost quietly, like ripples fading into the sea.</p>
+        </div>
+        <!-- <div class="isotype-column" style="color: #fbc900">
+          <div class="isotype-grid">
+            2 full blocks -->
+            <!-- <div class="isotype-block"></div>
+            <div class="isotype-block"></div>
+            1 faded block for 6% -->
+            <!-- <div class="isotype-block" style="opacity: 0.2"></div>
+          </div>
+          <div class="label">Dead</div>
+        </div>
+        
+        <div class="isotype-column" style="color: #87cefa">
+          <div class="isotype-grid">
+            example: 100 blocks shown, actual 460 -->
+            <!-- <div class="isotype-block"></div>
+            repeat 100 times -->
+          <!-- </div>
+          <div class="label">Arrived (out of 45997)</div>
+        </div>         -->
+    </section>
+
+
+  <!-- 8. 2024 on its own -->
+
+  <!-- 9. the ending -->
+  <section id="epilogue" class="section epilogue">
+    <div class="epilogue-wrapper">
+      <div class="epilogue-text">
+        <p class="fade-step">On clear days, Lampedusa is visible from far out at sea.<br>A silhouette. A hope.</p>
+        <p class="fade-step">They could see the island.<br>They could see Europe.<br>But seeing is not reaching.</p>
+        <p class="fade-step">If a single plane crash killed 200 people, we would mourn. We would change laws.</p>
+        <p class="fade-step">But when 206 people die across 19 migrant boats, while 45,997 others safely step onto the
+          island, we tell ourselves — maybe that number's not so high.<br>After all, most made it.</p>
+        <p class="fade-step">And yet,<br>206 didn't.</p>
+      </div>
+      <div class="epilogue-image">
+        <img src="./images/lampedusa_shade_dark.png" alt="Lampedusa Aerial" />
+      </div>
+    </div>
+  </section>
+
+  <div id="tooltip" style="
+  position: absolute;
+  background: rgba(5, 14, 35, 0.85);
+  opacity: 0.75;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-family: monospace;
+  padding: 6px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 9999;
+"></div>
+
+
+  <!-- replay button, not currently used
+  <button id="replay-btn" style="
+position: fixed;
+top: 20px;
+right: 20px;
+padding: 10px 16px;
+font-size: 14px;
+background: #fbc900;
+color: #000;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.5s ease;
+z-index: 100;
+">
+    Replay
+  </button> -->
+
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <script type="module" src="js/main.js"></script>
+
+  <!-- scroll handling for the cover, intro and nav -->
+  <script>
+    const steps = document.querySelectorAll('.intro-step');
+    const introContent = document.querySelector('#intro .content');
+    const nav = document.querySelector('#main-nav');
+    const navLinks = document.querySelectorAll('#main-nav .nav-link');
+    const shadeImage = document.querySelector('#lampedusa_shade_dark');
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const windowH = window.innerHeight;
+
+      // the intro paragraphs surface one at a time
+      const introRect = introContent.getBoundingClientRect();
+      if (introRect.top < windowH * 0.95) {
+        introContent.classList.add('revealed');
+      }
+
+      steps.forEach((step, i) => {
+        const rect = step.getBoundingClientRect();
+        const triggerPoint = windowH * 0.85 - i * 40;
+        if (rect.top < triggerPoint) {
+          step.classList.add('visible');
+        }
+      });
+
+      const navTop = nav.getBoundingClientRect().top;
+      if (navTop < window.innerHeight) {
+        nav.classList.add('visible');
+        navLinks.forEach((link, i) => {
+          setTimeout(() => {
+            link.classList.add('visible');
+          }, i * 150);
+        });
+
+        const introBottom = document.querySelector('#intro').offsetTop + document.querySelector('#intro').offsetHeight;
+        if (scrollY > introBottom - 100) {
+          nav.classList.add('sticky-top');
+        } else {
+          nav.classList.remove('sticky-top');
+        }
+      } else {
+        nav.classList.remove('visible', 'sticky-top');
+        navLinks.forEach(link => link.classList.remove('visible'));
+      }
+
+      const lastStep = document.querySelector('.intro-step.final');
+      if (lastStep && shadeImage) {
+        if (lastStep.classList.contains('visible')) {
+          setTimeout(() => {
+            shadeImage.classList.add('visible');
+          }, 300);
+        } else {
+          shadeImage.classList.remove('visible');
+        }
+      }
+
+
+    });
+
+    window.dispatchEvent(new Event('scroll'));
+  </script>
+
+</body>
+
+<footer id="footer-credit">
+  Designed by Zhuoqi Liu
+</footer>
+
+</html>
