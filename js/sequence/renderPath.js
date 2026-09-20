@@ -11,7 +11,7 @@ import {
   RIPPLE_OUTER_OPA_ORG, RIPPLE_SHOWING,
   RIPPLE_OUTER_FADING_DURATION, RIPPLE_OUTER_ENLARGE,
   RIPPLE_INNER_OPACITY_STEPS, RIPPLE_BLUR_MAX,
-  LABEL_OFFSET, LABEL_NUDGES, LABEL_FADE, LABEL_HOLD
+  LABEL_FONT, LABEL_OFFSET, LABEL_NUDGES, LABEL_FADE, LABEL_HOLD
 } from "../config.js";
 
 // Where the travelling label sits relative to the head of its path:
@@ -40,7 +40,8 @@ function labelStyle(selection) {
     .attr("stroke-width", 0.6)
     .style("opacity", 0)
     .style("pointer-events", "none")
-    .style("font-family", "monospace");
+    .style("font-family", LABEL_FONT)
+    .style("font-variant-numeric", "tabular-nums lining-nums");
 }
 
 export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 1, onEnd }) {

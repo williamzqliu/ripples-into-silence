@@ -1,6 +1,6 @@
 // js/sequence/drawRadiusLine.js
 
-import { cx, cy, LAUNCH_RADIUS, RADIUS_KM } from "../config.js";
+import { cx, cy, LAUNCH_RADIUS, RADIUS_KM, LABEL_FONT } from "../config.js";
 
 export function drawRadiusLine() {
     const svg = d3.select("#viz").select("svg");
@@ -27,8 +27,9 @@ export function drawRadiusLine() {
         .attr("y", centerY - 10)
         .attr("text-anchor", "middle")
         .attr("fill", "white")
-        .attr("font-size", 11)
-        .attr("font-family", "monospace")
+        .attr("font-size", 12)
+        .style("font-family", LABEL_FONT)
+        .style("font-variant-numeric", "tabular-nums lining-nums")
         .attr("opacity", 0)
         .text("0 km")
         .lower();

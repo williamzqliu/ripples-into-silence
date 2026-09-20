@@ -4,7 +4,7 @@ import {
   cx, cy,
   LAUNCH_RADIUS, RADIUS_KM,
   RANGE_CIRCLE_STROKE,
-  DISTANCE_RINGS_KM, radiusFractionFor
+  DISTANCE_RINGS_KM, radiusFractionFor, LABEL_FONT
 } from "../config.js";
 
 // Resolves when the fade-in is over, so the opening can be sequenced.
@@ -61,8 +61,8 @@ function drawDistanceRings(delay) {
       .attr("y", cy - r - 5)
       .attr("text-anchor", "middle")
       .attr("fill", "rgba(255,255,255,0.28)")
-      .attr("font-size", 9)
-      .attr("font-family", "monospace")
+      .attr("font-size", 10)
+      .style("font-family", LABEL_FONT)
       .attr("opacity", 0)
       .text(`${km} km`)
       .lower()

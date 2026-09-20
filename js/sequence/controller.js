@@ -25,6 +25,11 @@ export async function runSceneIntro() {
     // 3. wait for both
     await Promise.all([svgPromise, labelPromise]);
 
+    // The opening overlay is fixed, full-screen and was pinned above
+    // everything else on the page. It used to stay there for the rest of the
+    // scroll, so the island and its label showed through every section below.
+    d3.select("#lampedusa-intro").style("display", "none");
+
     // 4. the fifty kilometre circle
     await drawCircle(2000); // 2s delay plus a 1.2s fade
 

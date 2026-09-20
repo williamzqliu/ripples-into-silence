@@ -39,7 +39,9 @@ served over HTTP rather than opened from the filesystem:
 python -m http.server 8099
 ```
 
-Then open <http://localhost:8099>. D3 is loaded from a CDN; the fonts are self-hosted.
+Then open <http://localhost:8099>. D3 is loaded from a CDN. EB Garamond is
+self-hosted from `fonts/` as a woff2 variable font; Bebas Neue, used for the
+headings, still comes from Google Fonts.
 
 ## Layout
 

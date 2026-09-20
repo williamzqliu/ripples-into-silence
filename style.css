@@ -1,4 +1,49 @@
+/* ---------- page tokens ---------- */
+
+:root {
+  /* One measure for every full-width block on the page. The content edges
+     used to land at 193, 233, 253 and 273 on a 1600 screen, because each
+     block carried its own padding inside the same 1200 box. */
+  --page-max: 1200px;
+  --page-pad: 40px;
+
+  /* One stacking ladder, low to high. It used to run 0, 1, 10, 20, 100, 999,
+     9999 with the scrollytelling frame above the navigation and the opening
+     overlay above everything, for the whole length of the page. */
+  --z-background: -1;
+  --z-section: 1;
+  --z-viz: 2;
+  --z-scrolly-graphic: 3;
+  --z-nav: 10;
+  --z-opening: 20;
+  --z-minsize: 30;
+}
+
 /* ---------- base ---------- */
+
+/* EB Garamond, self-hosted. The variable roman covers 400 to 800, which is
+   every weight this page asks for. Converted from the OFL TTF in
+   fonts/EB_Garamond/ to woff2: 914KB to 288KB. */
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('fonts/EBGaramond-Variable.woff2') format('woff2-variations'),
+       url('fonts/EB_Garamond/EBGaramond-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The running readouts count up and down, so their digits have to hold the
+   same width or the label jitters as it changes. EB Garamond carries tabular
+   figures; the monospace this replaces was doing the same job by brute
+   force. */
+.tabular,
+#incident-count,
+#death-count,
+#viz text {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
 * {
   box-sizing: border-box;
   margin: 0;
@@ -11,7 +56,7 @@ html {
 
 
 body {
-  font-family: monospace, sans-serif;
+  font-family: 'EB Garamond', Georgia, serif;
   background-color: #0F1A32;
   color: white;
   line-height: 1.6;
@@ -58,7 +103,7 @@ img {
     bottom: 0;
     color: white;
     background-color: rgba(0, 0, 0, 0.85);
-    z-index: 9999;
+    z-index: var(--z-minsize);
     text-align: center;
     padding: 20px;
   }
@@ -73,7 +118,7 @@ img {
   top: 0;
   width: 100%;
   background: #050E23;
-  z-index: 20;
+  z-index: var(--z-nav);
   display: flex;
   justify-content: center; /* centre the contents */
   align-items: center;
@@ -85,8 +130,8 @@ img {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 1200px;
-  padding: 0 40px;
+  max-width: var(--page-max);
+  padding: 0 var(--page-pad);
 }
 
 .nav-title {
@@ -105,7 +150,7 @@ img {
 #epilogue,
 #viz-section {
   background-color: #0F1A32; /* the page background */
-  z-index: 10;
+  z-index: var(--z-section);
   position: relative;
 }
 
@@ -120,7 +165,7 @@ img {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
+  z-index: var(--z-background);
   pointer-events: none;
   overflow: hidden;
   opacity: 1;
@@ -229,7 +274,7 @@ img {
   justify-content: space-between;
   text-align: left;
   color: white;
-  font-family: monospace;
+  font-family: 'EB Garamond', Georgia, serif;
   padding:0 20px;
   padding-left: 60px;
   gap: 400px;
@@ -293,7 +338,7 @@ img {
   top: 0;
   width: 100%;
   background: #050E23;
-  z-index: 20;
+  z-index: var(--z-nav);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -361,12 +406,12 @@ img {
 .layout {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: var(--z-viz);
   height: 90vh;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 40px 60px 0;
+  padding: 40px var(--page-pad) 0;
   box-sizing: border-box;
   /* The canvas is 650 wide and the two counter columns are 200 each, so
      1170 is the width at which they sit as close to the circle as they can
@@ -530,7 +575,7 @@ h1, h2, h3, h4 {
   left: 0;
   width: 100%;
   height: 100vh;
-  z-index: 999;
+  z-index: var(--z-opening);
   pointer-events: none;
   display: flex;
   justify-content: center;
@@ -596,9 +641,12 @@ h1, h2, h3, h4 {
   background-color: #0F1A32;
   margin-top: 250px;     /* space above */
   margin-bottom: 250px;  /* space below */
-  padding: 40px 0;       /* vertical padding */
+  /* This is the same element as .scrolly-section below. An id beats a class,
+     so the 0 here was zeroing that rule's horizontal padding and leaving the
+     block 40px wider on each side than everything above it. */
+  padding: 40px var(--page-pad);
   position: relative;
-  z-index: 0;
+  z-index: var(--z-section);
 }
 
 #details h2,
@@ -641,9 +689,9 @@ h1, h2, h3, h4 {
   justify-content: center;
   align-items: flex-start;
   gap: 60px;
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 100px 40px;
+  padding: 100px var(--page-pad);
 }
 
 .scrolly-container {
@@ -686,7 +734,7 @@ h1, h2, h3, h4 {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 100;
+  z-index: var(--z-scrolly-graphic);
   pointer-events: none;
   opacity: 1;
   transition: opacity 0.6s ease;
@@ -780,9 +828,9 @@ svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 80px 80px;
+  padding: 80px var(--page-pad);
   gap: 40px;
 }
 
@@ -790,7 +838,7 @@ svg {
   flex: 1;
   color: white;
   font-size: 14px;
-  font-family: monospace;
+  font-family: 'EB Garamond', Georgia, serif;
   line-height: 1.8;
 }
 
@@ -841,9 +889,9 @@ svg {
 
 #trends-section {
   background-color: #0F1A32;
-  padding: 120px 60px;
+  padding: 120px var(--page-pad);
   position: relative;
-  z-index: 1;
+  z-index: var(--z-section);
 }
 
 #year-grid {
@@ -915,7 +963,7 @@ svg {
 }
 
 .isotype-label {
-  font-family: monospace;
+  font-family: 'EB Garamond', Georgia, serif;
   font-size: 14px;
   color: rgba(255,255,255,0.8);
 }
