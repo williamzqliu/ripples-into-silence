@@ -1,7 +1,7 @@
 // js/main.js
 
 import { runSceneIntro } from "./sequence/controller.js";
-import { drawDeathSurvivalChart } from './sequence/deathSurvivalChart.js';
+import { drawYearDiscs } from './sequence/yearDiscs.js';
 import { startRippleBackground } from './sequence/rippleBackground.js';
 
 
@@ -11,8 +11,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-// The eleven year chart, further down the page.
-drawDeathSurvivalChart("#death-chart-container");
+// The eleven years, further down the page. This replaced a line chart whose
+// series was written into the source by hand: of its eleven values only 2024
+// matched the data, and the paragraph beside it described the shape of the
+// invented curve.
+drawYearDiscs("#year-discs");
 
 let animationStarted = false;
 
