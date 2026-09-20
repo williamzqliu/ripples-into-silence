@@ -14,7 +14,7 @@ Built for *Mapping Movement: Exploring Migration through Data*.
 ## Data
 
 `data/lampedusa_nearby_incidents.csv` is a filtered extract of the
-[Missing Migrants Project](https://missingmigrants.iom.int/) record published by the
+[Missing Migrants Project](https://missingmigrants.iom.int/downloads) record published by the
 International Organization for Migration, cut to incidents within 50 km of Lampedusa.
 
 | | |
@@ -87,4 +87,5 @@ jump a path forward when it returns.
 ## Credits
 
 Design and development by Zhuoqi Liu. Faculty guidance from Todd Linkner.
-Data from the Missing Migrants Project, IOM.
+Data from the Missing Migrants Project, International Organization for Migration:
+<https://missingmigrants.iom.int/downloads>

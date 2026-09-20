@@ -392,12 +392,19 @@ img {
   margin-right: 55px;
 }
 
+/* The SVG is a fixed 650 square and .layout is 90vh with its items at
+   flex-start, so the circle used to hang under the sticky nav with the slack
+   left below it. Stretching this column to the full height lets its own
+   align-items centre the square, and the padding keeps the top of the circle
+   clear of the nav. Measured at 1900x900: 83px above, 81px below. */
 #viz {
   flex-grow: 1;
+  align-self: stretch;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 40px;
+  padding-top: 48px;
+  box-sizing: border-box;
   text-align: center;
 }
 
@@ -811,8 +818,19 @@ svg {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 14px;
   color: rgba(255, 255, 255, 0.3); /* semi-transparent white */
-  padding: -20px 0 20px;
+  padding: 0 0 20px;
   letter-spacing: 1px;
+  line-height: 1.7;
+}
+
+#footer-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#footer-credit a:hover {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 #trends-section {
