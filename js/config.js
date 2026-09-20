@@ -124,6 +124,18 @@ export const LABEL_NUDGES = [
 export const LABEL_FADE = 300;        // ms, in and out
 export const LABEL_HOLD = 800;        // ms the death count stays up
 
+// --------------------------------------------------------------- arrivals
+
+// The only figure on this page that is not in the incident record. The
+// Missing Migrants extract counts boats where somebody died; it has no way
+// of counting the boats that arrived. 45,997 people landed at Lampedusa in
+// 2024, on 1,095 boats, per the Italian Red Cross, which runs the reception
+// centre there. For scale, UNHCR puts sea arrivals for the whole of Italy
+// that year at 66,617.
+export const ARRIVALS_2024 = 45997;
+export const ARRIVALS_SOURCE =
+  "Arrivals: Italian Red Cross via InfoMigrants, 13 January 2025";
+
 // ------------------------------------------------------------------- stats
 
 export const UPDATE_RATE = 850;

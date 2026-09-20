@@ -190,8 +190,7 @@
           <h2>2024</h2>
           <p>45,997 people reached Lampedusa in 2024, on 1,095 boats, according to the
             Italian Red Cross, which runs the reception centre on the island. In the same
-            water that year, 206 did not: 180 drowned, 21 died in the boat itself, 3 of
-            exposure and 2 of illness on the way.</p>
+            water that year, 206 did not.</p>
         </div>
         <!-- <div class="isotype-column" style="color: #fbc900">
           <div class="isotype-grid">
@@ -215,7 +214,19 @@
     </section>
 
 
-  <!-- 8. 2024 on its own -->
+  <!-- 8. 2024, at one dot per person. The section is tall and the canvas is
+       stuck to the top of it, so scrolling through the section is what fades
+       the arrivals out and sorts the 206. -->
+  <section id="arrivals-section" class="section arrivals">
+    <div class="arrivals__sticky">
+      <div class="arrivals__caption">
+        <p class="arrivals__count">46,203 people</p>
+        <p class="arrivals__note">Everyone who set out for Lampedusa in 2024 and reached
+          this water. One dot is one person.</p>
+      </div>
+      <canvas id="arrivals-canvas"></canvas>
+    </div>
+  </section>
 
   <!-- 9. the ending -->
   <section id="epilogue" class="section epilogue">

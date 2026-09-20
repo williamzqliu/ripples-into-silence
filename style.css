@@ -823,6 +823,65 @@ svg {
   margin: 0 auto;
 }
 
+/* ---------- 2024, one dot per person ---------- */
+
+/* Tall, because the scroll through it is the animation. The canvas sticks to
+   the top and the section's own height is the timeline. */
+.arrivals {
+  position: relative;
+  z-index: var(--z-section);
+  background-color: #0F1A32;
+  height: 320vh;
+  padding: 0;
+}
+
+.arrivals__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.arrivals__caption {
+  padding: 84px var(--page-pad) 0;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  width: 100%;
+  text-align: center;
+}
+
+.arrivals__count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.arrivals__note {
+  margin: 6px auto 0;
+  max-width: 34em;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+#arrivals-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .arrivals { height: 280vh; }
+  .arrivals__caption { padding-top: 56px; }
+  .arrivals__count { font-size: 28px; }
+}
+
 /* ---------- ending ---------- */
 .epilogue-wrapper {
   display: flex;

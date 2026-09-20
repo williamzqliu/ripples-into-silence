@@ -2,6 +2,7 @@
 
 import { runSceneIntro } from "./sequence/controller.js";
 import { drawYearDiscs } from './sequence/yearDiscs.js';
+import { drawArrivalsField } from './sequence/arrivalsField.js';
 import { startRippleBackground } from './sequence/rippleBackground.js';
 
 
@@ -16,6 +17,10 @@ window.addEventListener("DOMContentLoaded", () => {
 // matched the data, and the paragraph beside it described the shape of the
 // invented curve.
 drawYearDiscs("#year-discs");
+
+// 2024 at one dot per person: the 206 are 0.45 per cent of the field they
+// are hidden in, until the rest of it goes.
+drawArrivalsField("#arrivals-section", "#arrivals-canvas");
 
 let animationStarted = false;
 
