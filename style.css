@@ -863,7 +863,28 @@ svg {
 .epilogue-image img {
   width: 100%;
   max-width: 500px;
-  filter: brightness(0.9) contrast(1.2);
+  /* The asset carries its own tone now. The filter here used to pull the
+     brightness down by a tenth on a relief whose median luminance was 29
+     against a background of 25: a contrast ratio of 1.04 to 1. Held a little
+     under full strength so the last two lines of text close the page. */
+  opacity: 0.9;
+}
+
+.epilogue-sources {
+  margin-top: 4em;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.85em;
+  line-height: 1.9;
+}
+
+.epilogue-sources a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.epilogue-sources a:hover {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 
