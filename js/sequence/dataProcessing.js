@@ -2,8 +2,8 @@
 
 import {
   SCALE_DEAD_MIN, SCALE_DEAD_MAX,
-  SCALE_DISTANCE_MIN, SCALE_DISTANCE_MAX,
-  ANGLE_BUCKETS, INITIAL_INCIDENTS,
+  RADIUS_KM, radiusFractionFor,
+  ANGLE_BUCKETS, GOLDEN_ANGLE, INITIAL_INCIDENTS,
   FEATURED_DEAD, FEATURED_DISTANCE,
   FEATURED_ANGLE_MIN_DEG, FEATURED_ANGLE_MAX_DEG
 } from "../config.js";
@@ -27,21 +27,24 @@ export async function loadAndProcessData(csvPath = "./data/lampedusa_nearby_inci
     .domain(d3.extent(events, d => d.dead))
     .range([SCALE_DEAD_MIN, SCALE_DEAD_MAX]);
 
-  const disappearScale = d3.scaleLinear()
-    .domain(d3.extent(events, d => d.distance))
-    .range([SCALE_DISTANCE_MIN, SCALE_DISTANCE_MAX])
-    .clamp(true);
-
-  const baseAngles = d3.range(events.length).map(i =>
-    (i / events.length) * 2 * Math.PI + (Math.random() - 0.5) * 0.05
-  );
-
-  const paths = events.map((d, i) => ({
+  const paths = events.map(d => ({
     ...d,
-    angle: baseAngles[i],
     radius: rScale(d.dead),
-    disappearRatio: disappearScale(d.distance)
+    disappearRatio: radiusFractionFor(d.distance)
   }));
+
+  // Angle is the one free variable here: the piece never asks anyone to read
+  // it. It used to be handed out in CSV row order, which is chronological, so
+  // each year owned a contiguous wedge and marks at a similar distance sat
+  // next to each other. Fifty-eight of the ninety-four landing points
+  // overlapped another one. Walking the golden angle down the radius order
+  // puts consecutive radii 137.5 degrees apart and brings that to ten,
+  // without moving a single mark off the distance it was recorded at.
+  [...paths]
+    .sort((a, b) => a.disappearRatio - b.disappearRatio)
+    // Wrapped into one turn: the angle window that picks the opening paths,
+  // the sector buckets and the label nudges all read it as a bearing.
+  .forEach((d, k) => { d.angle = (k * GOLDEN_ANGLE) % (2 * Math.PI); });
 
   const yearEventCounts = {};
   paths.forEach(p => {

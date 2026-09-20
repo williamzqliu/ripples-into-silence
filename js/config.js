@@ -26,18 +26,40 @@ export const CROSS_COLOUR = "#FBC900";
 
 // ---------------------------------------------------------------- encoding
 
-// Ripple radius carries the number of people dead or missing.
-export const SCALE_DEAD_MIN = 5;
+// Ripple radius carries the number of people dead or missing. Seventy of
+// the ninety-four incidents killed five people or fewer, so the floor is
+// what most of the marks are drawn at.
+export const SCALE_DEAD_MIN = 6;
 export const SCALE_DEAD_MAX = 25;
 
-// Radial position carries the incident's recorded distance from the island:
-// a tenth of the radius for the nearest, nine tenths for the furthest.
-export const SCALE_DISTANCE_MIN = 0.1;
-export const SCALE_DISTANCE_MAX = 0.9;
+// Radial position carries the incident's recorded distance from the island.
+// The far end is the whole radius, so an incident recorded at fifty
+// kilometres lands on the dashed circle the radius line calls fifty
+// kilometres; it used to stop at nine tenths of it. The near end keeps a
+// little clearance so the closest incident does not land on the cross.
+export const SCALE_DISTANCE_MIN = 0.08;
+export const SCALE_DISTANCE_MAX = 1;
 
-// Paths are spread over this many angular sectors, so a dense year does not
-// collapse into one overlapping smear.
+/** Where a distance in kilometres sits, as a fraction of LAUNCH_RADIUS. The
+    scale is fixed to the frame rather than to the extent of the data, so the
+    rings below and the incidents are read off the same ruler. */
+export function radiusFractionFor(km) {
+  const t = Math.min(Math.max(km / RADIUS_KM, 0), 1);
+  return SCALE_DISTANCE_MIN + t * (SCALE_DISTANCE_MAX - SCALE_DISTANCE_MIN);
+}
+
+// Drawn inside the fifty kilometre circle, so the empty outer water reads as
+// a measured distance rather than as space nothing was plotted in.
+export const DISTANCE_RINGS_KM = [10, 25];
+
+// Paths are released in a shuffled round robin over this many angular
+// sectors, so consecutive incidents arrive from different directions.
 export const ANGLE_BUCKETS = 20;
+
+// Angle carries nothing, so it is free to be chosen for legibility. Walking
+// the golden angle down the radius order puts marks at a similar distance
+// 137.5 degrees apart. See dataProcessing.
+export const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 // The first few paths are picked to be legible rather than representative:
 // small enough to read, near enough to arrive quickly, and launched from the
@@ -73,14 +95,16 @@ export const RIPPLE_INNER_STROKE = 2;
 export const RIPPLE_BLUR_MAX = 4;                 // px, by the end of the fade
 
 // How visible the ring left behind is, by the size of the loss, so a larger
-// incident stays readable for longer.
+// incident stays readable for longer. The bottom rung was 0.1, which is
+// where seventy of the ninety-four incidents sit: three quarters of the
+// record was drawn at the edge of visibility. The ordering is unchanged.
 export const RIPPLE_INNER_OPACITY_STEPS = [
-  { upTo: 5, opacity: 0.1 },
-  { upTo: 10, opacity: 0.15 },
-  { upTo: 20, opacity: 0.2 },
-  { upTo: 50, opacity: 0.25 },
-  { upTo: 100, opacity: 0.3 },
-  { upTo: Infinity, opacity: 0.4 },
+  { upTo: 5, opacity: 0.18 },
+  { upTo: 10, opacity: 0.22 },
+  { upTo: 20, opacity: 0.26 },
+  { upTo: 50, opacity: 0.31 },
+  { upTo: 100, opacity: 0.37 },
+  { upTo: Infinity, opacity: 0.45 },
 ];
 
 // -------------------------------------------------------- travelling label

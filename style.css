@@ -368,12 +368,17 @@ img {
   align-items: flex-start;
   padding: 40px 60px 0;
   box-sizing: border-box;
-  max-width: 1440px;
+  /* The canvas is 650 wide and the two counter columns are 200 each, so
+     1170 is the width at which they sit as close to the circle as they can
+     without being squeezed. At 1440 they were pushed to the far corners of a
+     wide screen with four hundred empty pixels in between. */
+  max-width: 1200px;
   margin: -105px auto 0;
 }
 
 #left {
   width: 200px;
+  flex-shrink: 0;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -384,6 +389,7 @@ img {
 
 #right {
   width: 200px;
+  flex-shrink: 0;
   text-align: right;
   display: flex;
   flex-direction: column;
