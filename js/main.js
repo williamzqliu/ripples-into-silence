@@ -15,18 +15,72 @@ window.addEventListener("DOMContentLoaded", () => {
 drawDeathSurvivalChart("#death-chart-container");
 
 let animationStarted = false;
-let allowAutoAnimation = true; // on by default
+
+// Reloading part way down the page should not haul the reader back to the
+// top and play the opening at them. Read here and again on load, because a
+// browser restoring the previous scroll position may do it after this module
+// has already run.
+let loadedAtTop = window.scrollY <= 100;
+
+// Nothing may start the opening until load has confirmed where the page
+// actually opened. The synthetic scroll event further down fires before that,
+// and without this gate it started the animation from any scroll position.
+let armed = false;
+
+// The opening is choreographed, so the page holds still while it establishes
+// itself. It holds gently. It lets go after LOCK_MAX_MS whatever the sequence
+// is doing, and sooner if the reader makes a deliberate move: the animation
+// runs for about twelve seconds, which is far too long to take the scrollbar
+// away from somebody.
+const LOCK_MAX_MS = 3500;
+// One notch of a trackpad is not an instruction to leave; a push is.
+const WHEEL_RELEASE_PX = 60;
+const TOUCH_RELEASE_PX = 24;
+const RELEASE_KEYS = new Set([
+  ' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'
+]);
+
+// Replaced while the lock is on, so unlockScroll and every release trigger
+// go through the same teardown exactly once.
+let releaseLock = () => { };
 
 function lockScroll() {
   document.body.style.overflow = 'hidden';
-  const nav = document.getElementById('main-nav');
-  if (nav) nav.style.pointerEvents = 'none';
+
+  let wheeled = 0;
+  let touchStart = null;
+
+  const onWheel = (e) => {
+    wheeled += Math.abs(e.deltaY);
+    if (wheeled >= WHEEL_RELEASE_PX) releaseLock();
+  };
+  const onTouchStart = (e) => { touchStart = e.touches[0].clientY; };
+  const onTouchMove = (e) => {
+    if (touchStart === null) return;
+    if (Math.abs(e.touches[0].clientY - touchStart) >= TOUCH_RELEASE_PX) releaseLock();
+  };
+  const onKey = (e) => { if (RELEASE_KEYS.has(e.key)) releaseLock(); };
+
+  const timer = setTimeout(() => releaseLock(), LOCK_MAX_MS);
+
+  window.addEventListener('wheel', onWheel, { passive: true });
+  window.addEventListener('touchstart', onTouchStart, { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('keydown', onKey);
+
+  releaseLock = () => {
+    clearTimeout(timer);
+    window.removeEventListener('wheel', onWheel);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('keydown', onKey);
+    document.body.style.overflow = '';
+    releaseLock = () => { };
+  };
 }
 
 function unlockScroll() {
-  document.body.style.overflow = '';
-  const nav = document.getElementById('main-nav');
-  if (nav) nav.style.pointerEvents = 'auto';
+  releaseLock();
 }
 
 function showReplayButton() {
@@ -55,6 +109,10 @@ window.addEventListener('scroll', () => {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
   const navTop = nav.getBoundingClientRect().top;
 
+  // Suppressed by a reload below the fold, but scrolling back to the top is
+  // the reader choosing to start from the beginning, so arm it again.
+  if (!loadedAtTop && window.scrollY <= 100) loadedAtTop = true;
+
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -63,7 +121,7 @@ window.addEventListener('scroll', () => {
       }, i * 150);
     });
 
-    if (!animationStarted && allowAutoAnimation) {
+    if (!animationStarted && armed && loadedAtTop) {
       animationStarted = true;
       lockScroll();
       runSceneIntro().then(() => {
@@ -116,7 +174,7 @@ function autoScrollAndStartAnimation() {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
 
   const check = () => {
-    if (animationStarted || !nav || !allowAutoAnimation) return;
+    if (animationStarted || !nav || !armed || !loadedAtTop) return;
 
     const navTop = nav.getBoundingClientRect().top;
 
@@ -128,8 +186,15 @@ function autoScrollAndStartAnimation() {
         behavior: 'smooth',
       });
 
+      let aborted = false;
+      const abort = () => { aborted = true; };
+      window.addEventListener('wheel', abort, { passive: true });
+      window.addEventListener('touchmove', abort, { passive: true });
+
       setTimeout(() => {
-        if (animationStarted) return;
+        window.removeEventListener('wheel', abort);
+        window.removeEventListener('touchmove', abort);
+        if (animationStarted || aborted) return;
 
         animationStarted = true;
         nav.classList.add('sticky-top', 'visible');
@@ -156,9 +221,8 @@ function autoScrollAndStartAnimation() {
 // A reload part way down the page should not lock the reader in place and
 // play the opening at them, so the automatic run is only armed at the top.
 window.addEventListener('load', () => {
-  if (window.scrollY > 100) {
-    allowAutoAnimation = false; // reloaded below the fold
-  }
+  loadedAtTop = loadedAtTop && window.scrollY <= 100;
+  armed = true;
 
   setTimeout(() => {
     autoScrollAndStartAnimation();
