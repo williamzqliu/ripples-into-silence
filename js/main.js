@@ -91,27 +91,6 @@ function unlockScroll() {
   releaseLock();
 }
 
-function showReplayButton() {
-  const btn = document.getElementById('replay-btn');
-  if (btn) {
-    btn.style.opacity = 1;
-    btn.style.pointerEvents = 'auto';
-  }
-}
-
-function hideReplayButton() {
-  const btn = document.getElementById('replay-btn');
-  if (btn) {
-    btn.style.opacity = 0;
-    btn.style.pointerEvents = 'none';
-  }
-}
-
-function resetVizArea() {
-  const viz = document.getElementById('viz');
-  if (viz) viz.innerHTML = '';
-}
-
 window.addEventListener('scroll', () => {
   const nav = document.querySelector('#main-nav');
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
@@ -134,7 +113,6 @@ window.addEventListener('scroll', () => {
       lockScroll();
       runSceneIntro().then(() => {
         unlockScroll();
-        showReplayButton();
       });
     }
   }
@@ -182,7 +160,15 @@ function autoScrollAndStartAnimation() {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
 
   const check = () => {
-    if (animationStarted || !nav || !armed || !loadedAtTop) return;
+    if (animationStarted || !nav) return;
+
+    // `armed` turns on at load and `loadedAtTop` can turn back on when the
+    // reader scrolls up to the top, so a guard that is false now is not
+    // false for good. Keep looking rather than giving up on the first no.
+    if (!armed || !loadedAtTop) {
+      requestAnimationFrame(check);
+      return;
+    }
 
     const navTop = nav.getBoundingClientRect().top;
 
@@ -194,15 +180,13 @@ function autoScrollAndStartAnimation() {
         behavior: 'smooth',
       });
 
-      let aborted = false;
-      const abort = () => { aborted = true; };
-      window.addEventListener('wheel', abort, { passive: true });
-      window.addEventListener('touchmove', abort, { passive: true });
-
+      // This used to cancel on any wheel event during the 800ms, which meant
+      // it cancelled almost every time: wheeling is how a reader arrives
+      // here, and the last notch of that wheel lands inside the window. The
+      // way out of the opening is the hold below, which lets go on 60px of
+      // deliberate input; it does not need a second, twitchier one here.
       setTimeout(() => {
-        window.removeEventListener('wheel', abort);
-        window.removeEventListener('touchmove', abort);
-        if (animationStarted || aborted) return;
+        if (animationStarted) return;
 
         animationStarted = true;
         nav.classList.add('sticky-top', 'visible');
@@ -213,10 +197,7 @@ function autoScrollAndStartAnimation() {
         });
 
         lockScroll();
-        runSceneIntro().then(() => {
-          unlockScroll();
-          showReplayButton();
-        });
+        runSceneIntro().then(unlockScroll);
       }, 800);
     } else {
       requestAnimationFrame(check);
@@ -244,24 +225,14 @@ const scrollySteps = document.querySelectorAll('.scrolly-step');
 const imgFront = document.getElementById('scrolly-image-front');
 const imgBack = document.getElementById('scrolly-image-back');
 const scrollyGraphic = document.querySelector('.scrolly-graphic');
-const scrollyContainer = document.querySelector('.scrolly-section');
 
 let currentImage = ''; // which scrollytelling frame is up
 
 if (scrollySteps.length && imgFront && imgBack && scrollyGraphic) {
-  // fade the image out when the whole scrollytelling block leaves
-  window.addEventListener('scroll', () => {
-    const rect = scrollyContainer.getBoundingClientRect();
-    const screenH = window.innerHeight;
-
-    const fullyInView = rect.top < screenH * 0.5 && rect.bottom > screenH * 0.5;
-
-    if (fullyInView) {
-      scrollyGraphic.classList.remove('hidden');
-    } else {
-      scrollyGraphic.classList.add('hidden');
-    }
-  });
+  // The graphic used to be hidden from here, because it was fixed and would
+  // otherwise float over the rest of the page. It is sticky now, so its own
+  // container keeps it in place and this listener could only get the timing
+  // wrong at the section's edges.
 
   // swap the image as each paragraph takes over
   scrollySteps.forEach((step, index) => {

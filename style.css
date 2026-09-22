@@ -655,12 +655,12 @@ h1, h2, h3, h4 {
 /* ---------- scrollytelling ---------- */
 #lampedusa-context {
   background-color: #0F1A32;
-  margin-top: 250px;     /* space above */
-  margin-bottom: 250px;  /* space below */
-  /* This is the same element as .scrolly-section below. An id beats a class,
-     so the 0 here was zeroing that rule's horizontal padding and leaving the
-     block 40px wider on each side than everything above it. */
-  padding: 40px var(--page-pad);
+  /* The 250px above and below used to be margin, which is outside the
+     background: two unpainted bands half a screen tall, through which the
+     fixed ripple layer showed. Padding holds the same space and paints it.
+     Horizontal padding is set here rather than on .scrolly-section below,
+     because that is the same element and an id beats a class. */
+  padding: 290px var(--page-pad);
   position: relative;
   z-index: var(--z-section);
 }
@@ -742,26 +742,26 @@ h1, h2, h3, h4 {
   opacity: 1;
 }
 
+/* Sticky, not fixed. A fixed element floats over the whole document, so
+   this one needed a scroll listener and a 0.6s fade to get it out of the
+   way, and during that fade, and any frame the listener had not caught up
+   with, it painted over the section below. Sticky is clipped to its own
+   container: it cannot reach another section to begin with. */
 .scrolly-graphic {
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 5vw;
-  width: 40vw;
+  position: sticky;
+  top: calc(50vh - 175px);
+  align-self: flex-start;
+  height: 350px;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: var(--z-scrolly-graphic);
   pointer-events: none;
   opacity: 1;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.4s ease;
 }
 
 
-.scrolly-graphic.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
 
 
 .scrolly-graphic img {
@@ -782,6 +782,9 @@ h1, h2, h3, h4 {
 
 .fade-img {
   position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
   max-width: 350px;
   max-height: 350px;
   width: auto;
