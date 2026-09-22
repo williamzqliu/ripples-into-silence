@@ -660,7 +660,7 @@ h1, h2, h3, h4 {
      fixed ripple layer showed. Padding holds the same space and paints it.
      Horizontal padding is set here rather than on .scrolly-section below,
      because that is the same element and an id beats a class. */
-  padding: 290px var(--page-pad);
+  padding: 290px 0;
   position: relative;
   z-index: var(--z-section);
 }
@@ -701,19 +701,25 @@ h1, h2, h3, h4 {
 }
 
 
+/* The band is full width so its background reaches both edges; the measure
+   lives on the container inside it. These used to be the same element, so
+   the background stopped at 1200px and the fixed ripple layer showed down
+   either side of it. */
 .scrolly-section {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 60px;
-  max-width: var(--page-max);
-  margin: 0 auto;
-  padding: 100px var(--page-pad);
 }
 
+/* Same shape as .nav-inner: a 1200 box with the page padding inside it, so
+   the content edge lands where every other block's does. */
 .scrolly-container {
   display: flex;
   width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
 }
 
 .scrolly-text {
