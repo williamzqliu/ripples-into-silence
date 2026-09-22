@@ -110,6 +110,7 @@ export const RIPPLE_INNER_OPACITY_STEPS = [
 // -------------------------------------------------------- travelling label
 
 export const LABEL_FONT = "'EB Garamond', Georgia, serif";
+export const LABEL_SIZE = 15;         // the km readout and the death count
 export const LABEL_OFFSET = 26;       // px from the path, perpendicular
 
 // Near the bottom of the circle the perpendicular offset alone leaves the

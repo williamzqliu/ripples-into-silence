@@ -24,15 +24,9 @@ drawArrivalsField("#arrivals-section", "#arrivals-canvas");
 
 let animationStarted = false;
 
-// Reloading part way down the page should not haul the reader back to the
-// top and play the opening at them. Read here and again on load, because a
-// browser restoring the previous scroll position may do it after this module
-// has already run.
-let loadedAtTop = window.scrollY <= 100;
-
-// Nothing may start the opening until load has confirmed where the page
-// actually opened. The synthetic scroll event further down fires before that,
-// and without this gate it started the animation from any scroll position.
+// Nothing may start the opening until load has run: the synthetic scroll
+// event at the foot of this module fires during module evaluation, and
+// without this gate it started the animation from any scroll position.
 let armed = false;
 
 // The opening is choreographed, so the page holds still while it establishes
@@ -110,6 +104,18 @@ window.addEventListener('scroll', () => {
   const vizRect = vizSection.getBoundingClientRect();
   const onTheAnimation = vizRect.top <= 0 && vizRect.bottom > 0;
 
+  // Belt as well as braces. The opening overlay is fixed and full screen, so
+  // if it is ever up while the reader is somewhere else it covers whatever
+  // they are reading. The hold can be broken out of mid-opening, so this is
+  // reachable; it cannot show outside its own section now whatever happens.
+  // Only once the opening has begun: before that the overlay is harmless,
+  // its two children sit at opacity 0, and hiding it here would take the
+  // island away before it ever got to play.
+  if (animationStarted && !onTheAnimation) {
+    const overlay = document.getElementById('lampedusa-intro');
+    if (overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
+  }
+
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -168,70 +174,13 @@ window.addEventListener('scroll', () => {
   }
 });
 
-function autoScrollAndStartAnimation() {
-  const nav = document.querySelector('#main-nav');
-  const navLinks = document.querySelectorAll('#main-nav .nav-link');
+// The opening used to have a second way in: a poll that watched the nav,
+// scrolled the page so the section lined up, waited 800ms and then started
+// it. Three separate bugs came out of that one function and none out of the
+// listener above, so it is gone. Scrolling to the section is the trigger.
 
-  const check = () => {
-    if (animationStarted || !nav) return;
-
-    // The snap is the part a reload below the fold should suppress: it
-    // scrolls the page for the reader. `armed` turns on at load, so a guard
-    // that is false now is not false for good; keep looking.
-    if (!armed || !loadedAtTop) {
-      requestAnimationFrame(check);
-      return;
-    }
-
-    const navTop = nav.getBoundingClientRect().top;
-
-    if (navTop < window.innerHeight * 0.6 && navTop > 0) {
-      const scrollTarget = window.scrollY + navTop;
-
-      window.scrollTo({
-        top: scrollTarget,
-        behavior: 'smooth',
-      });
-
-      // This used to cancel on any wheel event during the 800ms, which meant
-      // it cancelled almost every time: wheeling is how a reader arrives
-      // here, and the last notch of that wheel lands inside the window. The
-      // way out of the opening is the hold below, which lets go on 60px of
-      // deliberate input; it does not need a second, twitchier one here.
-      setTimeout(() => {
-        if (animationStarted) return;
-
-        animationStarted = true;
-        nav.classList.add('sticky-top', 'visible');
-        navLinks.forEach((link, i) => {
-          setTimeout(() => {
-            link.classList.add('visible');
-          }, i * 150);
-        });
-
-        lockScroll();
-        runSceneIntro().then(unlockScroll, (err) => {
-          unlockScroll();
-          console.error('The opening did not finish:', err);
-        });
-      }, 800);
-    } else {
-      requestAnimationFrame(check);
-    }
-  };
-
-  requestAnimationFrame(check);
-}
-
-// A reload part way down the page should not lock the reader in place and
-// play the opening at them, so the automatic run is only armed at the top.
 window.addEventListener('load', () => {
-  loadedAtTop = loadedAtTop && window.scrollY <= 100;
   armed = true;
-
-  setTimeout(() => {
-    autoScrollAndStartAnimation();
-  }, 200);
 });
 
 // run the scroll handler once, for the position we loaded at

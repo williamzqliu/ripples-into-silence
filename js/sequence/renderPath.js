@@ -11,7 +11,7 @@ import {
   RIPPLE_OUTER_OPA_ORG, RIPPLE_SHOWING,
   RIPPLE_OUTER_FADING_DURATION, RIPPLE_OUTER_ENLARGE,
   RIPPLE_INNER_OPACITY_STEPS, RIPPLE_BLUR_MAX,
-  LABEL_FONT, LABEL_OFFSET, LABEL_NUDGES, LABEL_FADE, LABEL_HOLD
+  LABEL_FONT, LABEL_SIZE, LABEL_OFFSET, LABEL_NUDGES, LABEL_FADE, LABEL_HOLD
 } from "../config.js";
 
 // Where the travelling label sits relative to the head of its path:
@@ -34,7 +34,7 @@ function labelStyle(selection) {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "central")
     .attr("fill", "#ffffff")
-    .attr("font-size", 11)
+    .attr("font-size", LABEL_SIZE)
     .attr("font-weight", "500")
     .attr("stroke", "rgba(0,0,0,0.5)")
     .attr("stroke-width", 0.6)
