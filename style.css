@@ -513,9 +513,9 @@ h1, h2, h3, h4 {
 /* ---- year bar wrapper, against the bottom of the animation ---- */
 .year-progress-wrapper {
   position: absolute;
-  bottom: 15px;
-  left: 150px;
-  right: 150px;
+  bottom: 24px;
+  left: var(--page-pad);
+  right: var(--page-pad);
   height: 32px;
   z-index: 10;
 }

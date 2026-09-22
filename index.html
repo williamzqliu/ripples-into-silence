@@ -95,13 +95,16 @@
         <div class="label">DEAD & MISSING</div>
         <div id="death-count">0</div>
       </div>
-    </div>
 
-    <div class="year-progress-wrapper">
-      <div class="year-progress-bar" id="year-progress-bar">
-        <div id="year-progress-fill"></div>
+      <!-- Inside .layout, which is the part that sticks. Out here it was
+           anchored to the section instead, so it climbed up the screen and
+           across the circle while the animation stayed pinned. -->
+      <div class="year-progress-wrapper">
+        <div class="year-progress-bar" id="year-progress-bar">
+          <div id="year-progress-fill"></div>
+        </div>
+        <div id="year-pop-labels"></div>
       </div>
-      <div id="year-pop-labels"></div>
     </div>
   </section>
 
