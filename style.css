@@ -10,7 +10,7 @@
   /* The reading size. EB Garamond has a small x-height for its point size,
      so the 14px this page was set at while it was falling back to a system
      monospace reads smaller in the serif than it did in the mono. */
-  --fs-body: 16px;
+  --fs-body: 20px;
 
   /* Line length. The body paragraphs ran the full width of the section: 117
      characters a line at the reading size, which is about twice what anyone
@@ -720,7 +720,7 @@ h1, h2, h3, h4 {
 
 
 
-..scrolly-step {
+.scrolly-step {
   font-size: var(--fs-body);
   line-height: 1.7;
   opacity: 0.4;
@@ -793,6 +793,24 @@ h1, h2, h3, h4 {
 
 /* ---------- responsive ---------- */
 @media (max-width: 768px) {
+  /* Two-column blocks stack. Both of these held their columns at any width,
+     which left the ending's text in a 96px gutter and the scrollytelling
+     copy in 168px: four or five words a line at the reading size. */
+  .epilogue-wrapper,
+  .scrolly-container {
+    flex-direction: column;
+  }
+
+  .epilogue-image {
+    scale: 1;
+    text-align: center;
+  }
+
+  .scrolly-text {
+    padding-right: 0;
+    max-width: none;
+  }
+
   .layout {
     flex-direction: column;
     padding: 2em;
