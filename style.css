@@ -7,6 +7,16 @@
   --page-max: 1200px;
   --page-pad: 40px;
 
+  /* The reading size. EB Garamond has a small x-height for its point size,
+     so the 14px this page was set at while it was falling back to a system
+     monospace reads smaller in the serif than it did in the mono. */
+  --fs-body: 16px;
+
+  /* Line length. The body paragraphs ran the full width of the section: 117
+     characters a line at the reading size, which is about twice what anyone
+     tracks comfortably. */
+  --measure-body: 32em;
+
   /* One stacking ladder, low to high. It used to run 0, 1, 10, 20, 100, 999,
      9999 with the scrollytelling frame above the navigation and the opening
      overlay above everything, for the whole length of the page. */
@@ -268,7 +278,7 @@ img {
 
 #intro .content {
   width: 100%;
-  max-width: 820px;
+  max-width: var(--measure-body);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -289,7 +299,7 @@ img {
 
 /* ----- intro reveal ----- */
 .intro .content {
-  font-size: 14px;
+  font-size: var(--fs-body);
   opacity: 0;
   transform: translateY(40px);
   transition: all 1s ease;
@@ -671,7 +681,8 @@ h1, h2, h3, h4 {
 
 #details p,
 #reflection p {
-  font-size: 14px;
+  font-size: var(--fs-body);
+  max-width: var(--measure-body);
   opacity: 0.9;
 }
 
@@ -704,13 +715,13 @@ h1, h2, h3, h4 {
   flex-direction: column;
   gap: 240px; /* the paragraphs need room to take turns */
   padding-right: 60px; /* keeps the text off the frame beside it */
-  max-width: 720px;
+  max-width: calc(var(--measure-body) + 60px);
 }
 
 
 
-.scrolly-step {
-  font-size: 14px;
+..scrolly-step {
+  font-size: var(--fs-body);
   line-height: 1.7;
   opacity: 0.4;
   transition: opacity 0.3s ease;
@@ -896,7 +907,7 @@ svg {
 .epilogue-text {
   flex: 1;
   color: white;
-  font-size: 14px;
+  font-size: var(--fs-body);
   font-family: 'EB Garamond', Georgia, serif;
   line-height: 1.8;
 }
@@ -967,12 +978,6 @@ svg {
   color: rgba(255, 255, 255, 0.6);
 }
 
-#trends-section {
-  background-color: #0F1A32;
-  padding: 120px var(--page-pad);
-  position: relative;
-  z-index: var(--z-section);
-}
 
 /* ---------- eleven years ---------- */
 
@@ -1030,7 +1035,7 @@ svg {
 .year-disc--below .year-disc__year { font-size: 34px; }
 
 .year-disc__figures {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.55);
 }
@@ -1062,82 +1067,13 @@ svg {
   .year-disc--right .year-disc__label { text-align: center; min-width: 0; }
 }
 
-#year-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: auto;
-  grid-gap: 40px;
-  max-width: 1400px;
-  margin: 0 auto;
-  justify-items: center;
-  align-items: center;
-}
 
-/* the last row of three is centred */
-#year-grid canvas:nth-child(n+9) {
-  grid-column: span 1;
-  justify-self: center;
-}
 
-.year-canvas {
-  width: 200px;   /* fixed, so every canvas draws at the same size */
-  height: 200px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  display: block;
-}
 
-/* isotype, drafted and set aside */
-.isotype-title {
-  text-align: center;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 24px;
-  color: white;
-  margin-bottom: 30px;
-  letter-spacing: 1px;
-}
 
-.isotype-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 80px;
-}
 
-.isotype-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: white;
-}
 
-.isotype-grid {
-  display: grid;
-  grid-template-columns: repeat(10, 12px); /* ten per row */
-  gap: 3px;
-  margin-bottom: 12px;
-}
 
-.isotype-block {
-  width: 12px;
-  height: 12px;
-  background-color: currentColor;
-  border-radius: 1px;
-  transition: transform 0.2s ease;
-}
 
-.isotype-block:hover {
-  transform: scale(1.3);
-}
-
-.isotype-label {
-  font-family: 'EB Garamond', Georgia, serif;
-  font-size: 14px;
-  color: rgba(255,255,255,0.8);
-}
-
-#trends-section {
-  scroll-margin-top: -50px;  /* matches the nav bar height */
-}
 
 

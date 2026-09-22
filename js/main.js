@@ -315,9 +315,9 @@ if (scrollySteps.length && imgFront && imgBack && scrollyGraphic) {
   
 }
 
-// An isotype grid for the 206 dead against the 45,997 who arrived was drafted
-// and then set aside: the markup it wrote into is commented out in index.html,
-// so the two calls threw on every load and stopped the rest of this module.
-// Removed rather than guarded, because there is nothing left for it to fill.
+// The 206 against the 45,997 was drafted here as an isotype grid and left
+// unfinished, writing into markup that was commented out, so it threw on
+// every load and stopped the rest of this module. It is built now, in
+// sequence/arrivalsField.js, at one dot per person.
 
   
