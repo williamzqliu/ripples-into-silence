@@ -562,7 +562,8 @@ h1, h2, h3, h4 {
   transform: translateX(-50%);
   font-size: 17px;
   font-family: 'Bebas Neue', sans-serif;
-  font-weight: bold;
+  /* One weight in the face, so `bold` only asked for a smear. */
+  font-weight: 400;
   color: white;
   opacity: 0;
   transition: opacity 0.5s ease;

@@ -51,9 +51,11 @@ function drawDistanceRings(delay) {
       .attr("cy", cy)
       .attr("r", r)
       .attr("fill", "none")
-      .attr("stroke", "rgba(255,255,255,0.10)")
+      /* 0.10 at a 3-on-7-off dash is almost no ink: the outer circle is
+         0.18 at 2px and reads, these did not. */
+      .attr("stroke", "rgba(255,255,255,0.20)")
       .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3 7")
+      .attr("stroke-dasharray", "3 5")
       .attr("opacity", 0)
       .lower()
       .transition()

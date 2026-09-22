@@ -96,10 +96,6 @@ window.addEventListener('scroll', () => {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
   const navTop = nav.getBoundingClientRect().top;
 
-  // Suppressed by a reload below the fold, but scrolling back to the top is
-  // the reader choosing to start from the beginning, so arm it again.
-  if (!loadedAtTop && window.scrollY <= 100) loadedAtTop = true;
-
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -108,11 +104,21 @@ window.addEventListener('scroll', () => {
       }, i * 150);
     });
 
-    if (!animationStarted && armed && loadedAtTop) {
+    // No `loadedAtTop` here, and that was the bug. It was meant to stop a
+    // reload below the fold from hauling the reader back to the top and
+    // playing the opening at them, but hauling them back is the snap's
+    // doing, not this. By the time navTop reaches zero the reader is looking
+    // straight at the section, and a reload anywhere but the very top left
+    // them looking at an empty one, with a 12,500px page to scroll back up
+    // before it would arm again.
+    if (!animationStarted && armed) {
       animationStarted = true;
       lockScroll();
-      runSceneIntro().then(() => {
+      // The lock has to come off even if the opening falls over, or the page
+      // keeps the scrollbar.
+      runSceneIntro().then(unlockScroll, (err) => {
         unlockScroll();
+        console.error('The opening did not finish:', err);
       });
     }
   }
@@ -162,9 +168,9 @@ function autoScrollAndStartAnimation() {
   const check = () => {
     if (animationStarted || !nav) return;
 
-    // `armed` turns on at load and `loadedAtTop` can turn back on when the
-    // reader scrolls up to the top, so a guard that is false now is not
-    // false for good. Keep looking rather than giving up on the first no.
+    // The snap is the part a reload below the fold should suppress: it
+    // scrolls the page for the reader. `armed` turns on at load, so a guard
+    // that is false now is not false for good; keep looking.
     if (!armed || !loadedAtTop) {
       requestAnimationFrame(check);
       return;
@@ -197,7 +203,10 @@ function autoScrollAndStartAnimation() {
         });
 
         lockScroll();
-        runSceneIntro().then(unlockScroll);
+        runSceneIntro().then(unlockScroll, (err) => {
+          unlockScroll();
+          console.error('The opening did not finish:', err);
+        });
       }, 800);
     } else {
       requestAnimationFrame(check);
