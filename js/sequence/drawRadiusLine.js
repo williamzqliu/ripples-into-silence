@@ -27,7 +27,7 @@ export function drawRadiusLine() {
         .attr("y", centerY - 10)
         .attr("text-anchor", "middle")
         .attr("fill", "white")
-        .attr("font-size", 12)
+        .attr("font-size", 14)
         .style("font-family", LABEL_FONT)
         .style("font-variant-numeric", "tabular-nums lining-nums")
         .attr("opacity", 0)

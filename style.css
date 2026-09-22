@@ -492,7 +492,9 @@ h1, h2, h3, h4 {
 #incident-count,
 #death-count {
   font-size: 48px;
-  font-weight: bold;
+  /* Bebas Neue ships a single weight, so `bold` was asking the browser to
+     smear the outlines rather than load a heavier cut. */
+  font-weight: 400;
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 2px;
   text-align: right;
