@@ -16,6 +16,7 @@
      characters a line at the reading size, which is about twice what anyone
      tracks comfortably. */
   --measure-body: 32em;
+  --measure-intro: 660px;
 
   /* One stacking ladder, low to high. It used to run 0, 1, 10, 20, 100, 999,
      9999 with the scrollytelling frame above the navigation and the opening
@@ -278,15 +279,18 @@ img {
 
 #intro .content {
   width: 100%;
-  max-width: var(--measure-body);
+  /* Every line in the intro is authored, with a hard break at the end of it,
+     so the measure has to hold the longest one rather than a comfortable
+     running length: at 21px that is 620px. The padding is added back on top
+     so it is the text box that gets the width, not the box. */
+  max-width: calc(var(--measure-intro) + 80px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
   color: white;
   font-family: 'EB Garamond', Georgia, serif;
-  padding:0 20px;
-  padding-left: 60px;
+  padding: 0 40px;
   gap: 400px;
   height: 100%;
 }
