@@ -102,6 +102,14 @@ window.addEventListener('scroll', () => {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
   const navTop = nav.getBoundingClientRect().top;
 
+  // The nav is sticky, so navTop is 0 for the whole eight thousand pixels
+  // below this point. It says the reader has come past the top of the page;
+  // it does not say where they are. The opening has to key off its own
+  // section, or it plays over whatever the reader happens to be reading.
+  const vizSection = document.querySelector('#viz-section');
+  const vizRect = vizSection.getBoundingClientRect();
+  const onTheAnimation = vizRect.top <= 0 && vizRect.bottom > 0;
+
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -110,14 +118,7 @@ window.addEventListener('scroll', () => {
       }, i * 150);
     });
 
-    // No `loadedAtTop` here, and that was the bug. It was meant to stop a
-    // reload below the fold from hauling the reader back to the top and
-    // playing the opening at them, but hauling them back is the snap's
-    // doing, not this. By the time navTop reaches zero the reader is looking
-    // straight at the section, and a reload anywhere but the very top left
-    // them looking at an empty one, with a 12,500px page to scroll back up
-    // before it would arm again.
-    if (!animationStarted && armed) {
+    if (!animationStarted && armed && onTheAnimation) {
       animationStarted = true;
       lockScroll();
       // The lock has to come off even if the opening falls over, or the page
