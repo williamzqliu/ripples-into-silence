@@ -63,6 +63,11 @@
 
 html {
   scroll-behavior: smooth;
+  /* The opening holds the page with overflow: hidden, which takes the
+     scrollbar away and hands its 15px back to the layout: everything on the
+     page jumps sideways, and jumps back when the hold lets go. Reserving the
+     gutter permanently means the width never changes. */
+  scrollbar-gutter: stable;
 }
 
 

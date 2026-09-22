@@ -53,7 +53,12 @@ const RELEASE_KEYS = new Set([
 let releaseLock = () => { };
 
 function lockScroll() {
+  // `scrollbar-gutter: stable` keeps the width steady where it is supported,
+  // and where it is not this puts back exactly what the vanishing scrollbar
+  // took. It measures 0 in the supported case, so the two do not fight.
+  const gutter = window.innerWidth - document.documentElement.clientWidth;
   document.body.style.overflow = 'hidden';
+  if (gutter > 0) document.body.style.paddingRight = `${gutter}px`;
 
   let wheeled = 0;
   let touchStart = null;
@@ -83,6 +88,7 @@ function lockScroll() {
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('keydown', onKey);
     document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
     releaseLock = () => { };
   };
 }
