@@ -1178,27 +1178,27 @@ svg {
   border: 0.55cqw solid #C0272D;
 }
 
-/* A live marker: a soft red glow swells out from the town and fades, over
-   and over, the way a map marks something still happening. It was a hard
-   ring with a tinted fill, which round the white dot read as a target. It
-   is its own element under the marker, so it never tints the dot. */
+/* A live marker: a thin red ring goes out from the town and fades, over
+   and over, the way a map marks something still happening. This is the
+   first of the four tried; thicker and filled it read as a target, and a
+   soft glow in its place was either too faint or a blot. */
 .epilogue-pulse {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 3cqw;
-  height: 3cqw;
-  margin: -1.5cqw 0 0 -1.5cqw;
+  width: 3.3cqw;
+  height: 3.3cqw;
+  margin: -1.65cqw 0 0 -1.65cqw;
+  box-sizing: border-box;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(232, 56, 62, 1) 0%,
-    rgba(232, 56, 62, 0.7) 40%, rgba(232, 56, 62, 0) 72%);
-  animation: epilogue-pulse 3s cubic-bezier(0.25, 0.5, 0.35, 1) infinite;
+  border: 0.4cqw solid #C0272D;
+  animation: epilogue-pulse 2.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
 @keyframes epilogue-pulse {
-  0%   { transform: scale(1); opacity: 1; }
-  85%  { transform: scale(4.5); opacity: 0; }
-  100% { transform: scale(4.5); opacity: 0; }
+  0%   { transform: scale(1); opacity: 0.9; }
+  80%  { transform: scale(3.2); opacity: 0; }
+  100% { transform: scale(3.2); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
