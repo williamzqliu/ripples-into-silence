@@ -1,8 +1,9 @@
 // js/sequence/yearProgressBar.js
 
+import { isOnScene } from "./onScene.js";
+
 let allYears = [];
 let yearMap = [];
-let progressStartTime = null;
 let totalDuration = 60000;
 
 // Each year sits at a hand-set fraction of the bar rather than an even
@@ -112,10 +113,19 @@ function layoutYearLabels() {
 export function startLinearProgressBar(duration = totalDuration) {
     totalDuration = duration;
     const bar = d3.select("#year-progress-fill").node();
-    progressStartTime = performance.now();
+
+    // The bar is read against the paths, and the paths stop going out when
+    // the section is off screen, so the bar has to stop with them. On wall
+    // clock time it filled while the record stood still and a reader coming
+    // back found 2024 under a bar that said 2019.
+    let elapsed = 0;
+    let lastFrame = null;
 
     function animate(now) {
-        const elapsed = now - progressStartTime;
+        const step = lastFrame === null ? 0 : now - lastFrame;
+        lastFrame = now;
+        if (isOnScene()) elapsed += step;
+
         const progress = Math.min(elapsed / totalDuration, 1);
         bar.style.width = `${progress * 100}%`;
 

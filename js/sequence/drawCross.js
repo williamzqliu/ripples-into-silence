@@ -8,9 +8,11 @@ import {
   CROSS_COLOUR
 } from "../config.js";
 
-// The cross at the centre is Lampedusa. It scales up from nothing once the
-// island outline has shrunk down to it.
-function drawCross() {
+// The cross at the centre is Lampedusa. It grows as the island outline
+// comes down onto it: same centre, same duration, so the two read as one
+// movement. It used to wait five hundred milliseconds and take a second,
+// by which time the island had already been taken off the screen.
+function drawCross(duration = 900) {
   const svg = d3.select("#viz").select("svg");
 
   const crossGroup = svg.append("g")
@@ -38,8 +40,8 @@ function drawCross() {
 
   // grow into place
   crossGroup.transition()
-    .delay(500)
-    .duration(1000)
+    .duration(duration)
+    .ease(d3.easeCubicInOut)
     .attr("transform", `translate(${cx}, ${cy}) scale(1)`)
     .attr("opacity", CROSS_LINE_OPACITY);
 

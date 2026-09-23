@@ -5,6 +5,7 @@ import {
   LAUNCH_RADIUS, RADIUS_KM,
   RANGE_CIRCLE_STROKE,
   DISTANCE_RINGS_KM, DISTANCE_RING_STROKE, RING_LABEL_GAP,
+  CIRCLE_OPEN, RING_STAGGER,
   radiusFractionFor, LABEL_FONT
 } from "../config.js";
 
@@ -17,7 +18,9 @@ function drawCircle(delay = 0) {
       .append("circle")
       .attr("cx", cx)
       .attr("cy", cy)
-      .attr("r", LAUNCH_RADIUS)
+      /* Opened out of the cross rather than faded in at full size. The
+         piece is about ripples; the fifty kilometres is the first one. */
+      .attr("r", 0)
       .attr("fill", "none")
       .attr("stroke", "rgba(255,255,255,0.18)")
       .attr("stroke-width", RANGE_CIRCLE_STROKE)
@@ -25,11 +28,12 @@ function drawCircle(delay = 0) {
       .attr("opacity", 0)
       .transition()
       .delay(delay)
-      .duration(1200)
-      .ease(d3.easeCubicInOut)
+      .duration(CIRCLE_OPEN)
+      .ease(d3.easeCubicOut)
+      .attr("r", LAUNCH_RADIUS)
       .attr("opacity", 1)
       .on("end", () => {
-        drawDistanceRings(delay);
+        drawDistanceRings();
         resolve();
       });
   });
@@ -38,13 +42,13 @@ function drawCircle(delay = 0) {
 // Most of these incidents happened close in: the median is fourteen
 // kilometres of the fifty. Without a ruler the empty outer water reads as
 // space nothing was plotted in, rather than as the finding it is.
-function drawDistanceRings(delay) {
+function drawDistanceRings() {
   const svg = d3.select("#viz").select("svg");
 
   // The outer circle carries the reading the radius line gives once and then
   // takes away with it, so a reader who arrives after the opening still has
   // a scale to read the marks against.
-  ringLabel(svg, LAUNCH_RADIUS, RADIUS_KM, delay);
+  ringLabel(svg, LAUNCH_RADIUS, RADIUS_KM, 0);
 
   DISTANCE_RINGS_KM.forEach((km, i) => {
     const r = LAUNCH_RADIUS * radiusFractionFor(km);
@@ -62,11 +66,11 @@ function drawDistanceRings(delay) {
       .attr("opacity", 0)
       .lower()
       .transition()
-      .delay(delay + i * 200)
+      .delay(i * RING_STAGGER)
       .duration(900)
       .attr("opacity", 1);
 
-    ringLabel(svg, r, km, delay + (i + 1) * 200);
+    ringLabel(svg, r, km, (i + 1) * RING_STAGGER);
   });
 }
 

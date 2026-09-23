@@ -30,7 +30,6 @@
   --z-viz: 2;
   --z-scrolly-graphic: 3;
   --z-nav: 10;
-  --z-opening: 20;
   --z-minsize: 30;
 }
 
@@ -172,6 +171,16 @@ img {
 
 #viz-section {
   scroll-margin-top: 60px;
+
+  /* Somewhere to stand. The sequence runs for over a minute and this
+     section used to be 1.09 screens tall, which gave the sticky frame
+     inside it 128 pixels of travel: less scroll than any other section in
+     the piece, for the one thing the piece is about. At four and a half
+     screens the frame stays pinned for about three and a half, which is
+     what the arrivals field gets, and a reader who wants past still gets
+     past. The rest of the run is handled by the sequence standing down
+     when the section leaves the screen, not by making the page taller. */
+  min-height: 450vh;
 }
 
 
@@ -600,61 +609,10 @@ h1, h2, h3, h4 {
 }
 
 
-#lampedusa-intro {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: var(--z-opening);
-  pointer-events: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.island-wrapper {
-  position: relative;
-
-
-  opacity: 0;
-  transform: scale(1);
-  transform-origin: center center;
-  transition: opacity 1s ease, transform 1s ease;
-}
-
-.island-wrapper svg {
-  width: 300px; /* enlarged */
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-.island-wrapper.show {
-  opacity: 1;
-}
-
-.island-wrapper.shrink {
-  transform: scale(0.5) translateY(10px);
-  opacity: 0;
-}
-
-.lampedusa-label {
-  position: absolute;
-  top: calc(50% + 55px);
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 32px;
-  color: white;
-  opacity: 0;
-  transition: opacity 1s ease;
-  letter-spacing: 1.5px;
-}
-
-.lampedusa-label.show {
-  opacity: 1;
+/* Markup only. The outline is cloned out of here into the drawing frame,
+   where the shrink can land on the cross instead of near it. */
+#island-asset {
+  display: none;
 }
 
 #incident-count,

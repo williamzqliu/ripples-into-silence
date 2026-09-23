@@ -11,6 +11,7 @@ import {
 } from "../config.js";
 
 import { launchPathWithStats } from "./launchPathWithStats.js";
+import { isOnScene, whenOnScene, wait } from "./onScene.js";
 
 export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuckets }) {
   let active = 0;
@@ -35,28 +36,32 @@ export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuck
     });
   }
 
-  // Phase one: the slow opening.
-  function launchInitial() {
-    let i = 0;
+  // Phase one: the slow opening. Three incidents, six seconds apart, each
+  // one waiting for the reader to be there for it. Written as a loop rather
+  // than a setTimeout wrapping a setInterval, because a schedule that can
+  // pause has to be able to say where it paused.
+  async function launchInitial() {
+    await wait(FIRST_DELAY);
 
-    setTimeout(() => {
-      launch(firstBatch[i++], { showLabel: true, speed: INITIAL_SPEED });
+    for (const d of firstBatch) {
+      await whenOnScene();
+      launch(d, { showLabel: true, speed: INITIAL_SPEED });
+      await wait(INITIAL_DELAY);
+    }
 
-      const timer = setInterval(() => {
-        if (i >= firstBatch.length) {
-          clearInterval(timer);
-          launchGrouped();
-          return;
-        }
-        launch(firstBatch[i++], { showLabel: true, speed: INITIAL_SPEED });
-      }, INITIAL_DELAY);
-    }, FIRST_DELAY);
+    launchGrouped();
   }
 
   // Phase two: round robin over the angular sectors, so consecutive paths
   // arrive from different directions instead of stacking up in one place.
   function launchGrouped() {
     const interval = setInterval(() => {
+      // Ninety-one of the ninety-four go out here, over about half a
+      // minute. Off screen the queue simply stops moving, so a reader who
+      // leaves and comes back finds the record where they left it rather
+      // than finished without them.
+      if (!isOnScene()) return;
+
       const now = Date.now();
       if (active >= MAX_CURRENT || now - lastLaunchTime < MIN_GAP) return;
 

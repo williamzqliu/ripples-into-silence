@@ -29,72 +29,13 @@ let animationStarted = false;
 // without this gate it started the animation from any scroll position.
 let armed = false;
 
-// The opening is choreographed, so the page holds still while it establishes
-// itself. It holds gently. It lets go after LOCK_MAX_MS whatever the sequence
-// is doing, and sooner if the reader makes a deliberate move: the animation
-// runs for about twelve seconds, which is far too long to hold somebody in
-// one place.
-const LOCK_MAX_MS = 3500;
-// One notch of a trackpad is not an instruction to leave; a push is.
-const WHEEL_RELEASE_PX = 60;
-const TOUCH_RELEASE_PX = 24;
-const RELEASE_KEYS = new Set([
-  ' ', 'ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End'
-]);
-
-// Replaced while the lock is on, so unlockScroll and every release trigger
-// go through the same teardown exactly once.
-let releaseLock = () => { };
-
-function lockScroll() {
-  // The hold refuses the scroll rather than removing it. `overflow: hidden`
-  // makes the page unscrollable, which changes the width of the document and
-  // moves everything on it sideways for the length of the hold. Cancelling
-  // the input changes nothing about the layout: as far as the browser is
-  // concerned the page is scrollable the whole time, it just keeps being
-  // told no. A text selection drag still works, which is fine; it is
-  // deliberate, the same bar the release below sets.
-  let wheeled = 0;
-  let touchStart = null;
-
-  const onWheel = (e) => {
-    e.preventDefault();
-    wheeled += Math.abs(e.deltaY);
-    if (wheeled >= WHEEL_RELEASE_PX) releaseLock();
-  };
-  const onTouchStart = (e) => { touchStart = e.touches[0].clientY; };
-  const onTouchMove = (e) => {
-    e.preventDefault();
-    if (touchStart === null) return;
-    if (Math.abs(e.touches[0].clientY - touchStart) >= TOUCH_RELEASE_PX) releaseLock();
-  };
-  const onKey = (e) => {
-    if (!RELEASE_KEYS.has(e.key)) return;
-    e.preventDefault();
-    releaseLock();
-  };
-
-  const timer = setTimeout(() => releaseLock(), LOCK_MAX_MS);
-
-  // passive: false, or preventDefault on a scroll gesture is ignored.
-  window.addEventListener('wheel', onWheel, { passive: false });
-  window.addEventListener('touchstart', onTouchStart, { passive: true });
-  window.addEventListener('touchmove', onTouchMove, { passive: false });
-  window.addEventListener('keydown', onKey);
-
-  releaseLock = () => {
-    clearTimeout(timer);
-    window.removeEventListener('wheel', onWheel);
-    window.removeEventListener('touchstart', onTouchStart);
-    window.removeEventListener('touchmove', onTouchMove);
-    window.removeEventListener('keydown', onKey);
-    releaseLock = () => { };
-  };
-}
-
-function unlockScroll() {
-  releaseLock();
-}
+// The opening used to hold the page still for three and a half seconds by
+// cancelling every scroll gesture. It is gone. It was a jolt at the one
+// moment the page is asking to be looked at, and it bought nothing: the
+// sequence runs for over a minute and the first incident lands around
+// fifteen seconds in, so the hold always let go long before there was
+// anything to hold anybody for. The section is long enough to stand in now
+// and the sequence waits for the reader instead. See sequence/onScene.js.
 
 window.addEventListener('scroll', () => {
   const nav = document.querySelector('#main-nav');
@@ -109,18 +50,6 @@ window.addEventListener('scroll', () => {
   const vizRect = vizSection.getBoundingClientRect();
   const onTheAnimation = vizRect.top <= 0 && vizRect.bottom > 0;
 
-  // Belt as well as braces. The opening overlay is fixed and full screen, so
-  // if it is ever up while the reader is somewhere else it covers whatever
-  // they are reading. The hold can be broken out of mid-opening, so this is
-  // reachable; it cannot show outside its own section now whatever happens.
-  // Only once the opening has begun: before that the overlay is harmless,
-  // its two children sit at opacity 0, and hiding it here would take the
-  // island away before it ever got to play.
-  if (animationStarted && !onTheAnimation) {
-    const overlay = document.getElementById('lampedusa-intro');
-    if (overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
-  }
-
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -131,11 +60,7 @@ window.addEventListener('scroll', () => {
 
     if (!animationStarted && armed && onTheAnimation) {
       animationStarted = true;
-      lockScroll();
-      // The lock has to come off even if the opening falls over, or the
-      // reader is stuck on this section for good.
-      runSceneIntro().then(unlockScroll, (err) => {
-        unlockScroll();
+      runSceneIntro().catch(err => {
         console.error('The opening did not finish:', err);
       });
     }

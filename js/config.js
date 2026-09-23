@@ -81,10 +81,37 @@ export const FEATURED_DISTANCE = 0.4;
 export const FEATURED_ANGLE_MIN_DEG = 100;
 export const FEATURED_ANGLE_MAX_DEG = 260;
 
+// ----------------------------------------------------------------- opening
+//
+// The island, its name, and the shrink that lands it on the cross. These
+// used to be three setTimeouts spread across showIsland and the controller
+// that disagreed with each other about when the opening was over.
+
+export const ISLAND_WIDTH = 300;      // the outline, in frame units
+export const NAME_OFFSET = 78;        // the name, below the middle
+export const ISLAND_FADE_IN = 800;
+export const ISLAND_HOLD = 1300;      // before the name goes
+export const NAME_FADE_OUT = 600;
+export const ISLAND_SHRINK = 900;     // onto the cross, which grows in step
+
+// The fifty kilometre circle opens out of the cross rather than fading in
+// at full size, so the reader sees where it came from. It used to wait two
+// seconds after the island had gone, and the rings another two after that,
+// because drawDistanceRings was passed the same delay a second time.
+export const CIRCLE_OPEN = 1400;
+export const RING_STAGGER = 220;
+
+// How long the radius line's reading is left up before the counters arrive.
+export const RADIUS_HOLD = 3200;
+
 // ------------------------------------------------------------------ pacing
 
 export const INITIAL_INCIDENTS = 3;   // released slowly, one at a time
-export const FIRST_DELAY = 3000;      // ms before the first one
+// The last of the dead air. Everything before this is now continuous, so
+// three seconds of a finished, motionless frame was the one gap left in
+// the opening. It does not buy anything: the frame has already been read
+// by the time the counters finish arriving.
+export const FIRST_DELAY = 1200;      // ms before the first one
 export const INITIAL_DELAY = 6000;    // ms between those first few
 export const INITIAL_SPEED = 0.25;    // and they travel slowly as well
 

@@ -1,4 +1,12 @@
 // js/sequence/controller.js
+//
+// The opening, in order. Every step waits on whenOnScene first: if the
+// reader has scrolled away the sequence holds there and picks up when they
+// come back, so leaving is free and nothing plays to an empty room. This
+// replaced a three and a half second scroll lock, which jolted the reader
+// at the one moment the page is asking to be looked at, and which did not
+// solve the problem anyway: the first incident is about fifteen seconds in,
+// so the lock let go long before there was anything to see.
 
 import { drawCanvas } from "./drawCanvas.js";
 import { drawCircle } from "./drawCircle.js";
@@ -6,13 +14,15 @@ import { drawRadiusLine } from "./drawRadiusLine.js";
 import { fadeInUI } from "./fadeUI.js";
 import { drawPaths } from "./drawPaths.js";
 import { loadAndProcessData } from "./dataProcessing.js";
+import { whenOnScene, wait } from "./onScene.js";
+import { RADIUS_HOLD } from "../config.js";
 import {
     initYearProgressBar,
     updateProgress,
     startLinearProgressBar
 } from "./yearProgressBar.js";
 
-import { showIslandSVG, showIslandLabel } from "./showIsland.js";
+import { showIsland } from "./showIsland.js";
 
 export async function runSceneIntro() {
     // 1. the canvas everything is drawn on
@@ -28,32 +38,27 @@ export async function runSceneIntro() {
         remainingBuckets
     } = await loadAndProcessData();
 
-    // 2. the island outline and its name, started together
-    const svgPromise = showIslandSVG();     // island, shrink, cross
-    const labelPromise = showIslandLabel(); // the name, in and out
+    // 2. the island, its name, and the shrink that lands it on the cross.
+    //    Drawn in the frame, so it ends where the circle is about to begin.
+    await whenOnScene();
+    await showIsland();
 
-    // 3. wait for both
-    await Promise.all([svgPromise, labelPromise]);
+    // 3. the fifty kilometre circle, opening out of that cross, and the
+    //    rings inside it
+    await whenOnScene();
+    await drawCircle();
 
-    // The opening overlay is fixed, full-screen and was pinned above
-    // everything else on the page. It used to stay there for the rest of the
-    // scroll, so the island and its label showed through every section below.
-    d3.select("#lampedusa-intro").style("display", "none");
-
-    // 4. the fifty kilometre circle
-    await drawCircle(2000); // 2s delay plus a 1.2s fade
-
-    // 5. the radius, which says what the circle is
-    await new Promise(res => setTimeout(res, 0));
+    // 4. the radius, which says what the circle is
+    await whenOnScene();
     drawRadiusLine();
+    await wait(RADIUS_HOLD);
 
-    // 6. let it finish: 1.6s to open, 1.5s held, 1s to fade
-    await new Promise(res => setTimeout(res, 3600));
-
-    // 7. the counters and the year bar
+    // 5. the counters and the year bar
+    await whenOnScene();
     await fadeInUI();
 
-    // 8. and then the incidents themselves
+    // 6. and then the incidents themselves
+    await whenOnScene();
     initYearProgressBar(allYears);
     startLinearProgressBar();
 
