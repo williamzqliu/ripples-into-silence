@@ -1,4 +1,4 @@
-// js/sequence/yearProgressBar.js
+// js/scenes/record/yearProgressBar.js
 
 import { isOnScene } from "./onScene.js";
 
@@ -188,7 +188,7 @@ function lightYearUnderFill(progress) {
 }
 
 // ----- highlighting the year on screen
-export function updateProgress(currentYearIndex) {
+function updateProgress(currentYearIndex) {
     if (!yearMap.length) return;
 
     // walk the labels and move each to its new state

@@ -12,7 +12,7 @@
   pointer-events: none;
   overflow: hidden;
   opacity: 1;
-  /* No transition: main.js scrubs this with the first scene's opacity, and
+  /* No transition: js/core/scenes.js scrubs this with the first scene's opacity, and
      a half-second ease behind the scroll left the ripples trailing into
      the next scene on a quick scroll. */
   background: linear-gradient(to bottom,

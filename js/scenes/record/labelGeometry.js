@@ -1,4 +1,4 @@
-// js/sequence/labelGeometry.js
+// js/scenes/record/labelGeometry.js
 //
 // Putting a label somewhere it can be read. The travelling labels and the
 // ring labels have the same problem from opposite ends: one has a fixed
@@ -14,7 +14,7 @@
 // pixels wide pushed twenty-six pixels sideways is still sitting on top of
 // the thing it was supposed to have cleared.
 
-import { FRAME_WIDTH, FRAME_HEIGHT } from "../config.js";
+import { FRAME_WIDTH, FRAME_HEIGHT } from "../../config.js";
 
 export function unit(angle) {
   return { x: Math.cos(angle), y: Math.sin(angle) };
@@ -27,7 +27,7 @@ export function halfBox(node) {
 }
 
 /** How far the box extends from its own centre in direction u. */
-export function reach(u, box) {
+function reach(u, box) {
   return Math.abs(u.x) * box.w + Math.abs(u.y) * box.h;
 }
 

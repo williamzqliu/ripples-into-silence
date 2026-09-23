@@ -77,10 +77,10 @@
   line-height: 1.5;
   white-space: nowrap;
   color: rgba(255, 255, 255, 0.9);
-  transition: opacity 0.15s ease;  /* NOTE_FADE_MS in arrivalsField.js */
+  transition: opacity 0.15s ease;  /* NOTE_FADE_MS in js/scenes/in2024.js */
 }
 
-/* arrivalsField.js fades the note out, changes it, and fades it back in. */
+/* js/scenes/in2024.js fades the note out, changes it, and fades it back in. */
 .arrivals__note.is-swapping {
   opacity: 0;
 }

@@ -44,7 +44,7 @@
 
 /* The epilogue fits one screen, so there is no scroll through it to reveal
    its paragraphs by, and with .fade-step they all came up at once as the
-   scene arrived. main.js brings them in one at a time, then the credits:
+   scene arrived. js/scenes/epilogue.js brings them in one at a time, then the credits:
    the same float up as .fade-step, a little quicker. When the scene is left
    they go, quicker and together, and play again on the way back. */
 .epilogue-line {
@@ -68,7 +68,7 @@
   text-align: right;
   /* Drawn at one and a half times its box, which a wide screen has the
      margin for and a 1280 window does not: it ran 63px off the right edge.
-     main.js brings the scale down to whatever the margin allows, never
+     js/scenes/epilogue.js brings the scale down to whatever the margin allows, never
      below 1; this is the value without script. */
   scale: 1.5;
 }

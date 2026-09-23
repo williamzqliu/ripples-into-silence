@@ -1,4 +1,4 @@
-// js/sequence/showIsland.js
+// js/scenes/record/showIsland.js
 //
 // The island outline, its name, and the shrink that lands it on the cross
 // the rest of the diagram is measured from.
@@ -21,7 +21,7 @@ import {
   cx, cy,
   ISLAND_WIDTH, ISLAND_FADE_IN, ISLAND_HOLD,
   NAME_FADE_OUT, NAME_OFFSET, ISLAND_SHRINK
-} from "../config.js";
+} from "../../config.js";
 
 import { drawCross } from "./drawCross.js";
 

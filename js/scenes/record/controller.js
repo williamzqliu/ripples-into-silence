@@ -1,4 +1,4 @@
-// js/sequence/controller.js
+// js/scenes/record/controller.js
 //
 // The opening, in order. Every step waits on whenOnScene first: if the
 // reader has scrolled away the sequence holds there and picks up when they
@@ -13,9 +13,9 @@ import { drawCircle } from "./drawCircle.js";
 import { drawRadiusLine } from "./drawRadiusLine.js";
 import { fadeInUI } from "./fadeUI.js";
 import { drawPaths } from "./drawPaths.js";
-import { loadAndProcessData } from "./dataProcessing.js";
+import { loadAndProcessData } from "../../data/incidents.js";
 import { whenOnScene, wait } from "./onScene.js";
-import { RADIUS_HOLD } from "../config.js";
+import { RADIUS_HOLD } from "../../config.js";
 import {
     initYearProgressBar,
     startLinearProgressBar

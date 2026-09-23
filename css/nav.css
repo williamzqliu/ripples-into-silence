@@ -1,7 +1,7 @@
 /* nav.css
 
-   The bar that sticks once the intro is over, and its links. main.js
-   (core/nav.js) shows it, lights the current section, and does the jumps. */
+   The bar that sticks once the intro is over, and its links. js/core/nav.js
+   shows it, lights the current section, and does the jumps. */
 
 nav {
   font-family: 'Bebas Neue', sans-serif;

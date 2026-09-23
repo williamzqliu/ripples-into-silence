@@ -1,4 +1,4 @@
-// js/sequence/dataProcessing.js
+// js/data/incidents.js
 
 import {
   SCALE_DEAD_MIN, SCALE_DEAD_MAX,

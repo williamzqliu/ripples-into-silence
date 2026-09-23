@@ -1,4 +1,4 @@
-// js/sequence/launchPathWithStats.js
+// js/scenes/record/launchPathWithStats.js
 //
 // One incident, from launch to the counters catching up with it.
 

@@ -1,4 +1,4 @@
-// js/sequence/arrivalsField.js
+// js/scenes/in2024.js
 //
 // 2024, at one dot per person. 45,997 people reached Lampedusa and 206 did
 // not, so the field holds 46,203 dots and the 206 are 0.45 per cent of it.
@@ -81,7 +81,13 @@ function shortCause(raw) {
   return "Drowning";
 }
 
-export async function drawArrivalsField(sectionSelector, canvasSelector) {
+// Driven by the dots' own track, not the whole 2024 section, so the
+// heading above it does not move where the fade happens.
+export function initIn2024() {
+  drawArrivalsField("#year-2024 .arrivals", "#arrivals-canvas");
+}
+
+async function drawArrivalsField(sectionSelector, canvasSelector) {
   const section = document.querySelector(sectionSelector);
   const canvas = document.querySelector(canvasSelector);
   if (!section || !canvas) return;

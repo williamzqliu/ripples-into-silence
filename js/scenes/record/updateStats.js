@@ -1,4 +1,4 @@
-// js/sequence/updateStats.js
+// js/scenes/record/updateStats.js
 //
 // The two running counters in the corners. The year is not set from here
 // any more: it is read off the progress bar. See yearProgressBar.js.

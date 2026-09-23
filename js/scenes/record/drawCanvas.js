@@ -1,6 +1,6 @@
-// js/sequence/drawCanvas.js
+// js/scenes/record/drawCanvas.js
 
-import { FRAME_WIDTH, FRAME_HEIGHT, MIN_TEXT_PX } from "../config.js";
+import { FRAME_WIDTH, FRAME_HEIGHT, MIN_TEXT_PX } from "../../config.js";
 
 // Declared up here so the other modules can import them once drawCanvas has
 // run and filled them in.
@@ -47,4 +47,4 @@ function fitCanvas() {
     }
 }
 
-export { drawCanvas, intro_svg, intro_defs, intro_layer };
+export { drawCanvas, intro_defs, intro_layer };

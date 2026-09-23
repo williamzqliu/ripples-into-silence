@@ -1,4 +1,4 @@
-// js/sequence/onScene.js
+// js/scenes/record/onScene.js
 //
 // The sequence is about a minute long and it lives in a section the reader
 // can leave at any moment. It used to deal with that by taking the scroll

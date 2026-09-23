@@ -1,7 +1,7 @@
 /* context.css
 
    Scene 3, Why Lampedusa: three steps of text pinned beside their
-   diagrams. main.js (scenes/context.js) says which step is up. */
+   diagrams. js/scenes/context.js says which step is up. */
 
 /* ---------- scrollytelling ---------- */
 #context {
@@ -39,12 +39,12 @@
      At the full column it crowded the paragraph and filled the screen. */
   --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4 * 0.75), 60vh);
   /* Scroll given to each step while the text and the diagram are pinned.
-     main.js shares the run from the scene being fully up to the pair
+     scenes/context.js shares the run from the scene being fully up to the pair
      coming unstuck, so this is most of each step's turn: at 1897x815 each
      paragraph is fully on screen for about 220px. At 8vh, when the steps
      also counted the rise under a scene that was still fading in, the
      first paragraph was never fully seen at all. --steps is set from
-     main.js, from the markup. */
+     scenes/context.js, from the markup. */
   --step-scroll: 24vh;
   --steps: 3;
   min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
@@ -148,7 +148,7 @@
   width: var(--g);
   height: var(--g);
   /* --fx and --fy move the drawing's own centre onto the frame's, as a
-     fraction of the frame. Set by main.js, measured from each SVG. */
+     fraction of the frame. Set by scenes/context.js, measured from each SVG. */
   translate: calc(-50% + var(--fx, 0) * var(--g)) calc(-50% + var(--fy, 0) * var(--g));
   object-fit: contain;
   opacity: 0;

@@ -1,4 +1,4 @@
-// js/sequence/rippleBackground.js
+// js/scenes/opening/rippleBackground.js
 //
 // The ambient field behind the cover and the intro. Each ripple opens, holds
 // and goes; what matters here is that it goes. Every one of these used to be
@@ -15,7 +15,7 @@ import {
   BG_MAX_LIVE,
   BG_TICK_MIN,
   BG_TICK_MAX,
-} from "../config.js";
+} from "../../config.js";
 
 export function startRippleBackground(containerId) {
   const container = d3.select(containerId);
@@ -87,7 +87,7 @@ export function startRippleBackground(containerId) {
       .on("interrupt", () => { g.remove(); live--; });
   }
 
-  // main.js puts `hidden` on this layer once the cover and the intro are both
+  // core/scenes.js puts `hidden` on this layer once the cover and the intro are both
   // off screen. Drawing into something nobody can see is the other half of
   // the cost, so the loop stands down until it comes back.
   function showing() {

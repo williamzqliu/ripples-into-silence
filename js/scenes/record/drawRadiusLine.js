@@ -1,6 +1,6 @@
-// js/sequence/drawRadiusLine.js
+// js/scenes/record/drawRadiusLine.js
 
-import { cx, cy, LAUNCH_RADIUS, RADIUS_KM, LABEL_FONT } from "../config.js";
+import { cx, cy, LAUNCH_RADIUS, RADIUS_KM, LABEL_FONT } from "../../config.js";
 
 export function drawRadiusLine() {
     const svg = d3.select("#viz").select("svg");

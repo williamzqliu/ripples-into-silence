@@ -1,4 +1,4 @@
-// js/sequence/drawPaths.js
+// js/scenes/record/drawPaths.js
 //
 // The release schedule. The first few incidents go out one at a time and
 // travel slowly, so a viewer has time to see that one path is one incident.
@@ -8,7 +8,7 @@
 import {
   ANGLE_BUCKETS, LAUNCH_INTERVAL,
   INITIAL_DELAY, INITIAL_SPEED, FIRST_DELAY, MAX_CURRENT, MIN_GAP
-} from "../config.js";
+} from "../../config.js";
 
 import { launchPathWithStats } from "./launchPathWithStats.js";
 import { isOnScene, whenOnScene, sceneWait } from "./onScene.js";

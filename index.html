@@ -46,7 +46,6 @@
   <div id="ripple-bg-wrapper">
     <!-- 1. cover -->
     <section id="cover" class="fullscreen cover">
-      <!-- <img src="./images/lampedusa_cover.png" alt="Opening Cover" id="cover-image" /> -->
       <div class="cover-content">
         <h1>Ripples into Silence</h1>
         <h2>Lives That Vanished Within Sight of Lampedusa</h2>
@@ -77,7 +76,6 @@
           And what stories lie just beneath the surface?
         </p>
       </div>
-      <!-- <img src="./images/lampedusa_shade_dark.png" alt="lampedusa_shade_dark" id="lampedusa_shade_dark" /> -->
     </section>
   </div>
 
@@ -245,8 +243,8 @@
          Cross's. UNHCR used to be listed and nothing on the page uses it.
          TODO: the InfoMigrants report needs its URL. -->
     <footer id="footer-credit">
-      <!-- The entrance is on this wrapper: main.js sets the scene's opacity
-           on the footer itself, inline, which would override it. -->
+      <!-- The entrance is on this wrapper: core/scenes.js sets the scene's
+           opacity on the footer itself, inline, which would override it. -->
       <div class="epilogue-line">
         <p class="footer-credit__by">Designed by <a class="footer-credit__name"
           href="https://williamzqliu.com/" target="_blank" rel="noopener">Zhuoqi Liu</a></p>
@@ -262,93 +260,12 @@
   <div id="tooltip"></div>
 
 
-  <!-- replay button, not currently used
-  <button id="replay-btn" style="
-position: fixed;
-top: 20px;
-right: 20px;
-padding: 10px 16px;
-font-size: 14px;
-background: #fbc900;
-color: #000;
-border: none;
-border-radius: 6px;
-cursor: pointer;
-opacity: 0;
-pointer-events: none;
-transition: opacity 0.5s ease;
-z-index: 100;
-">
-    Replay
-  </button> -->
 
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
 
   <script type="module" src="js/main.js"></script>
 
-  <!-- scroll handling for the cover, intro and nav -->
-  <script>
-    const steps = document.querySelectorAll('.intro-step');
-    const introContent = document.querySelector('#intro .content');
-    const nav = document.querySelector('#main-nav');
-    const navLinks = document.querySelectorAll('#main-nav .nav-link');
-    const shadeImage = document.querySelector('#lampedusa_shade_dark');
-
-    window.addEventListener('scroll', () => {
-      const scrollY = window.scrollY;
-      const windowH = window.innerHeight;
-
-      // the intro paragraphs surface one at a time
-      const introRect = introContent.getBoundingClientRect();
-      if (introRect.top < windowH * 0.95) {
-        introContent.classList.add('revealed');
-      }
-
-      steps.forEach((step, i) => {
-        const rect = step.getBoundingClientRect();
-        const triggerPoint = windowH * 0.85 - i * 40;
-        if (rect.top < triggerPoint) {
-          step.classList.add('visible');
-        }
-      });
-
-      const navTop = nav.getBoundingClientRect().top;
-      if (navTop < window.innerHeight) {
-        nav.classList.add('visible');
-        navLinks.forEach((link, i) => {
-          setTimeout(() => {
-            link.classList.add('visible');
-          }, i * 150);
-        });
-
-        const introBottom = document.querySelector('#intro').offsetTop + document.querySelector('#intro').offsetHeight;
-        if (scrollY > introBottom - 100) {
-          nav.classList.add('sticky-top');
-        } else {
-          nav.classList.remove('sticky-top');
-        }
-      } else {
-        nav.classList.remove('visible', 'sticky-top');
-        navLinks.forEach(link => link.classList.remove('visible'));
-      }
-
-      const lastStep = document.querySelector('.intro-step.final');
-      if (lastStep && shadeImage) {
-        if (lastStep.classList.contains('visible')) {
-          setTimeout(() => {
-            shadeImage.classList.add('visible');
-          }, 300);
-        } else {
-          shadeImage.classList.remove('visible');
-        }
-      }
-
-
-    });
-
-    window.dispatchEvent(new Event('scroll'));
-  </script>
 
 </body>
 

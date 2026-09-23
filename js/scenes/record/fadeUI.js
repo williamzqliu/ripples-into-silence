@@ -1,4 +1,4 @@
-// js/sequence/fadeUI.js
+// js/scenes/record/fadeUI.js
 //
 // The frame the record is read in: the two counters and the year bar. They
 // used to arrive one at a time, a second apart, which took three seconds

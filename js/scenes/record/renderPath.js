@@ -1,4 +1,4 @@
-// js/sequence/renderPath.js
+// js/scenes/record/renderPath.js
 //
 // One incident: a line travelling in from the edge of the fifty kilometre
 // circle, stopping at the radius its recorded distance puts it at, and
@@ -14,7 +14,7 @@ import {
   RIPPLE_INNER_OPACITY_STEPS, RIPPLE_BLUR_MAX,
   LABEL_FONT, LABEL_SIZE, LABEL_OFFSET, LABEL_GAP, LABEL_MARK_CLEAR,
   LABEL_FADE, LABEL_HOLD
-} from "../config.js";
+} from "../../config.js";
 
 import {
   unit, halfBox, pushOut, boxAt, inFrame, overlaps, overlapsDisc

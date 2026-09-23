@@ -1,4 +1,4 @@
-// js/sequence/drawCircle.js
+// js/scenes/record/drawCircle.js
 
 import {
   cx, cy,
@@ -7,7 +7,7 @@ import {
   DISTANCE_RINGS_KM, DISTANCE_RING_STROKE, RING_LABEL_GAP,
   CIRCLE_OPEN, RING_STAGGER,
   radiusFractionFor, LABEL_FONT
-} from "../config.js";
+} from "../../config.js";
 
 import { unit, halfBox, pushOut } from "./labelGeometry.js";
 

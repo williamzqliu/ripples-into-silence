@@ -74,7 +74,7 @@ export const ANGLE_BUCKETS = 20;
 
 // Angle carries nothing, so it is free to be chosen for legibility. Walking
 // the golden angle down the radius order puts marks at a similar distance
-// 137.5 degrees apart. See dataProcessing.
+// 137.5 degrees apart. See data/incidents.js.
 export const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 // The first few paths are picked to be legible rather than representative:
@@ -191,9 +191,3 @@ export const BG_TICK_MAX = 800;
 // Credited in the footer, with the incident record.
 export const ARRIVALS_2024 = 45997;
 
-// ------------------------------------------------------------------- stats
-
-export const UPDATE_RATE = 850;
-export const UPDATE_SPEED_YEAR = 675;
-export const UPDATE_SPEED = 500;
-export const START_YEAR = 2014;

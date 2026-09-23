@@ -1,4 +1,4 @@
-// js/sequence/yearDiscs.js
+// js/scenes/elevenYears.js
 //
 // Eleven years, one disc each, every disc the same fifty kilometre circle as
 // the main sequence and read off the same two rules: how far out a mark sits
@@ -22,7 +22,8 @@ import {
   DISTANCE_RINGS_KM
 } from "../config.js";
 
-import { loadAndProcessData } from "./dataProcessing.js";
+import { loadAndProcessData } from "../data/incidents.js";
+import { reducedMotion as REDUCED } from "../core/motion.js";
 
 // Rows, top to bottom. On an eight column grid each disc spans two, and a
 // shorter row is inset by one column a disc short, which sets it between
@@ -57,9 +58,6 @@ const TAIL_MS = 260;
 const RUN_MS = 1100;           // the spread of launch times across one disc
 const STEP_MAX_MS = 110;       // and the longest gap between two of them
 
-const REDUCED = window.matchMedia &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 // Each disc plays once, when its top comes above this line: the same kind
 // of scroll check every other entrance on the page uses.
 const PLAY_AT = 0.9;
@@ -76,11 +74,15 @@ function checkDiscs() {
     }
   }
 }
-window.addEventListener("scroll", checkDiscs, { passive: true });
-window.addEventListener("resize", checkDiscs);
-window.addEventListener("scenechange", checkDiscs);
+export function initElevenYears() {
+  window.addEventListener("scroll", checkDiscs, { passive: true });
+  window.addEventListener("resize", checkDiscs);
+  window.addEventListener("scenechange", checkDiscs);
+  window.addEventListener("resize", fitRingLabels);
+  drawYearDiscs("#year-discs");
+}
 
-export async function drawYearDiscs(containerId) {
+async function drawYearDiscs(containerId) {
   const root = d3.select(containerId);
   if (root.empty()) return;
   root.html("");
@@ -115,7 +117,7 @@ export async function drawYearDiscs(containerId) {
     row++;
   }
 
-  // The cells carry .fade-step, which main.js reveals on scroll, and the
+  // The cells carry .fade-step, which core/reveal.js reveals on scroll, and the
   // discs play on scroll. Both checks may already have run before these
   // existed.
   window.dispatchEvent(new Event("scroll"));
@@ -383,7 +385,6 @@ function fitRingLabels() {
   d3.select(svg).selectAll(".year-disc__ring-label")
     .attr("font-size", Math.max(RING_LABEL_UNITS, MIN_TEXT_PX * units));
 }
-window.addEventListener("resize", fitRingLabels);
 
 function openYear(year, rows, from, isWorst) {
   if (!lightbox) lightbox = buildLightbox();

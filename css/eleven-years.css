@@ -10,7 +10,7 @@
 }
 
 /* Rows of four, three and four on an eight column grid, each disc two
-   columns wide, the middle row set between the others (yearDiscs.js places
+   columns wide, the middle row set between the others (js/scenes/elevenYears.js places
    them). The three rows, discs and figures, fit one screen under the nav:
    the figures and the gaps take 286px with the worst year's note, and the
    discs share what is left less a little air, up to 200px: 148px at 815

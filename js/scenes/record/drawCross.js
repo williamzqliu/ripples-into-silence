@@ -1,4 +1,4 @@
-// js/sequence/drawCross.js
+// js/scenes/record/drawCross.js
 
 import {
   cx, cy,
@@ -6,7 +6,7 @@ import {
   CROSS_LINE_OPACITY,
   CROSS_LINE_STROKE,
   CROSS_COLOUR
-} from "../config.js";
+} from "../../config.js";
 
 // The cross at the centre is Lampedusa. It grows as the island outline
 // comes down onto it: same centre, same duration, so the two read as one

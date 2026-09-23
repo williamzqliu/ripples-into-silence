@@ -66,7 +66,7 @@
 }
 
 html {
-  /* No smooth scrolling here: the nav's jumps are main.js's, which glide
+  /* No smooth scrolling here: the nav's jumps are js/core/nav.js's, which glide
      when the section is near and cut when it is far. */
   /* No blinking caret anywhere on the page. With caret browsing on, a
      click in any text leaves one flashing in it, which on titles and over
@@ -121,7 +121,7 @@ svg {
 /* One entrance for the prose outside the pinned sections: up forty pixels
    as it fades in, over the 0.8s the intro's lines and the scrollytelling's
    steps take. The ending had its own at 1.2s and Eleven Years had none at
-   all. main.js adds .visible as each one comes up the screen. */
+   all. js/core/reveal.js adds .visible as each comes up the screen. */
 .fade-step {
   opacity: 0;
   transform: translateY(40px);
@@ -217,7 +217,7 @@ svg {
   transition-duration: 0.16s;
 }
 
-/* main.js scrubs each scene's opacity with the scroll. A scene that is not
+/* js/core/scenes.js scrubs each scene's opacity with the scroll. A scene that is not
    leading takes no pointer, so a tooltip cannot be raised on a drawing that
    is not there. */
 .scene--away {
