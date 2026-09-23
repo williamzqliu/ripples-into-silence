@@ -1207,8 +1207,10 @@ svg {
   margin: -1.65cqw 0 0 -1.65cqw;
 }
 
-/* Two rings, the second half a beat behind the first, so one is always
-   going out. */
+/* Two rings close together, then a rest: bong bong, bong bong, like a
+   heartbeat, rather than an even train of them. Each ring goes out in the
+   first 1.5s of a 2.8s cycle and waits out the rest; the second leaves
+   0.28s after the first. */
 .epilogue-pulse::before,
 .epilogue-pulse::after {
   content: "";
@@ -1218,16 +1220,16 @@ svg {
   border-radius: 50%;
   border: 0.4cqw solid #C0272D;
   opacity: 0;
-  animation: epilogue-pulse 2.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  animation: epilogue-pulse 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
 .epilogue-pulse::after {
-  animation-delay: 1.1s;
+  animation-delay: 0.28s;
 }
 
 @keyframes epilogue-pulse {
   0%   { transform: scale(1); opacity: 0.9; }
-  80%  { transform: scale(3.2); opacity: 0; }
+  54%  { transform: scale(3.2); opacity: 0; }
   100% { transform: scale(3.2); opacity: 0; }
 }
 
