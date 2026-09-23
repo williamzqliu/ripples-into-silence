@@ -350,9 +350,9 @@ function fitEpilogueImage() {
 // ---------- the epilogue's lines
 //
 // One at a time as the scene arrives, then the credits. The wait before
-// each is the time to read the one before it, roughly, and the longest is
-// before the last: "And yet, 206 didn't." comes after a pause.
-const EPILOGUE_WAITS = [500, 1500, 1500, 1500, 2600, 1600];
+// each is the time to read the one before it, roughly, with a held breath
+// before "But seeing is not reaching." and before "But 206 did not."
+const EPILOGUE_WAITS = [500, 1400, 1300, 1700, 1600, 2000, 2700, 1800, 1800];
 const epilogueScene = document.getElementById('epilogue');
 const epilogueLines = epilogueScene ? [...epilogueScene.querySelectorAll('.epilogue-line')] : [];
 const reducedMotion = window.matchMedia &&

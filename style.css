@@ -1103,22 +1103,22 @@ svg {
   width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: 40px var(--page-pad);
+  padding: 24px var(--page-pad);
   gap: 40px;
 }
 
-/* A little closer set than it was, 1.8 and 40px, so the five paragraphs
+/* A little closer set than it was, 1.8 and 40px, so the eight paragraphs
    and the credits fit one laptop screen. */
 .epilogue-text {
   flex: 1;
   color: white;
   font-size: var(--fs-body);
   font-family: 'EB Garamond', Georgia, serif;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 .epilogue-text p {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 /* The epilogue fits one screen, so there is no scroll through it to reveal
