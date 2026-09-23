@@ -667,7 +667,11 @@ h1, h2, h3, h4 {
      fixed ripple layer showed. Padding holds the same space and paints it.
      Horizontal padding is set here rather than on .scrolly-section below,
      because that is the same element and an id beats a class. */
-  padding: 290px 0;
+  /* 120, not 290. With the main animation's own bottom padding above and
+     Eleven Years' top padding below, 290 left the screen more than half
+     empty for 320px of scroll on the way in and entirely empty on the way
+     out. */
+  padding: 120px 0;
   position: relative;
   z-index: var(--z-section);
 }

@@ -149,6 +149,15 @@ if (scrollyContainer) scrollyContainer.style.setProperty('--steps', scrollySteps
 // under a reader who had started scrolling faster.
 const ARRIVE_AT = 1;
 
+// On the way out the last step and its diagram stay up and scroll away
+// with the section, and only fade once the pair is this far up the screen.
+// They used to fade the moment the pair came unstuck, so an invisible pair
+// scrolled off and then the section's bottom padding followed it: 480px of
+// scroll with nothing on screen at all at 1912x849. At 0.4 there was still
+// a stretch with the top 58% of the screen empty above Eleven Years; by 0.2
+// the pair is mostly off the top and the fade only finishes it.
+const LEAVE_AT = 0.2;
+
 // The step that was up last time, so a step coming up out of nothing can
 // skip the wait that is only there to let another paragraph leave first.
 let lastActive = -1;
@@ -173,7 +182,9 @@ function updateScrolly() {
 
   let active;
   if (u < 0) active = -1;                           // not here yet
-  else if (u > run + 0.5) active = n;               // coming unstuck: all read
+  else if (u > run + 0.5) {                         // come unstuck
+    active = frame.bottom < vh * LEAVE_AT ? n : n - 1;
+  }
   else active = Math.min(n - 1, Math.floor(u / (run / n)));
 
   if (active !== lastActive) {
