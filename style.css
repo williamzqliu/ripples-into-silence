@@ -18,6 +18,10 @@
   --measure-body: 32em;
   --measure-intro: 660px;
 
+  /* The nav is sticky, so anything pinning under it has to know how tall
+     it is rather than guess at it with a negative margin. */
+  --nav-h: 64px;
+
   /* One stacking ladder, low to high. It used to run 0, 1, 10, 20, 100, 999,
      9999 with the scrollytelling frame above the navigation and the opening
      overlay above everything, for the whole length of the page. */
@@ -133,6 +137,7 @@ img {
   position: sticky;
   top: 0;
   width: 100%;
+  min-height: var(--nav-h);
   background: #050E23;
   z-index: var(--z-nav);
   display: flex;
@@ -423,21 +428,27 @@ img {
 
 /* ---------- the animated sequence ---------- */
 .layout {
+  /* Pinned below the nav rather than under it, and exactly as tall as what
+     is left of the viewport, so the composition has one frame to sit in.
+     This was 90vh with a -105px margin and top: 0, three numbers that
+     referred to nothing: together they parked the animation under the nav,
+     left ninety pixels of dead space below it and slid the year bar onto
+     the bottom of the circle. */
   position: sticky;
-  top: 0;
+  top: var(--nav-h);
   z-index: var(--z-viz);
-  height: 90vh;
+  height: calc(100vh - var(--nav-h));
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 40px var(--page-pad) 0;
+  padding: 24px var(--page-pad) 0;
   box-sizing: border-box;
   /* The canvas is 650 wide and the two counter columns are 200 each, so
      1170 is the width at which they sit as close to the circle as they can
      without being squeezed. At 1440 they were pushed to the far corners of a
      wide screen with four hundred empty pixels in between. */
   max-width: 1200px;
-  margin: -105px auto 0;
+  margin: 0 auto;
 }
 
 #left {
@@ -473,7 +484,10 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 48px;
+  /* clear of the counters above and the year bar below, square centred in
+     what is left. At 900 tall the frame has 154px to share out around a 650
+     square: this puts about 100 of it above and leaves the bar 29. */
+  padding: 64px 0 72px;
   box-sizing: border-box;
   text-align: center;
 }

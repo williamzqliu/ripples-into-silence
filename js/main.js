@@ -47,32 +47,41 @@ const RELEASE_KEYS = new Set([
 let releaseLock = () => { };
 
 function lockScroll() {
-  // `scrollbar-gutter: stable` keeps the width steady where it is supported,
-  // and where it is not this puts back exactly what the vanishing scrollbar
-  // took. It measures 0 in the supported case, so the two do not fight.
-  const gutter = window.innerWidth - document.documentElement.clientWidth;
-  document.body.style.overflow = 'hidden';
-  if (gutter > 0) document.body.style.paddingRight = `${gutter}px`;
-
+  // The hold refuses the scroll rather than removing it. `overflow: hidden`
+  // makes the page unscrollable, which takes the scrollbar off the screen
+  // and puts it back three seconds later: the thumb blinks even with the
+  // gutter reserved, because there is nothing to draw a thumb for. Cancelling
+  // the input leaves the page scrollable as far as the browser is concerned,
+  // so the scrollbar stays exactly where it was and never flickers.
+  //
+  // Dragging the scrollbar itself still works, and so does a text selection
+  // drag. Both are deliberate, which is the same bar the release below sets.
   let wheeled = 0;
   let touchStart = null;
 
   const onWheel = (e) => {
+    e.preventDefault();
     wheeled += Math.abs(e.deltaY);
     if (wheeled >= WHEEL_RELEASE_PX) releaseLock();
   };
   const onTouchStart = (e) => { touchStart = e.touches[0].clientY; };
   const onTouchMove = (e) => {
+    e.preventDefault();
     if (touchStart === null) return;
     if (Math.abs(e.touches[0].clientY - touchStart) >= TOUCH_RELEASE_PX) releaseLock();
   };
-  const onKey = (e) => { if (RELEASE_KEYS.has(e.key)) releaseLock(); };
+  const onKey = (e) => {
+    if (!RELEASE_KEYS.has(e.key)) return;
+    e.preventDefault();
+    releaseLock();
+  };
 
   const timer = setTimeout(() => releaseLock(), LOCK_MAX_MS);
 
-  window.addEventListener('wheel', onWheel, { passive: true });
+  // passive: false, or preventDefault on a scroll gesture is ignored.
+  window.addEventListener('wheel', onWheel, { passive: false });
   window.addEventListener('touchstart', onTouchStart, { passive: true });
-  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('keydown', onKey);
 
   releaseLock = () => {
@@ -81,8 +90,6 @@ function lockScroll() {
     window.removeEventListener('touchstart', onTouchStart);
     window.removeEventListener('touchmove', onTouchMove);
     window.removeEventListener('keydown', onKey);
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
     releaseLock = () => { };
   };
 }
