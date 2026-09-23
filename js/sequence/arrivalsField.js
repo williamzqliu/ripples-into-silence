@@ -46,11 +46,12 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   const canvas = document.querySelector(canvasSelector);
   if (!section || !canvas) return;
 
-  // The heading counts what is actually on screen, so it has to change when
-  // most of the field leaves.
+  // The heading counts what is actually on screen: it runs down from 46,203
+  // to 206 as the arrivals fade, on the same curve, so the number and the
+  // field always agree. It used to jump from one to the other half way.
   const countEl = section.querySelector(".arrivals__count");
   const noteEl = section.querySelector(".arrivals__note");
-  const CAPTION_AT = 0.46;
+  let shownCount = null;
   let captionState = null;
 
   const rows = await d3.csv("./data/lampedusa_nearby_incidents.csv");
@@ -119,12 +120,13 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       octx.fill();
     }
 
-    // Where the 206 end up: one block per cause, in the order of the legend.
+    // Where the 206 end up: one block per cause, in the order of the legend,
+    // set on the left edge the heading and the text above are set on.
     const markR = Math.max(3.5, Math.min(7, w / 150));
     const gap = markR * 3.1;
     const gridCols = Math.max(10, Math.min(30, Math.floor((w * 0.55) / gap)));
     const gridRows = Math.ceil(people.length / gridCols);
-    const gx = (w - (gridCols - 1) * gap) / 2;
+    const gx = markR;
     // The legend hangs below the grid, so the pair is centred together rather
     // than the grid alone, which left a hole between it and the heading.
     const legendH = markR * 4.4 * (CAUSES.length + 1) + markR * 7;
@@ -137,7 +139,7 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       p.y1 = gy + Math.floor(i / gridCols) * gap;
     });
 
-    field = { pitch, dotR, markR, offscreen: off, gridRows, gy, gap };
+    field = { pitch, dotR, markR, offscreen: off, gridRows, gx, gy, gap };
   }
 
   const ease = t => t * t * (3 - 2 * t);
@@ -151,7 +153,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     ctx.clearRect(0, 0, w, h);
 
     // The arrivals hold, then go.
-    const fade = 1 - ease(clamp01((progress - 0.30) / 0.28));
+    const gone = ease(clamp01((progress - 0.30) / 0.28));
+    const fade = 1 - gone;
     if (fade > 0.002) {
       ctx.save();
       ctx.globalAlpha = fade;
@@ -180,18 +183,20 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
 
     legend(ctx, w, h, ease(clamp01((progress - 0.82) / 0.18)));
 
-    const state = progress < CAPTION_AT ? "all" : "dead";
-    if (state !== captionState) {
+    const count = Math.round(total - (total - people.length) * gone);
+    if (countEl && count !== shownCount) {
+      shownCount = count;
+      countEl.textContent = `${count.toLocaleString("en-US")} people`;
+    }
+
+    // The note says which field it is, and changes once, half way down.
+    const state = gone < 0.5 ? "all" : "dead";
+    if (noteEl && state !== captionState) {
       captionState = state;
-      if (countEl && noteEl) {
-        countEl.textContent = state === "all"
-          ? `${total.toLocaleString()} people`
-          : `${people.length} people`;
-        noteEl.textContent = state === "all"
-          ? "Everyone who set out for Lampedusa in 2024 and reached this water. " +
-            "One dot is one person."
-          : "The same field, with everyone who reached the island taken out of it.";
-      }
+      noteEl.textContent = state === "all"
+        ? "Everyone who set out for Lampedusa in 2024 and reached this water. " +
+          "One dot is one person."
+        : "The same field, with everyone who reached the island taken out of it.";
     }
   }
 
@@ -223,11 +228,11 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     const r = Math.max(3.5, Math.min(7, w / 150));
     const lineH = r * 4.4;
     const top = field.gy + (field.gridRows - 1) * field.gap + r * 7;
-    const x = (w - Math.min(360, w * 0.5)) / 2;
+    const x = field.gx - r;       // the marks line up with the grid's first column
 
     c.save();
     c.globalAlpha = alpha;
-    c.font = `${Math.max(11, r * 2.1)}px ${LABEL_FONT}`;
+    c.font = `${Math.max(15, r * 2.3)}px ${LABEL_FONT}`;
     c.textBaseline = "middle";
 
     CAUSES.forEach((cause, i) => {
