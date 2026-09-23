@@ -49,7 +49,10 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   // The heading counts what is actually on screen: it runs down from 46,203
   // to 206 as the arrivals fade, on the same curve, so the number and the
   // field always agree. It used to jump from one to the other half way.
-  const countEl = section.querySelector(".arrivals__count");
+  const countEl = section.querySelector(".arrivals__num");
+  // And it is the colour of what it counts: the arrivals' yellow, turning to
+  // the white of the 206 as they are left alone in the field.
+  const countColour = d3.interpolateRgb(ARRIVED_COLOUR, DEAD_COLOUR);
   const noteEl = section.querySelector(".arrivals__note");
   let shownCount = null;
   let captionState = null;
@@ -186,7 +189,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     const count = Math.round(total - (total - people.length) * gone);
     if (countEl && count !== shownCount) {
       shownCount = count;
-      countEl.textContent = `${count.toLocaleString("en-US")} people`;
+      countEl.textContent = count.toLocaleString("en-US");
+      countEl.style.color = countColour(gone);
     }
 
     // The note says which field it is, and changes once, half way down.

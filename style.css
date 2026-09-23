@@ -1017,7 +1017,11 @@ svg {
    used to run from edge to edge of the window under a caption centred on
    the page, below a heading set on the left. The caption is on the left
    edge too, under the nav once the frame is pinned, and the count left
-   aligned so only its right end moves as it runs down. */
+   aligned so only its right end moves as it runs down.
+
+   The count is a figure, not a heading, so it is not set like one: the
+   serif of the text rather than the titles' Bebas, the number large in
+   the colour of the dots it counts and "people" at reading size after it. */
 .arrivals__sticky {
   position: sticky;
   top: 0;
@@ -1037,12 +1041,17 @@ svg {
 }
 
 .arrivals__count {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 48px;
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 24px;
   line-height: 1;
-  letter-spacing: 2px;
-  color: #FFFFFF;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
+}
+
+.arrivals__num {
+  font-size: 56px;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: #FBC900;
 }
 
 /* One line, always: the longer of the two notes is 690px at this size and
