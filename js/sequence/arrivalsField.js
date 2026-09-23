@@ -132,43 +132,44 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
 
     // Where the 206 end up: a block per cause, one under the next, on the
-    // left edge the heading and the text above are set on. Each block's
-    // label sits after its first row, so it is read with the block.
+    // left edge the heading and the text above are set on, each with its
+    // label over its top left corner.
     const markR = Math.max(3.5, Math.min(7, w / 150));
     const gap = markR * 3.1;
-    const blockGap = gap * 1.6;          // between one cause and the next
+    const labelH = 30;                   // label line to the block's first row
+    const blockGap = gap * 2.4;          // last row to the next label, well over
+                                         // the label to its own row, so each
+                                         // label reads with the block below it
     const gridCols = Math.max(10, Math.min(30, Math.floor((w * 0.55) / gap)));
     const gx = markR;
 
+    // Laid out from 0, then the whole stack, source line and all, centred.
     const blocks = [];
-    let rowsAbove = 0, gapsAbove = 0;
+    let y = 0;
     for (const cause of CAUSES) {
       const n = people.filter(p => p.cause === cause.key).length;
       if (!n) continue;
-      blocks.push({ cause, n, row: rowsAbove, gaps: gapsAbove,
-        firstRow: Math.min(n, gridCols) });
-      rowsAbove += Math.ceil(n / gridCols);
-      gapsAbove += 1;
+      const rowsN = Math.ceil(n / gridCols);
+      blocks.push({ cause, n, labelY: y, firstY: y + labelH });
+      y += labelH + (rowsN - 1) * gap + blockGap;
     }
-    // Centred with the source line under it.
-    const sourceH = gap * 2.4;
-    const blocksH = (rowsAbove - 1) * gap + (blocks.length - 1) * blockGap;
-    const gy = (h - blocksH - sourceH) / 2;
-    const rowY = (b, k) => gy + (b.row + k) * gap + b.gaps * blockGap;
+    const sourceY0 = y - blockGap + gap * 2.4;
+    const top = (h - sourceY0) / 2;
 
     let i = 0;
     for (const b of blocks) {
+      b.labelY += top;
+      b.firstY += top;
+      b.labelX = gx - markR;
       for (let k = 0; k < b.n; k++, i++) {
         const p = people[i];
         const src = cellXY(deadCells[i]);
         p.x0 = src.x; p.y0 = src.y;
         p.x1 = gx + (k % gridCols) * gap;
-        p.y1 = rowY(b, Math.floor(k / gridCols));
+        p.y1 = b.firstY + Math.floor(k / gridCols) * gap;
       }
-      b.labelX = gx + (b.firstRow - 1) * gap + markR + gap * 0.9;
-      b.labelY = rowY(b, 0);
     }
-    const sourceY = gy + blocksH + sourceH;
+    const sourceY = top + sourceY0;
 
     field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks, sourceY };
   }
