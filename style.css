@@ -1185,14 +1185,15 @@ svg {
   position: absolute;
   inset: -0.55cqw;
   border-radius: 50%;
-  border: 0.4cqw solid #C0272D;
-  animation: epilogue-pulse 2.2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  border: 0.6cqw solid #E0343B;
+  background: rgba(224, 52, 59, 0.22);
+  animation: epilogue-pulse 2s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
 @keyframes epilogue-pulse {
-  0%   { transform: scale(1); opacity: 0.9; }
-  80%  { transform: scale(3.2); opacity: 0; }
-  100% { transform: scale(3.2); opacity: 0; }
+  0%   { transform: scale(1); opacity: 1; }
+  80%  { transform: scale(3.8); opacity: 0; }
+  100% { transform: scale(3.8); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
