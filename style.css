@@ -35,6 +35,7 @@
   --z-viz: 2;
   --z-scrolly-graphic: 3;
   --z-nav: 10;
+  --z-tooltip: 25;
   --z-minsize: 30;
 }
 
@@ -658,6 +659,26 @@ h1, h2, h3, h4 {
   opacity: 0; /* hidden until the script fades it in */
 }
 
+
+/* ---------- tooltip ---------- */
+/* Shared by the incidents, the cross and the year discs. It was styled
+   inline in the markup, at 12px in 85% white on an 85% background, which
+   read as grey type on a smoky panel. 14px, near-white, and a panel solid
+   enough that the rings under it do not show through the words. */
+#tooltip {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: rgba(5, 14, 35, 0.94);
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  line-height: 1.45;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
 
 /* ---------- scrollytelling ---------- */
 #lampedusa-context {
