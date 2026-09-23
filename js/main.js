@@ -1,6 +1,7 @@
 // js/main.js
 
 import { runSceneIntro } from "./sequence/controller.js";
+import { isOnScene } from "./sequence/onScene.js";
 import { drawYearDiscs } from './sequence/yearDiscs.js';
 import { drawArrivalsField } from './sequence/arrivalsField.js';
 import { startRippleBackground } from './sequence/rippleBackground.js';
@@ -42,14 +43,6 @@ window.addEventListener('scroll', () => {
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
   const navTop = nav.getBoundingClientRect().top;
 
-  // The nav is sticky, so navTop is 0 for the whole eight thousand pixels
-  // below this point. It says the reader has come past the top of the page;
-  // it does not say where they are. The opening has to key off its own
-  // section, or it plays over whatever the reader happens to be reading.
-  const vizSection = document.querySelector('#viz-section');
-  const vizRect = vizSection.getBoundingClientRect();
-  const onTheAnimation = vizRect.top <= 0 && vizRect.bottom > 0;
-
   if (navTop <= 0) {
     nav.classList.add('sticky-top', 'visible');
     navLinks.forEach((link, i) => {
@@ -58,7 +51,13 @@ window.addEventListener('scroll', () => {
       }, i * 150);
     });
 
-    if (!animationStarted && armed && onTheAnimation) {
+    // The opening starts the moment the nav reaches the top, which is when
+    // the section arrives under it. The nav is sticky, though, so navTop
+    // stays 0 for the whole page below this point: on its own it would
+    // start the opening for a reader who loaded halfway down the page and
+    // is reading the ending. isOnScene is what says the section is the
+    // thing on screen.
+    if (!animationStarted && armed && isOnScene()) {
       animationStarted = true;
       runSceneIntro().catch(err => {
         console.error('The opening did not finish:', err);

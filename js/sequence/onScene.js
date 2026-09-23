@@ -13,9 +13,11 @@
 
 const SECTION = "#viz-section";
 
-// A third of the viewport has to be the section. Less than that and the
-// opening starts while it is still a sliver at the bottom of the screen.
-const MIN_VISIBLE = 0.33;
+// Half the viewport has to be the section. Below that the reader is on
+// their way into it or out of it rather than looking at it, so the
+// sequence holds. When the nav reaches the top the section already fills
+// 91 per cent of the screen, so the opening is free to start there.
+const MIN_VISIBLE = 0.5;
 
 export function isOnScene() {
   const el = document.querySelector(SECTION);
