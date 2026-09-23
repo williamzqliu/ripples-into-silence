@@ -351,7 +351,7 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       noteEl.textContent = state === "all"
         ? "Everyone who set out for Lampedusa in 2024 and reached this water. " +
           "One dot is one person."
-        : "The same field, with everyone who reached the island taken out of it.";
+        : "The 206 who died or went missing before reaching the island.";
     }
   }
 
