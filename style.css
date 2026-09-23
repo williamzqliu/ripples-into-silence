@@ -116,8 +116,13 @@ img {
   display: none;
 }
 
-/* shown under 1200px wide or 600px tall, where the sequence does not fit */
-@media only screen and (max-width: 1199px), only screen and (max-height: 599px) {
+/* Desktop only. Under 1024 wide or 640 tall the counters, the drawing and
+   the year bar no longer have room side by side and above one another,
+   and a phone would want a different layout rather than a smaller one.
+   The gate used to be 1200x600, which was both too wide and too short:
+   narrow desktop windows were turned away, and at 600 tall the fixed 650px
+   drawing ran under the nav and off the bottom of the screen. */
+@media only screen and (max-width: 1023px), only screen and (max-height: 639px) {
   .minsize {
     position: fixed;
     display: flex;
@@ -465,6 +470,11 @@ img {
   margin: 0 auto;
 }
 
+/* The insets give way on narrower windows, down to nothing at 1024, so
+   the room goes to the drawing rather than to empty gutters. 35 at full
+   width leaves the drawing exactly its 650: at 55 there were only 610px
+   between the counters, and the fixed 650 drawing had been hanging 20px
+   into each of them. */
 #left {
   width: 200px;
   flex-shrink: 0;
@@ -473,7 +483,7 @@ img {
   flex-direction: column;
   align-items: flex-start;
   margin-top: 55px;
-  margin-left: 55px;
+  margin-left: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
 }
 
 #right {
@@ -484,7 +494,7 @@ img {
   flex-direction: column;
   align-items: flex-end;
   margin-top: 55px;
-  margin-right: 55px;
+  margin-right: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
 }
 
 /* The SVG is a fixed 650 square and .layout is 90vh with its items at
@@ -493,15 +503,22 @@ img {
    align-items centre the square, and the padding keeps the top of the circle
    clear of the nav. Measured at 1900x900: 83px above, 81px below. */
 #viz {
-  flex-grow: 1;
+  /* Its width is what the counters leave, not what the drawing asks for:
+     drawCanvas measures this box to size the drawing, so the box must not
+     be sized by the drawing. */
+  flex: 1 1 0;
+  min-width: 0;
   align-self: stretch;
   display: flex;
   justify-content: center;
   align-items: center;
   /* clear of the counters above and the year bar below, square centred in
      what is left. At 900 tall the frame has 154px to share out around a 650
-     square: this puts about 100 of it above and leaves the bar 29. */
-  padding: 64px 0 72px;
+     square: this puts about 100 of it above and leaves the bar 29. Below
+     874 tall the top padding gives way first, down to 16px at 826, and only
+     then does the drawing start to shrink. The bottom 72 is the year bar's
+     and does not move. */
+  padding: clamp(16px, calc(100vh - 810px), 64px) 0 72px;
   box-sizing: border-box;
   text-align: center;
 }
@@ -994,6 +1011,10 @@ svg {
 .epilogue-image {
   flex: 1;
   text-align: right;
+  /* Drawn at one and a half times its box, which a wide screen has the
+     margin for and a 1280 window does not: it ran 63px off the right edge.
+     main.js brings the scale down to whatever the margin allows, never
+     below 1; this is the value without script. */
   scale: 1.5;
 }
 
@@ -1056,9 +1077,16 @@ svg {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 48px;
-  margin: 72px auto 0;
-  max-width: var(--page-max);
+  /* 48 on a wide screen, closing to 28 at 1024 so the three still fit. */
+  gap: clamp(28px, calc(28px + (100vw - 1024px) * 0.05), 48px);
+  /* The page's width, not the 800px text column it sits in. Laid out it
+     needed 1062px, so inside 800 it ran off to the right: 131px off
+     centre on a wide screen, and on anything under 1440 the page scrolled
+     sideways. Centred on the column by its own half-width. */
+  width: min(calc(var(--page-max) - 2 * var(--page-pad)),
+             calc(100vw - 2 * var(--page-pad) - 16px));
+  margin: 72px 0 0 50%;
+  translate: -50% 0;
 }
 
 .year-discs__col {
@@ -1107,8 +1135,12 @@ svg {
   color: rgba(255, 255, 255, 0.55);
 }
 
+/* The widest label, "36 dead or missing", is 113px; this is just over
+   it, so no figure breaks a line. It was 11em, 176px, for text that never
+   needed it, and those 63px a side are what pushed the grid past its
+   column. */
 .year-disc__label {
-  min-width: 11em;
+  min-width: 7.5em;
 }
 
 .year-disc--below .year-disc__label { min-width: 0; }

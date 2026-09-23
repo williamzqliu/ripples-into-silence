@@ -94,7 +94,7 @@ function ringLabel(svg, r, km, delay) {
     .attr("stroke", "#0F1A32")
     .attr("stroke-width", 3)
     .attr("paint-order", "stroke")
-    .attr("font-size", 14)
+    .style("font-size", "max(14px, var(--min-text, 0px))")
     .style("font-family", LABEL_FONT)
     .style("font-variant-numeric", "tabular-nums lining-nums")
     .attr("opacity", 0)

@@ -241,6 +241,29 @@ async function centreDiagram(img) {
 }
 scrollyImgs.forEach(centreDiagram);
 
+// ---------- the ending's relief
+//
+// The relief is drawn at 1.5 times its box. That reaches past the box on
+// both sides, which the page margin absorbs on a wide screen; on a 1280
+// window it ran off the right edge and the page scrolled sideways. The
+// image is not to be cropped, so the scale comes down instead, to what the
+// margin on the right allows.
+const EPILOGUE_SCALE = 1.5;
+
+function fitEpilogueImage() {
+  const box = document.querySelector('.epilogue-image');
+  if (!box || !box.offsetWidth) return;
+  box.style.scale = '1';
+  const right = box.getBoundingClientRect().right;       // unscaled
+  const room = document.body.clientWidth - right;
+  const s = Math.max(1, Math.min(EPILOGUE_SCALE, 1 + (2 * room) / box.offsetWidth));
+  box.style.scale = s.toFixed(3);
+}
+
+window.addEventListener('resize', fitEpilogueImage);
+window.addEventListener('load', fitEpilogueImage);
+fitEpilogueImage();
+
 // The 206 against the 45,997 was drafted here as an isotype grid and left
 // unfinished, writing into markup that was commented out, so it threw on
 // every load and stopped the rest of this module. It is built now, in

@@ -95,7 +95,8 @@ function labelStyle(selection) {
     .attr("text-anchor", "middle")
     .attr("dominant-baseline", "central")
     .attr("fill", "#ffffff")
-    .attr("font-size", LABEL_SIZE)
+    // Never under MIN_TEXT_PX on screen, however far the drawing is scaled.
+    .style("font-size", `max(${LABEL_SIZE}px, var(--min-text, 0px))`)
     .attr("font-weight", "500")
     /* Painted behind the glyphs rather than over them. Without paint-order
        the halo eats into the letterforms, which is the opposite of the job,
