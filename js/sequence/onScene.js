@@ -11,7 +11,7 @@
 // If the section is on screen the wait returns at once; if it is not, it
 // holds until the reader comes back, and the film picks up where it stopped.
 
-const SECTION = "#viz-section";
+const SECTION = "#sequence";
 
 // Half the viewport has to be the section. Below that the reader is on
 // their way into it or out of it rather than looking at it, so the

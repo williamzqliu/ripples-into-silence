@@ -78,16 +78,17 @@
       <a href="#cover" class="nav-link nav-title">RIPPLES INTO SILENCE</a> <!-- title -->
       <div class="nav-content">
         <a href="#intro" class="nav-link">Intro</a>
-        <a href="#viz-section" class="nav-link">Outlines</a>
-        <a href="#details" class="nav-link">Trends</a>
+        <a href="#sequence" class="nav-link">Outlines</a>
+        <a href="#eleven-years" class="nav-link">Trends</a>
         <!-- <a href="#contrast-section" class="nav-link">Contrast</a> -->
         <a href="#epilogue" class="nav-link">Ending</a>
       </div>
     </div>
   </nav>
 
-  <!-- 4. the animated sequence -->
-  <section id="viz-section" class="section viz">
+  <!-- 4. the sequence: the island, the fifty kilometre circle, and the
+       ninety-four incidents arriving in it -->
+  <section id="sequence" class="section viz">
     <div class="layout">
       <div id="left">
         <div class="label">TOTAL INCIDENTS</div>
@@ -111,8 +112,8 @@
     </div>
   </section>
 
-  <!-- 5. scrollytelling: distance, the island, the corridor -->
-  <section id="lampedusa-context" class="section scrolly-section">
+  <!-- 5. context: the distance, the island, the corridor -->
+  <section id="context" class="section scrolly-section">
     <div class="scrolly-container">
       <!-- text -->
       <div class="scrolly-text">
@@ -161,11 +162,8 @@
       </div>
     </div>
   </section>
-    <!-- 7. the eleven year chart -->
-    <!-- On the page's content edge, like the sections either side of it. It
-         used to sit in a centred 800px column, 160px in from everything
-         else at 1897 wide, and its outer div was never closed. -->
-    <section id="details" class="section">
+  <!-- 6. eleven years: one disc a year -->
+  <section id="eleven-years" class="section">
       <div class="page-width">
         <h2 class="fade-step">Eleven Years</h2>
         <p class="fade-step">Every disc is the same fifty kilometers of water, read the same way as the
@@ -174,31 +172,34 @@
           handful of incidents. Then 2022 holds seventeen, 2023 holds thirty-nine, and 2024
           holds nineteen that killed more people than any year before it.</p>
         <div id="year-discs"></div>
-        <div class="details-2024">
-          <h2 class="fade-step">2024</h2>
-          <p class="fade-step">45,997 people reached Lampedusa in 2024, on 1,095 boats, according to the
-            Italian Red Cross, which runs the reception center on the island. In the same
-            water that year, 206 did not.</p>
-        </div>
       </div>
     </section>
 
-
-  <!-- 8. 2024, at one dot per person. The section is tall and the canvas is
-       stuck to the top of it, so scrolling through the section is what fades
-       the arrivals out and sorts the 206. -->
-  <section id="arrivals-section" class="section arrivals">
-    <div class="arrivals__sticky">
-      <div class="arrivals__caption">
-        <p class="arrivals__count">46,203 people</p>
-        <p class="arrivals__note">Everyone who set out for Lampedusa in 2024 and reached
-          this water. One dot is one person.</p>
+  <!-- 7. 2024: the year told on its own, then at one dot per person. Its
+       heading and text used to sit at the foot of Eleven Years, and the dots
+       were a section of their own. The dots' track is tall and the canvas
+       is stuck to the top of it, so scrolling through the track is what
+       fades the arrivals out and sorts the 206. -->
+  <section id="year-2024" class="section">
+    <div class="page-width">
+      <h2 class="fade-step">2024</h2>
+      <p class="fade-step">45,997 people reached Lampedusa in 2024, on 1,095 boats, according to the
+        Italian Red Cross, which runs the reception center on the island. In the same
+        water that year, 206 did not.</p>
+    </div>
+    <div class="arrivals">
+      <div class="arrivals__sticky">
+        <div class="arrivals__caption">
+          <p class="arrivals__count">46,203 people</p>
+          <p class="arrivals__note">Everyone who set out for Lampedusa in 2024 and reached
+            this water. One dot is one person.</p>
+        </div>
+        <canvas id="arrivals-canvas"></canvas>
       </div>
-      <canvas id="arrivals-canvas"></canvas>
     </div>
   </section>
 
-  <!-- 9. the ending -->
+  <!-- 8. epilogue -->
   <section id="epilogue" class="section epilogue">
     <div class="epilogue-wrapper">
       <div class="epilogue-text">

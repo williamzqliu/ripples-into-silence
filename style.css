@@ -207,15 +207,18 @@ img {
 }
 
 
-#details,
-#epilogue,
-#viz-section {
+/* The same ground and layer for every section after the intro, whose
+   own background is the ripple field. */
+#sequence,
+#eleven-years,
+#year-2024,
+#epilogue {
   background-color: #0F1A32; /* the page background */
   z-index: var(--z-section);
   position: relative;
 }
 
-#viz-section {
+#sequence {
   scroll-margin-top: 60px;
 
   /* Room to stop in, and no more. At 1.09 screens the sticky frame had
@@ -579,7 +582,7 @@ h1, h2, h3, h4 {
   text-align: right;
 }
 
-/* .viz-section is the positioning context for the bar below */
+/* #sequence is the positioning context for the bar below */
 .viz {
   position: relative; /* so the year bar can sit at its foot */
 }
@@ -709,7 +712,7 @@ h1, h2, h3, h4 {
 }
 
 /* ---------- scrollytelling ---------- */
-#lampedusa-context {
+#context {
   background-color: #0F1A32;
   /* The 250px above and below used to be margin, which is outside the
      background: two unpainted bands half a screen tall, through which the
@@ -725,7 +728,8 @@ h1, h2, h3, h4 {
   z-index: var(--z-section);
 }
 
-#details h2,
+#eleven-years h2,
+#year-2024 h2,
 #reflection h2,
 .scrolly-step h2 {
   font-size: var(--fs-section-title);
@@ -740,7 +744,7 @@ h1, h2, h3, h4 {
   margin-bottom: 40px; 
 }
 
-#details {
+#eleven-years {
   scroll-margin-top: -80px; /* set against the nav bar height */
   /* A little more air after the scrollytelling: 128 here and 120 below
      the last step, where it was 64 and 120. On a short screen it comes
@@ -751,15 +755,22 @@ h1, h2, h3, h4 {
 
 /* 90% white as a colour rather than as opacity: an id's opacity outranks
    the fade-step classes, so the paragraph would never have faded in. */
-#details p,
+#eleven-years p,
+#year-2024 > .page-width p,
 #reflection p {
   font-size: var(--fs-body);
   max-width: var(--measure-body);
   color: rgba(255, 255, 255, 0.9);
 }
 
-.details-2024 {
-  margin-top: 72px;
+/* The dots run straight on into the epilogue, as they did when they
+   were a section of their own. */
+#year-2024 {
+  padding-bottom: 0;
+}
+
+#year-2024 > .page-width {
+  margin-bottom: 64px;
 }
 
 .scrolly-text {
@@ -985,6 +996,7 @@ svg {
 
 /* Tall, because the scroll through it is the animation. The canvas sticks to
    the top and the section's own height is the timeline. */
+/* The dots' track: tall, with the canvas stuck to the top of it. */
 .arrivals {
   position: relative;
   z-index: var(--z-section);

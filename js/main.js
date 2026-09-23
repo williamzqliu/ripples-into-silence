@@ -21,7 +21,9 @@ drawYearDiscs("#year-discs");
 
 // 2024 at one dot per person: the 206 are 0.45 per cent of the field they
 // are hidden in, until the rest of it goes.
-drawArrivalsField("#arrivals-section", "#arrivals-canvas");
+// Driven by the dots' own track, not the whole 2024 section, so the
+// heading above it does not move where the fade happens.
+drawArrivalsField("#year-2024 .arrivals", "#arrivals-canvas");
 
 let animationStarted = false;
 
