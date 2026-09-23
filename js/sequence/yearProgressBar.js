@@ -128,6 +128,9 @@ export function startLinearProgressBar(duration = totalDuration) {
 
         const progress = Math.min(elapsed / totalDuration, 1);
         bar.style.width = `${progress * 100}%`;
+        // Asked for early by the handover, so the number is lit at the
+        // moment the fill reaches it rather than 300ms (about 6px) after.
+        lightYearUnderFill(Math.min(progress + HANDOVER_MS / totalDuration, 1));
 
         if (progress < 1) {
             requestAnimationFrame(animate);
@@ -148,6 +151,42 @@ export function startLinearProgressBar(duration = totalDuration) {
     requestAnimationFrame(animate);
 }
 
+// ----- which year is lit
+//
+// A year lights up when the fill reaches its number. It used to light up
+// when that year's share of incidents had been launched, plus a delay, plus
+// a per-year table of millisecond corrections whose only job was to make
+// the label turn over when the bar got to it. Any change to the timing
+// elsewhere broke the table: cutting the wait before the first path by 1.8
+// seconds and spreading the crowded labels apart put every year 13 to 53
+// pixels ahead of the bar. Read off the fill, the two cannot disagree, and
+// they pause together because the fill is what pauses.
+//
+// Nothing is lost by it. The count it used was launches, not years: the
+// release is a round robin over directions, so a year's label never meant
+// that year's incidents were the ones on screen.
+let litIndex = -1;
+
+// The outgoing year fades before the next one comes up.
+const HANDOVER_MS = 300;
+
+function lightYearUnderFill(progress) {
+    if (!yearMap.length) return;
+    const track = document.getElementById("year-pop-labels");
+    const fillX = progress * (track ? track.clientWidth : 0);
+
+    let index = -1;
+    yearMap.forEach((d, i) => {
+        const x = parseFloat(d.label.style("left")) || 0;
+        if (fillX >= x) index = i;
+    });
+
+    if (index !== litIndex && index >= 0) {
+        litIndex = index;
+        updateProgress(index);
+    }
+}
+
 // ----- highlighting the year on screen
 export function updateProgress(currentYearIndex) {
     if (!yearMap.length) return;
@@ -162,11 +201,10 @@ export function updateProgress(currentYearIndex) {
     });
 
     // wait for the outgoing year to fade before bringing the next one up
-    const transitionDelay = 300;
     setTimeout(() => {
         const d = yearMap[currentYearIndex];
         if (d) {
             d.label.classed("hidden", false).classed("inactive", false).classed("active", true);
         }
-    }, transitionDelay);
+    }, HANDOVER_MS);
 }

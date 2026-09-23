@@ -11,7 +11,7 @@ import {
 } from "../config.js";
 
 import { launchPathWithStats } from "./launchPathWithStats.js";
-import { isOnScene, whenOnScene, wait } from "./onScene.js";
+import { isOnScene, whenOnScene, sceneWait } from "./onScene.js";
 
 export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuckets }) {
   let active = 0;
@@ -40,13 +40,17 @@ export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuck
   // one waiting for the reader to be there for it. Written as a loop rather
   // than a setTimeout wrapping a setInterval, because a schedule that can
   // pause has to be able to say where it paused.
+  //
+  // The waits count only time spent on screen, the same as the bar. On the
+  // wall clock a reader who left during the six seconds between openers
+  // came back to the next one already gone and the bar six seconds behind.
   async function launchInitial() {
-    await wait(FIRST_DELAY);
+    await sceneWait(FIRST_DELAY);
 
     for (const d of firstBatch) {
       await whenOnScene();
       launch(d, { showLabel: true, speed: INITIAL_SPEED });
-      await wait(INITIAL_DELAY);
+      await sceneWait(INITIAL_DELAY);
     }
 
     launchGrouped();

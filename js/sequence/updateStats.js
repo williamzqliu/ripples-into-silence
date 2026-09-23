@@ -1,10 +1,7 @@
 // js/sequence/updateStats.js
 //
-// The two running counters in the corners, and the year they belong to.
-
-import { updateProgress } from "./yearProgressBar.js";
-import { state } from "./state.js";
-import { YEAR_ADVANCE_DELAY, YEAR_DELAY_OVERRIDES } from "../config.js";
+// The two running counters in the corners. The year is not set from here
+// any more: it is read off the progress bar. See yearProgressBar.js.
 
 // Kept at module level rather than read back off the DOM, because the
 // counters animate and the text on screen is mid-interpolation most of the
@@ -64,18 +61,4 @@ export function updateDeathCount(d) {
     setTimeout(() => {
         animationFrameId = requestAnimationFrame(animate);
     }, 100);
-}
-
-// The year turns over when its last incident has landed.
-export function updateYearProgress(allYears, yearEventCounts) {
-    const launched = state.countLaunch();
-    const currentYear = allYears[state.yearIndex];
-
-    if (launched < yearEventCounts[currentYear]) return;
-
-    const newIndex = state.advanceYear();
-    if (newIndex >= allYears.length) return;
-
-    const delay = YEAR_DELAY_OVERRIDES[allYears[newIndex]] || 0;
-    setTimeout(() => updateProgress(newIndex), YEAR_ADVANCE_DELAY + delay);
 }

@@ -47,3 +47,20 @@ export function whenOnScene() {
 export function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+/** A wait that only counts time while the section is on screen, so it
+    stays in step with the year bar, which is measured the same way. */
+export function sceneWait(ms) {
+  return new Promise(resolve => {
+    let left = ms;
+    let last = performance.now();
+    const tick = () => {
+      const now = performance.now();
+      if (isOnScene()) left -= now - last;
+      last = now;
+      if (left <= 0) resolve();
+      else setTimeout(tick, 50);
+    };
+    setTimeout(tick, 50);
+  });
+}

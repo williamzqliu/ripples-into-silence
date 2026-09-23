@@ -4,11 +4,7 @@
 
 import { renderPath } from "./renderPath.js";
 import { intro_defs, intro_layer } from "./drawCanvas.js";
-import {
-    updateIncidentCount,
-    updateDeathCount,
-    updateYearProgress
-} from "./updateStats.js";
+import { updateIncidentCount, updateDeathCount } from "./updateStats.js";
 
 export function launchPathWithStats({
     d,
@@ -29,7 +25,6 @@ export function launchPathWithStats({
         onEnd: () => {
             updateIncidentCount();
             updateDeathCount(d);
-            updateYearProgress(allYears, yearEventCounts);
 
             if (onComplete) onComplete();
         }

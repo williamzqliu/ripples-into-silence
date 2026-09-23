@@ -107,11 +107,10 @@ export const RADIUS_HOLD = 3200;
 // ------------------------------------------------------------------ pacing
 
 export const INITIAL_INCIDENTS = 3;   // released slowly, one at a time
-// The last of the dead air. Everything before this is now continuous, so
-// three seconds of a finished, motionless frame was the one gap left in
-// the opening. It does not buy anything: the frame has already been read
-// by the time the counters finish arriving.
-export const FIRST_DELAY = 1200;      // ms before the first one
+// Three seconds with the bar already running. The piece was tuned with
+// this: at 1.2 seconds every incident went out ahead of the bar, which is
+// what put the years out of step with it.
+export const FIRST_DELAY = 3000;      // ms before the first one
 export const INITIAL_DELAY = 6000;    // ms between those first few
 export const INITIAL_SPEED = 0.25;    // and they travel slowly as well
 
@@ -195,16 +194,3 @@ export const UPDATE_RATE = 850;
 export const UPDATE_SPEED_YEAR = 675;
 export const UPDATE_SPEED = 500;
 export const START_YEAR = 2014;
-
-// The year advances when its last incident lands, which is not the same
-// moment as the year reading well on screen. These shift individual years so
-// the progress bar and the paths stay in step.
-export const YEAR_ADVANCE_DELAY = 1200;
-export const YEAR_DELAY_OVERRIDES = {
-  2017: -2000,
-  2018: 0,
-  2019: 1000,
-  2020: 1500,
-  2021: 1000,
-  2022: 1000,
-};

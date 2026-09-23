@@ -18,7 +18,6 @@ import { whenOnScene, wait } from "./onScene.js";
 import { RADIUS_HOLD } from "../config.js";
 import {
     initYearProgressBar,
-    updateProgress,
     startLinearProgressBar
 } from "./yearProgressBar.js";
 
@@ -61,10 +60,6 @@ export async function runSceneIntro() {
     await whenOnScene();
     initYearProgressBar(allYears);
     startLinearProgressBar();
-
-    setTimeout(() => {
-        updateProgress(0);
-    }, 2000);
 
     drawPaths({
         allYears,
