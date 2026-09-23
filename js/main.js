@@ -32,8 +32,8 @@ let armed = false;
 // The opening is choreographed, so the page holds still while it establishes
 // itself. It holds gently. It lets go after LOCK_MAX_MS whatever the sequence
 // is doing, and sooner if the reader makes a deliberate move: the animation
-// runs for about twelve seconds, which is far too long to take the scrollbar
-// away from somebody.
+// runs for about twelve seconds, which is far too long to hold somebody in
+// one place.
 const LOCK_MAX_MS = 3500;
 // One notch of a trackpad is not an instruction to leave; a push is.
 const WHEEL_RELEASE_PX = 60;
@@ -48,14 +48,12 @@ let releaseLock = () => { };
 
 function lockScroll() {
   // The hold refuses the scroll rather than removing it. `overflow: hidden`
-  // makes the page unscrollable, which takes the scrollbar off the screen
-  // and puts it back three seconds later: the thumb blinks even with the
-  // gutter reserved, because there is nothing to draw a thumb for. Cancelling
-  // the input leaves the page scrollable as far as the browser is concerned,
-  // so the scrollbar stays exactly where it was and never flickers.
-  //
-  // Dragging the scrollbar itself still works, and so does a text selection
-  // drag. Both are deliberate, which is the same bar the release below sets.
+  // makes the page unscrollable, which changes the width of the document and
+  // moves everything on it sideways for the length of the hold. Cancelling
+  // the input changes nothing about the layout: as far as the browser is
+  // concerned the page is scrollable the whole time, it just keeps being
+  // told no. A text selection drag still works, which is fine; it is
+  // deliberate, the same bar the release below sets.
   let wheeled = 0;
   let touchStart = null;
 
@@ -134,8 +132,8 @@ window.addEventListener('scroll', () => {
     if (!animationStarted && armed && onTheAnimation) {
       animationStarted = true;
       lockScroll();
-      // The lock has to come off even if the opening falls over, or the page
-      // keeps the scrollbar.
+      // The lock has to come off even if the opening falls over, or the
+      // reader is stuck on this section for good.
       runSceneIntro().then(unlockScroll, (err) => {
         unlockScroll();
         console.error('The opening did not finish:', err);

@@ -67,11 +67,19 @@
 
 html {
   scroll-behavior: smooth;
-  /* The opening holds the page with overflow: hidden, which takes the
-     scrollbar away and hands its 15px back to the layout: everything on the
-     page jumps sideways, and jumps back when the hold lets go. Reserving the
-     gutter permanently means the width never changes. */
-  scrollbar-gutter: stable;
+  /* No scrollbar, at all, ever. The opening holds the page for a few seconds
+     while the island plays, and every way of holding it either took the thumb
+     off the screen or left an empty groove where it had been, so the one
+     piece of chrome on the page blinked at the exact moment the page is
+     asking to be looked at. There is nothing left to blink. The cover says
+     which way the page runs, and once the sequence starts the year bar says
+     how far through it we are. */
+  scrollbar-width: none;
+}
+
+/* For builds that predate scrollbar-width on the standards track. */
+html::-webkit-scrollbar {
+  display: none;
 }
 
 
@@ -265,6 +273,51 @@ img {
   transform: translateY(20px);
   animation: fadeInUp 1.5s ease forwards;
   animation-delay: 0.1s;
+}
+
+/* The page has no scrollbar, so this is the only thing telling a reader it
+   runs downwards. It is inside #cover, so it leaves with the cover rather
+   than needing to be dismissed. */
+.cover-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.45);
+  opacity: 0;
+  /* Not fadeInUp: that one lands on translateY(0) and would undo the
+     centring this element is holding in its own transform. */
+  animation: hintIn 1.5s ease 1.4s forwards;
+}
+
+.cover-hint-line {
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(to bottom,
+    rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+  animation: hintDrop 2.6s ease-in-out infinite;
+}
+
+@keyframes hintIn {
+  to { opacity: 1; }
+}
+
+@keyframes hintDrop {
+  0%   { transform: scaleY(0.15); transform-origin: top; opacity: 0.15; }
+  50%  { transform: scaleY(1); transform-origin: top; opacity: 0.8; }
+  100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-hint-line { animation: none; }
 }
 
 /* keyframes */

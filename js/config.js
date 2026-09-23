@@ -49,8 +49,15 @@ export function radiusFractionFor(km) {
 }
 
 // Drawn inside the fifty kilometre circle, so the empty outer water reads as
-// a measured distance rather than as space nothing was plotted in.
-export const DISTANCE_RINGS_KM = [10, 25];
+// a measured distance rather than as space nothing was plotted in. In draw
+// order, which is outside in: the ruler is laid down from the edge the
+// fifty kilometre circle has already established, rather than from the
+// middle outwards to a boundary the reader has not been given yet.
+export const DISTANCE_RINGS_KM = [25, 10];
+
+// At 1px on a 3-on-5-off dash these were a suggestion of a ring rather than
+// a ring. The fifty kilometre circle is 2px, and these stay under it.
+export const DISTANCE_RING_STROKE = 1.5;
 
 // Paths are released in a shuffled round robin over this many angular
 // sectors, so consecutive incidents arrive from different directions.

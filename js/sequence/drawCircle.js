@@ -4,7 +4,7 @@ import {
   cx, cy,
   LAUNCH_RADIUS, RADIUS_KM,
   RANGE_CIRCLE_STROKE,
-  DISTANCE_RINGS_KM, radiusFractionFor, LABEL_FONT
+  DISTANCE_RINGS_KM, DISTANCE_RING_STROKE, radiusFractionFor, LABEL_FONT
 } from "../config.js";
 
 // Resolves when the fade-in is over, so the opening can be sequenced.
@@ -54,8 +54,8 @@ function drawDistanceRings(delay) {
       /* 0.10 at a 3-on-7-off dash is almost no ink: the outer circle is
          0.18 at 2px and reads, these did not. */
       .attr("stroke", "rgba(255,255,255,0.20)")
-      .attr("stroke-width", 1)
-      .attr("stroke-dasharray", "3 5")
+      .attr("stroke-width", DISTANCE_RING_STROKE)
+      .attr("stroke-dasharray", "4 6")
       .attr("opacity", 0)
       .lower()
       .transition()

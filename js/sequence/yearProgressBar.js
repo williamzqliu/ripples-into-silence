@@ -21,6 +21,11 @@ const yearLabelPositions = {
     2024: 0.895
 };
 
+// The smallest space allowed between two labels, in pixels, and a ceiling on
+// how many times the row is relaxed to get there.
+const LABEL_GAP = 12;
+const RELAX_PASSES = 60;
+
 // ----- year labels
 export function initYearProgressBar(years) {
     allYears = years;
@@ -35,15 +40,72 @@ export function initYearProgressBar(years) {
         const label = container.append("div")
             .attr("class", "year-pop hidden") // hidden until its year comes round
             .attr("id", `pop-${year}`)
-            .style("left", `${proportion * 100}%`)
             .style("top", "-34px")
             .text(year);
 
         // only record labels that were actually created
         if (label.node()) {
-            yearMap.push({ year, label, shown: false });
+            yearMap.push({ year, label, proportion, shown: false });
         }
     });
+
+    layoutYearLabels();
+    // Bebas arrives over the network, and a label measured in the fallback
+    // face is the wrong width to lay out against.
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(layoutYearLabels);
+    }
+    window.addEventListener("resize", layoutYearLabels);
+}
+
+// 2017 through 2022 hold one or two incidents each, so at a bar that fills
+// in real time those six labels land within about twenty-five pixels of one
+// another and run together into a grey smear.
+//
+// The bar is a clock rather than an axis. A label has to light up while its
+// year is on screen; it does not have to sit on a measured coordinate, and
+// no reading is taken off it. So a run that is too tight is pushed apart,
+// half a deficit to each side, until every label has room. The order is
+// preserved, each label stays as close to its own moment as legibility
+// allows, and the years that do carry weight - 2023 and 2024 hold nearly
+// half the record between them - keep the long spans that say so.
+function layoutYearLabels() {
+    const track = document.getElementById("year-pop-labels");
+    if (!track || !yearMap.length) return;
+
+    const width = track.clientWidth;
+    if (!width) return;
+
+    const items = yearMap.map(d => ({
+        x: d.proportion * width,
+        half: d.label.node().offsetWidth / 2,
+        label: d.label,
+    }));
+
+    for (let pass = 0; pass < RELAX_PASSES; pass++) {
+        let moved = false;
+
+        for (let i = 0; i < items.length - 1; i++) {
+            const a = items[i];
+            const b = items[i + 1];
+            const deficit = (a.half + b.half + LABEL_GAP) - (b.x - a.x);
+            if (deficit <= 0.5) continue;
+            a.x -= deficit / 2;
+            b.x += deficit / 2;
+            moved = true;
+        }
+
+        // Pushing apart can walk the ends off the bar. Pinning them here and
+        // running the sweep again feeds the correction back into the row.
+        const first = items[0];
+        const last = items[items.length - 1];
+        first.x = Math.max(first.half, first.x);
+        last.x = Math.min(width - last.half, last.x);
+
+        if (!moved) break;
+    }
+
+    items.forEach(d => d.label.style("left", `${Math.round(d.x)}px`));
 }
 
 // ----- the bar itself, filling at a constant rate
