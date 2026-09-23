@@ -1010,8 +1010,8 @@ svg {
   z-index: var(--z-section);
   background-color: #0F1A32;
   /* 320 before the field opened close up and drew back; the draw back is
-     the extra hundred. */
-  height: 420vh;
+     the extra forty. */
+  height: 360vh;
   padding: 0;
 }
 

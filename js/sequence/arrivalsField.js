@@ -51,13 +51,16 @@ const FEATHER = 0.2;
 
 // The scroll through the track, 0 to 1: the close-up holds, draws back, the
 // whole field holds, the arrivals fade, the 206 sort, the labels come in.
-const ZOOM_FROM_AT = 0.04;
-const ZOOM_TO_AT = 0.40;
-const FADE_FROM_AT = 0.48;
-const FADE_TO_AT = 0.66;
-const MOVE_FROM_AT = 0.62;
-const MOVE_TO_AT = 0.90;
-const LABELS_AT = 0.86;
+// On a 360vh track, 2.6 screens of scroll: the draw back takes 0.6 of a
+// screen, half what it first had, and everything after it the same scroll
+// as before.
+const ZOOM_FROM_AT = 0.038;
+const ZOOM_TO_AT = 0.27;
+const FADE_FROM_AT = 0.37;
+const FADE_TO_AT = 0.59;
+const MOVE_FROM_AT = 0.54;
+const MOVE_TO_AT = 0.885;
+const LABELS_AT = 0.84;
 
 // Deterministic, so the same person is in the same place on every load.
 function mulberry32(a) {
