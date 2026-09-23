@@ -330,16 +330,53 @@ scrollyImgs.forEach(centreDiagram);
 // image is not to be cropped, so the scale comes down instead, to what the
 // margin on the right allows.
 const EPILOGUE_SCALE = 1.5;
+// And moved this far right, off the text, from what is left of the margin
+// once it is scaled.
+const EPILOGUE_SHIFT = 80;
 
 function fitEpilogueImage() {
   const box = document.querySelector('.epilogue-image');
   if (!box || !box.offsetWidth) return;
   box.style.scale = '1';
+  box.style.translate = '0';
   const right = box.getBoundingClientRect().right;       // unscaled
   const room = document.body.clientWidth - right;
   const s = Math.max(1, Math.min(EPILOGUE_SCALE, 1 + (2 * room) / box.offsetWidth));
   box.style.scale = s.toFixed(3);
+  const shift = Math.max(0, Math.min(EPILOGUE_SHIFT, room - (s - 1) * box.offsetWidth / 2));
+  box.style.translate = `${Math.round(shift)}px 0`;
 }
+
+// ---------- the epilogue's lines
+//
+// One at a time as the scene arrives, then the credits. The wait before
+// each is the time to read the one before it, roughly, and the longest is
+// before the last: "And yet, 206 didn't." comes after a pause.
+const EPILOGUE_WAITS = [500, 1500, 1500, 1500, 2600, 1600];
+const epilogueScene = document.getElementById('epilogue');
+const epilogueLines = epilogueScene ? [...epilogueScene.querySelectorAll('.epilogue-line')] : [];
+const reducedMotion = window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let epilogueOn = false;
+let epilogueTimers = [];
+
+window.addEventListener('scenechange', () => {
+  if (!epilogueScene) return;
+  const on = !epilogueScene.classList.contains('scene--away');
+  if (on === epilogueOn) return;
+  epilogueOn = on;
+  epilogueTimers.forEach(clearTimeout);
+  epilogueTimers = [];
+  if (!on) {
+    epilogueLines.forEach(line => line.classList.remove('is-in'));
+    return;
+  }
+  let t = 0;
+  epilogueLines.forEach((line, i) => {
+    t += reducedMotion ? 0 : (EPILOGUE_WAITS[i] ?? 1500);
+    epilogueTimers.push(setTimeout(() => line.classList.add('is-in'), t));
+  });
+});
 
 window.addEventListener('resize', fitEpilogueImage);
 window.addEventListener('load', fitEpilogueImage);

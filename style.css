@@ -1117,9 +1117,25 @@ svg {
   line-height: 1.65;
 }
 
-/* The entrance is .fade-step's, shared with Eleven Years. */
 .epilogue-text p {
   margin-bottom: 28px;
+}
+
+/* The epilogue fits one screen, so there is no scroll through it to reveal
+   its paragraphs by, and with .fade-step they all came up at once as the
+   scene arrived. main.js brings them in one at a time, then the credits:
+   the same float up as .fade-step, a little slower. When the scene is left
+   they go, quicker and together, and play again on the way back. */
+.epilogue-line {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.epilogue-line.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 1.1s ease, transform 1.1s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .epilogue-text p:last-child {
