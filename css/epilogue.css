@@ -1,0 +1,222 @@
+/* epilogue.css
+
+   Scene 6, the epilogue: the last screen, its lines one at a time, the
+   island with its town pulsing, and the credits. */
+
+/* The last screen of the page is the epilogue, whole: its text and the
+   island centred between the nav and the credits, which are part of the
+   scene. It used to run 956px with the credits after it, so at the end
+   of the page, 815 tall, the first line had scrolled up under the nav. */
+#epilogue {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: var(--nav-h) 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.epilogue-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 24px var(--page-pad);
+  gap: 40px;
+}
+
+/* A little closer set than it was, 1.8 and 40px, so the eight paragraphs
+   and the credits fit one laptop screen. */
+.epilogue-text {
+  flex: 1;
+  color: white;
+  font-size: var(--fs-body);
+  font-family: 'EB Garamond', Georgia, serif;
+  line-height: 1.6;
+}
+
+.epilogue-text p {
+  margin-bottom: 20px;
+}
+
+/* The epilogue fits one screen, so there is no scroll through it to reveal
+   its paragraphs by, and with .fade-step they all came up at once as the
+   scene arrived. main.js brings them in one at a time, then the credits:
+   the same float up as .fade-step, a little quicker. When the scene is left
+   they go, quicker and together, and play again on the way back. */
+.epilogue-line {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.epilogue-line.is-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.epilogue-text p:last-child {
+  margin-bottom: 0;
+}
+
+.epilogue-image {
+  flex: 1;
+  text-align: right;
+  /* Drawn at one and a half times its box, which a wide screen has the
+     margin for and a 1280 window does not: it ran 63px off the right edge.
+     main.js brings the scale down to whatever the margin allows, never
+     below 1; this is the value without script. */
+  scale: 1.5;
+}
+
+/* The image and what is drawn on it, sized together: the label is set in
+   units of the figure's width, so it sits where the painted one was at any
+   size. */
+.epilogue-figure {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 500px;
+  container-type: inline-size;
+  line-height: 0;
+}
+
+/* The town, at 50% across and 50% down the file. */
+.epilogue-marker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.2cqw;
+  height: 2.2cqw;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 0.55cqw solid #C0272D;
+}
+
+/* A live marker: thin red rings go out from the town and fade, over
+   and over, the way a map marks something still happening. This is the
+   first of the four tried; thicker and filled it read as a target, and a
+   soft glow in its place was either too faint or a blot. */
+.epilogue-pulse {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3.3cqw;
+  height: 3.3cqw;
+  margin: -1.65cqw 0 0 -1.65cqw;
+}
+
+/* Two rings close together, then a rest: bong bong, bong bong, like a
+   heartbeat, rather than an even train of them. Each ring goes out in the
+   first 1.5s of a 2.8s cycle and waits out the rest; the second leaves
+   0.28s after the first. */
+.epilogue-pulse::before,
+.epilogue-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 0.4cqw solid #C0272D;
+  opacity: 0;
+  animation: epilogue-pulse 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+
+.epilogue-pulse::after {
+  animation-delay: 0.28s;
+}
+
+@keyframes epilogue-pulse {
+  0%   { transform: scale(1); opacity: 0.9; }
+  54%  { transform: scale(3.2); opacity: 0; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .epilogue-pulse::before,
+  .epilogue-pulse::after { animation: none; opacity: 0; }
+}
+
+.epilogue-place {
+  position: absolute;
+  left: 52%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.4cqw;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
+  /* A dark halo, so the name reads on the brightest of the relief. */
+  text-shadow:
+    0 0 0.4cqw rgba(5, 14, 35, 0.95),
+    0 0 1.2cqw rgba(5, 14, 35, 0.85),
+    0 0 2.4cqw rgba(5, 14, 35, 0.6);
+}
+
+.epilogue-image img {
+  width: 100%;
+  /* The asset carries its own tone now. The filter here used to pull the
+     brightness down by a tenth on a relief whose median luminance was 29
+     against a background of 25: a contrast ratio of 1.04 to 1. Held a little
+     under full strength so the last two lines of text close the page. */
+  opacity: 0.9;
+}
+
+/* On the epilogue's left edge, the page's content box, rather than centred
+   under a text that is set on the left. The credit in the titles' Bebas,
+   the sources in the text's serif. */
+#footer-credit {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad) 28px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+#footer-credit p {
+  margin: 0;
+}
+
+#footer-credit p + p {
+  margin-top: 6px;
+}
+
+.footer-credit__by {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  line-height: 1.7;
+}
+
+.footer-credit__sources {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+#footer-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+/* The name a little brighter than the line it is on. */
+#footer-credit a.footer-credit__name {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+#footer-credit a:hover {
+  color: rgba(255, 255, 255, 0.9);
+}

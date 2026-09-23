@@ -1,0 +1,167 @@
+/* context.css
+
+   Scene 3, Why Lampedusa: three steps of text pinned beside their
+   diagrams. main.js (scenes/context.js) says which step is up. */
+
+/* ---------- scrollytelling ---------- */
+#context {
+  background-color: #0F1A32;
+  /* The 250px above and below used to be margin, which is outside the
+     background: two unpainted bands half a screen tall, through which the
+     fixed ripple layer showed. Padding holds the same space and paints it.
+     Horizontal padding is set here rather than on .scrolly-section below,
+     because that is the same element and an id beats a class. */
+  /* 120, not 290. With the main animation's own bottom padding above and
+     Eleven Years' top padding below, 290 left the screen more than half
+     empty for 320px of scroll on the way in and entirely empty on the way
+     out. */
+  padding: 120px 0;
+  position: relative;
+  z-index: var(--z-section);
+}
+
+/* The band is full width so its background reaches both edges; the measure
+   lives on the container inside it. These used to be the same element, so
+   the background stopped at 1200px and the fixed ripple layer showed down
+   either side of it. */
+.scrolly-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px;
+}
+
+/* Same shape as .nav-inner: a 1200 box with the page padding inside it, so
+   the content edge lands where every other block's does. */
+.scrolly-container {
+  /* The diagram: three quarters of its 40% column, so it has air on both
+     sides and stands off the text, and no taller than 60% of the screen.
+     At the full column it crowded the paragraph and filled the screen. */
+  --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4 * 0.75), 60vh);
+  /* Scroll given to each step while the text and the diagram are pinned.
+     main.js shares the run from the scene being fully up to the pair
+     coming unstuck, so this is most of each step's turn: at 1897x815 each
+     paragraph is fully on screen for about 220px. At 8vh, when the steps
+     also counted the rise under a scene that was still fading in, the
+     first paragraph was never fully seen at all. --steps is set from
+     main.js, from the markup. */
+  --step-scroll: 24vh;
+  --steps: 3;
+  min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
+
+  display: flex;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+}
+
+/* Pinned, the same box as the diagram beside it: same top, same height,
+   so the two stick and come unstuck on the same pixel and share one centre
+   line the whole time. The paragraphs used to scroll past a pinned
+   diagram, so they only lined up with it for an instant and spent the rest
+   of their turn drifting up and away from it. */
+.scrolly-text {
+  flex: 0 0 60%;
+  position: sticky;
+  top: calc(50vh - var(--g) / 2);
+  align-self: flex-start;
+  height: var(--g);
+  padding-right: 60px; /* keeps the text off the frame beside it */
+  max-width: calc(var(--measure-body) + 60px);
+}
+
+/* Stacked on the centre line, one at a time. The same float-in the intro
+   and the ending use, up forty pixels as it fades in; a step that has been
+   read goes the same distance on upwards as it fades out, so the change
+   reads in the direction the page is moving. A paragraph taller than the
+   box overflows it evenly above and below and stays centred. */
+.scrolly-step {
+  position: absolute;
+  left: 0;
+  right: 60px;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(40px);
+  /* Leaving: out first, and quickly. The steps share one spot, so a
+     crossfade laid the outgoing paragraph over the incoming one for most
+     of a second, two sets of lines on top of each other. */
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.scrolly-step.past {
+  transform: translateY(-40px);
+}
+
+/* Arriving: waits for the last one to be gone, then floats in. 0.3 plus
+   0.5 is the 0.8s the intro's paragraphs take, and the two are never on
+   screen together. The diagrams beside them still crossfade. */
+.scrolly-step.active {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+}
+
+/* Coming up out of nothing there is no paragraph to wait for, and the
+   wait only delayed the first thing a reader sees after the main
+   animation. */
+.scrolly-step.active.from-blank {
+  transition-delay: 0s;
+}
+
+/* Sticky, not fixed. A fixed element floats over the whole document, so
+   this one needed a scroll listener and a 0.6s fade to get it out of the
+   way, and during that fade, and any frame the listener had not caught up
+   with, it painted over the section below. Sticky is clipped to its own
+   container: it cannot reach another section to begin with. */
+.scrolly-graphic {
+  /* Sized by --g on .scrolly-container, shared with the text. */
+  flex: 0 0 40%;
+  position: sticky;
+  top: calc(50vh - var(--g) / 2);
+  align-self: flex-start;
+  height: var(--g);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-scrolly-graphic);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
+/* Stacked and crossfaded. The outgoing diagram fades over 0.8s from the
+   moment the step changes. The incoming one waits 0.4s and comes up over
+   0.6s, so it follows its paragraph by a tenth of a second (the text
+   waits 0.3s for the last paragraph to go) and still overlaps the old
+   diagram on the way. Without the wait it was up before the words it
+   illustrates. */
+.scrolly-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--g);
+  height: var(--g);
+  /* --fx and --fy move the drawing's own centre onto the frame's, as a
+     fraction of the frame. Set by main.js, measured from each SVG. */
+  translate: calc(-50% + var(--fx, 0) * var(--g)) calc(-50% + var(--fy, 0) * var(--g));
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  display: block;
+}
+
+.scrolly-img.visible {
+  opacity: 1;
+  transition: opacity 0.6s ease 0.4s;
+}
+
+/* Still a tenth of a second behind its paragraph. */
+.scrolly-img.visible.from-blank {
+  transition-delay: 0.1s;
+}

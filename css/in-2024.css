@@ -1,0 +1,94 @@
+/* in-2024.css
+
+   Scene 5, In 2024: one dot per person, close up, then the whole field,
+   then the 206. */
+
+/* The dots run straight on into the epilogue, as they did when they
+   were a section of their own. */
+#year-2024 {
+  padding-bottom: 0;
+}
+
+/* The pinned frame's own top padding is the gap to the count. */
+#year-2024 > .page-width {
+  margin-bottom: 0;
+}
+
+/* Tall, because the scroll through it is the animation. The canvas sticks to
+   the top and the section's own height is the timeline. */
+/* The dots' track: tall, with the canvas stuck to the top of it. */
+.arrivals {
+  position: relative;
+  z-index: var(--z-section);
+  background-color: #0F1A32;
+  /* 320 before the field opened close up and drew back; the draw back is
+     the extra twenty. */
+  height: 340vh;
+  padding: 0;
+}
+
+/* The field sits on the page's content box, like every other section: it
+   used to run from edge to edge of the window under a caption centred on
+   the page, below a heading set on the left. The caption is on the left
+   edge too, under the nav once the frame is pinned, and the count left
+   aligned so only its right end moves as it runs down.
+
+   The count is a figure, not a heading, so it is not set like one: the
+   serif of the text rather than the titles' Bebas, the number large in
+   the colour of the dots it counts and "people" at reading size after it. */
+.arrivals__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: calc(var(--nav-h) + 40px) var(--page-pad) 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.arrivals__caption {
+  text-align: left;
+}
+
+.arrivals__count {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 24px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.arrivals__num {
+  font-size: 56px;
+  font-variant-numeric: lining-nums tabular-nums;
+  color: #FBC900;
+  margin-right: 0.12em;       /* a word space at 24px sat tight on a 56px figure */
+}
+
+/* One line, always: the longer of the two notes is 690px at this size and
+   the narrowest content box is 944. */
+.arrivals__note {
+  margin: 10px 0 0;
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
+  transition: opacity 0.15s ease;  /* NOTE_FADE_MS in arrivalsField.js */
+}
+
+/* arrivalsField.js fades the note out, changes it, and fades it back in. */
+.arrivals__note.is-swapping {
+  opacity: 0;
+}
+
+#arrivals-canvas {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  margin-top: 28px;
+  display: block;
+}

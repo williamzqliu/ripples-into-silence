@@ -7,7 +7,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="./assets/favicon.ico" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <!-- In cascade order: what every scene shares, then the scenes in the
+       order they come. -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/nav.css" />
+  <link rel="stylesheet" href="css/opening.css" />
+  <link rel="stylesheet" href="css/record.css" />
+  <link rel="stylesheet" href="css/context.css" />
+  <link rel="stylesheet" href="css/eleven-years.css" />
+  <link rel="stylesheet" href="css/in-2024.css" />
+  <link rel="stylesheet" href="css/epilogue.css" />
 </head>
 
 <body>
@@ -158,9 +167,9 @@
            single element whose src was swapped. The diagrams repeat what
            the paragraphs say, so they are hidden from screen readers. -->
       <div class="scrolly-graphic" aria-hidden="true">
-        <img class="scrolly-img" data-for="img-distance" src="./assets/img-distance.svg" alt="" />
-        <img class="scrolly-img" data-for="img-130" src="./assets/img-130.svg" alt="" />
-        <img class="scrolly-img" data-for="img-corridor" src="./assets/img-corridor.svg" alt="" />
+        <img class="scrolly-img" data-for="img-distance" src="./assets/diagrams/img-distance.svg" alt="" />
+        <img class="scrolly-img" data-for="img-130" src="./assets/diagrams/img-130.svg" alt="" />
+        <img class="scrolly-img" data-for="img-corridor" src="./assets/diagrams/img-corridor.svg" alt="" />
       </div>
     </div>
   </section>
@@ -223,7 +232,7 @@
              disappeared. They are drawn over it now, over the place they
              were painted out of. -->
         <span class="epilogue-figure">
-          <img src="./images/lampedusa_relief.png"
+          <img src="./assets/images/lampedusa_relief.png"
             alt="Lampedusa seen from above as a shaded relief, the town marked in red." />
           <span class="epilogue-pulse" aria-hidden="true"></span>
           <span class="epilogue-marker" aria-hidden="true"></span>

@@ -1,0 +1,237 @@
+/* record.css
+
+   Scene 2, The Record: the island, the fifty kilometre circle, the
+   counters either side and the year bar under it. */
+
+#sequence {
+
+  /* Room to stop in, and no more. At 1.09 screens the sticky frame had
+     128px of travel and was gone before anyone could settle on it; two
+     screens and more was scrolling that did nothing. The animation runs on
+     its own clock and holds when the section is under half the screen, so
+     the length only has to be enough to stop in. */
+  min-height: 150vh;
+}
+
+/* ---------- the animated sequence ---------- */
+.layout {
+  /* Pinned below the nav rather than under it, and exactly as tall as what
+     is left of the viewport, so the composition has one frame to sit in.
+     This was 90vh with a -105px margin and top: 0, three numbers that
+     referred to nothing: together they parked the animation under the nav,
+     left ninety pixels of dead space below it and slid the year bar onto
+     the bottom of the circle. */
+  position: sticky;
+  top: var(--nav-h);
+  z-index: var(--z-viz);
+  height: calc(100vh - var(--nav-h));
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px var(--page-pad) 0;
+  box-sizing: border-box;
+  /* The canvas is 650 wide and the two counter columns are 200 each, so
+     1170 is the width at which they sit as close to the circle as they can
+     without being squeezed. At 1440 they were pushed to the far corners of a
+     wide screen with four hundred empty pixels in between. */
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* The insets give way on narrower windows, down to nothing at 1024, so
+   the room goes to the drawing rather than to empty gutters. 35 at full
+   width leaves the drawing exactly its 650: at 55 there were only 610px
+   between the counters, and the fixed 650 drawing had been hanging 20px
+   into each of them. */
+#left {
+  width: 200px;
+  flex-shrink: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 55px;
+  margin-left: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
+}
+
+#right {
+  width: 200px;
+  flex-shrink: 0;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 55px;
+  margin-right: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
+}
+
+/* The SVG is a fixed 650 square and .layout is 90vh with its items at
+   flex-start, so the circle used to hang under the sticky nav with the slack
+   left below it. Stretching this column to the full height lets its own
+   align-items centre the square, and the padding keeps the top of the circle
+   clear of the nav. Measured at 1900x900: 83px above, 81px below. */
+#viz {
+  /* Its width is what the counters leave, not what the drawing asks for:
+     drawCanvas measures this box to size the drawing, so the box must not
+     be sized by the drawing. */
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* clear of the counters above and the year bar below, square centred in
+     what is left. At 900 tall the frame has 154px to share out around a 650
+     square: this puts about 100 of it above and leaves the bar 29. Below
+     874 tall the top padding gives way first, down to 16px at 826, and only
+     then does the drawing start to shrink. The bottom 72 is the year bar's
+     and does not move. */
+  padding: clamp(16px, calc(100vh - 810px), 64px) 0 72px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+/* The running readouts count up and down, so their digits have to hold the
+   same width or the label jitters as it changes. EB Garamond carries tabular
+   figures; the monospace this replaces was doing the same job by brute
+   force. */
+#incident-count,
+#death-count,
+#viz text {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+
+.label,
+#incident-count,
+#death-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+
+.label {
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+#incident-count,
+#death-count {
+  font-size: 48px;
+  /* Bebas Neue ships a single weight, so `bold` was asking the browser to
+     smear the outlines rather than load a heavier cut. */
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 2px;
+  text-align: right;
+}
+
+/* #sequence is the positioning context for the bar below */
+.viz {
+  position: relative; /* so the year bar can sit at its foot */
+}
+
+/* ---- year bar wrapper, against the bottom of the animation ---- */
+.year-progress-wrapper {
+  position: absolute;
+  bottom: 24px;
+  left: var(--page-pad);
+  right: var(--page-pad);
+  height: 32px;
+  z-index: 10;
+}
+
+/* ---- the white bar ---- */
+#year-progress-bar {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  z-index: 10;
+}
+
+#year-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  /* Full width and scaled, not sized. The bar moves about 18px a second,
+     and a width is painted to whole pixels, so it went forward in visible
+     one-pixel steps; a transform is composited and moves by fractions of
+     one. It also had a 0.1s transition on width, which the per-frame
+     update restarted every frame, so it never finished one. */
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
+  background-color: white;
+  opacity: 0.7;
+}
+
+#year-progress-fill.fade-out {
+  transition: opacity 1s ease;
+  opacity: 0;
+}
+
+/* ---- year labels ---- */
+#year-pop-labels {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 0;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+  letter-spacing: -0.5px;
+}
+
+.year-pop {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-family: 'Bebas Neue', sans-serif;
+  /* One weight in the face, so `bold` only asked for a smear. */
+  font-weight: 400;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.year-pop.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.year-pop.inactive {
+  opacity: 0.2;
+  visibility: visible;
+}
+
+.year-pop.active {
+  opacity: 0.8;
+  visibility: visible;
+}
+
+/* Markup only. The outline is cloned out of here into the drawing frame,
+   where the shrink can land on the cross instead of near it. */
+#island-asset {
+  display: none;
+}
+
+#incident-count,
+#death-count,
+#left .label,
+#right .label,
+#year-progress-bar,
+#year-pop-labels {
+  opacity: 0; /* hidden until the script fades it in */
+}

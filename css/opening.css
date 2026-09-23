@@ -1,0 +1,154 @@
+/* opening.css
+
+   Scene 1: the cover and the intro over the ripple field. */
+
+#ripple-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-background);
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 1;
+  /* No transition: main.js scrubs this with the first scene's opacity, and
+     a half-second ease behind the scroll left the ripples trailing into
+     the next scene on a quick scroll. */
+  background: linear-gradient(to bottom,
+    rgba(15, 26, 50, 0.6),   /* lighter at the top */
+    rgba(10, 18, 35, 0.8),
+    rgba(5, 14, 35, 0.92),
+    rgba(5, 14, 35, 1.0)     /* exactly #050E23 */
+  );}
+
+#ripple-background.hidden {
+  opacity: 0;
+}
+
+#ripple-bg-wrapper {
+  position: relative;
+  z-index: 0;
+  background: linear-gradient(to bottom,
+    rgba(15, 26, 50, 0.5),   /* top: light, semi-transparent */
+    rgba(10, 20, 40, 0.6),
+    rgba(5, 14, 35, 0.6),
+    rgba(5, 14, 35, 0.7),
+    rgba(5, 14, 35, 1.0)     /* bottom: opaque, meeting the nav */
+  );
+}
+
+/* ---------- cover ---------- */
+#cover {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.cover-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* centred */
+  z-index: 2;
+  text-align: center;
+  background: none;
+  padding: 0;
+}
+
+.cover-content h1 {
+  font-size: 64px;
+  margin-bottom: -15px; /* tighter leading */
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 1.5s ease forwards;
+}
+
+.cover-content h2 {
+  font-size: 28px;
+  margin-top: 0px;     /* sits against the title above */
+  color: white;
+  opacity: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.65px;
+  transform: translateY(20px);
+  animation: fadeInUp 1.5s ease forwards;
+  animation-delay: 0.1s;
+}
+
+/* keyframes */
+@keyframes fadeInUp {
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- intro ---------- */
+#intro {
+  position: relative;
+  overflow: hidden;
+  /* min-height: 240vh; */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 100px 0 340px;
+}
+
+#intro .content {
+  width: 100%;
+  margin: 0 auto;
+  /* Every line in the intro is authored, with a hard break at the end of it,
+     so the measure has to hold the longest one rather than a comfortable
+     running length: at 21px that is 620px. The padding is added back on top
+     so it is the text box that gets the width, not the box. */
+  max-width: calc(var(--measure-intro) + 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+  color: white;
+  font-family: 'EB Garamond', Georgia, serif;
+  padding: 0 40px;
+  gap: 400px;
+  height: 100%;
+}
+
+#cover,
+#intro {
+  background: transparent;
+}
+
+/* ----- intro reveal ----- */
+.intro .content {
+  font-size: var(--fs-body);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 1s ease;
+}
+
+/* added on scroll */
+.intro .content.revealed {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+
+/* each intro paragraph starts here */
+.intro-step {
+  margin-top: 50px;
+  margin-bottom: 90px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease;
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+
+.intro-step.visible {
+  opacity: 1;
+  transform: translateY(0);
+}

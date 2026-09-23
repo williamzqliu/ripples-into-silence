@@ -1,0 +1,197 @@
+/* eleven-years.css
+
+   Scene 4, 11 Years: a disc a year, and any year opened large. */
+
+#eleven-years {
+  /* A little more air after the scrollytelling: 128 here and 120 below
+     the last step, where it was 64 and 120. On a short screen it comes
+     down with the height, so 640 tall is not left half empty. */
+  padding-top: clamp(64px, 16vh, 128px);
+}
+
+/* Rows of four, three and four on an eight column grid, each disc two
+   columns wide, the middle row set between the others (yearDiscs.js places
+   them). The three rows, discs and figures, fit one screen under the nav:
+   the figures and the gaps take 286px with the worst year's note, and the
+   discs share what is left less a little air, up to 200px: 148px at 815
+   tall, 200 from 970. */
+.year-discs {
+  --disc: min(100%, 200px, max(100px, calc((100vh - var(--nav-h) - 306px) / 3)));
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  column-gap: clamp(16px, calc(16px + (100vw - 1024px) * 0.04), 32px);
+  row-gap: clamp(14px, 2.4vh, 28px);
+  margin-top: 64px;
+}
+
+.year-disc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.year-disc__plot {
+  width: var(--disc);
+  line-height: 0;
+}
+
+.year-disc__plot svg,
+.disc-lightbox__plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.year-disc__label { text-align: center; }
+
+.year-disc__year {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 0.2s ease;
+}
+
+.year-disc__figures {
+  font-size: 16px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* The frame, and on hover or keyboard focus the whole disc's frame and its
+   year go yellow: it opens. The mark under the pointer goes yellow too. */
+.year-disc__frame {
+  stroke: rgba(255, 255, 255, 0.22);
+  transition: stroke 0.2s ease;
+}
+
+.year-disc:hover .year-disc__frame,
+.year-disc:focus-visible .year-disc__frame,
+.year-disc--worst:hover .year-disc__frame {
+  stroke: #FBC900;
+}
+
+.year-disc:hover .year-disc__year,
+.year-disc:focus-visible .year-disc__year,
+.year-disc--worst:hover .year-disc__year {
+  color: #FBC900;
+}
+
+.year-disc__mark.is-hot .year-disc__core { fill: #FBC900; fill-opacity: 1; }
+
+/* The year the most people were lost: a solid, brighter frame, its year in
+   full white, and a line under its figures. Not larger, and not yellow,
+   which is kept for what the pointer is on. */
+.year-disc--worst .year-disc__frame,
+.disc-lightbox--worst .year-disc__frame {
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-dasharray: none;
+}
+
+.year-disc--worst .year-disc__year { color: #FFFFFF; }
+
+.year-disc__note {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 1.35;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.disc-lightbox__note {
+  font-size: var(--fs-body);
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.9);
+  margin: -0.8em 0 1.2em;
+}
+
+/* ---------- one year, opened large ---------- */
+/* Above the nav, under the tooltip. The disc is as big as the screen's
+   height allows, with the year and its figures beside it. */
+.disc-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-lightbox);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 14, 35, 0.97);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.disc-lightbox[hidden] { display: none; }
+.disc-lightbox.is-open { opacity: 1; }
+
+.disc-lightbox__panel {
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 5vw, 72px);
+  transform: scale(0.96);
+  transition: transform 0.3s ease;
+}
+
+.disc-lightbox.is-open .disc-lightbox__panel { transform: none; }
+
+.disc-lightbox__plot {
+  width: min(82vh, 640px, calc(100vw - 420px));
+  line-height: 0;
+}
+
+.disc-lightbox__text {
+  width: 260px;
+}
+
+.disc-lightbox__year {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  font-size: var(--fs-section-title);
+  letter-spacing: 1px;
+  color: #FFFFFF;
+  margin: 0 0 0.3em;
+}
+
+.disc-lightbox__figures {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1.2em;
+}
+
+.disc-lightbox__key {
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0;
+}
+
+.year-disc__ring-label {
+  font-family: 'EB Garamond', Georgia, serif;
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.disc-lightbox__close {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 34px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.disc-lightbox__close:hover,
+.disc-lightbox__close:focus-visible {
+  color: #FBC900;
+  outline: none;
+}

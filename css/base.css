@@ -1,0 +1,245 @@
+/* base.css
+
+   Tokens, the font, the reset, and what every scene shares: the page width,
+   the float-in, section titles, the scenes' ground and crossfade, the
+   tooltip, and the small-window notice. */
+
+/* ---------- page tokens ---------- */
+
+:root {
+  /* One measure for every full-width block on the page. The content edges
+     used to land at 193, 233, 253 and 273 on a 1600 screen, because each
+     block carried its own padding inside the same 1200 box. */
+  --page-max: 1200px;
+  --page-pad: 40px;
+
+  /* The reading size. EB Garamond has a small x-height for its point size,
+     so the 14px this page was set at while it was falling back to a system
+     monospace reads smaller in the serif than it did in the mono. */
+  --fs-body: 20px;
+
+  /* Line length. The body paragraphs ran the full width of the section: 117
+     characters a line at the reading size, which is about twice what anyone
+     tracks comfortably. */
+  --measure-body: 32em;
+  --measure-intro: 660px;
+
+  /* Section titles. These were all 2em, which is 32px under the 16px body
+     and 40px inside a scrollytelling step, whose text is set at 20px, so
+     the three step titles came out a size larger than Eleven Years. */
+  --fs-section-title: 32px;
+
+  /* The nav is sticky, so anything pinning under it has to know how tall
+     it is rather than guess at it with a negative margin. */
+  --nav-h: 64px;
+
+  /* One stacking ladder, low to high. It used to run 0, 1, 10, 20, 100, 999,
+     9999 with the scrollytelling frame above the navigation and the opening
+     overlay above everything, for the whole length of the page. */
+  --z-background: -1;
+  --z-section: 1;
+  --z-viz: 2;
+  --z-scrolly-graphic: 3;
+  --z-nav: 10;
+  --z-lightbox: 20;
+  --z-tooltip: 25;
+  --z-minsize: 30;
+}
+
+/* ---------- base ---------- */
+
+/* EB Garamond, self-hosted. The variable roman covers 400 to 800, which is
+   every weight this page asks for: the OFL TTF converted to woff2, 914KB to
+   288KB. Italics are the browser's slant of it. */
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('../assets/fonts/EBGaramond-Variable.woff2') format('woff2-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* No smooth scrolling here: the nav's jumps are main.js's, which glide
+     when the section is near and cut when it is far. */
+  /* No blinking caret anywhere on the page. With caret browsing on, a
+     click in any text leaves one flashing in it, which on titles and over
+     the drawing reads as a field waiting to be typed in. Text stays
+     selectable. There are no inputs here; one added later wants
+     caret-color: auto back. */
+  caret-color: transparent;
+}
+
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  background-color: #0F1A32;
+  color: white;
+  line-height: 1.6;
+}
+
+/* Headings are Bebas Neue, from Google Fonts. It ships one weight, so
+   they are set at normal rather than asking for a bold it does not have. */
+h1, h2, h3, h4 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Vertical rhythm only. Every section keeps its content in its own
+   1200 box with the page padding inside it; the 2em a side this used to
+   add stacked on top of that, so under 1264 wide the main animation,
+   Eleven Years and the ending sat 32px in from the nav and the
+   scrollytelling, and Eleven Years' discs ran off the right at 1024. */
+.section {
+  padding: 4em 0;
+}
+
+/* The page's content box: 1200 with the page padding inside it, the same
+   edge the nav, the scrollytelling, the year discs and the ending sit on. */
+.page-width {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+}
+
+/* One entrance for the prose outside the pinned sections: up forty pixels
+   as it fades in, over the 0.8s the intro's lines and the scrollytelling's
+   steps take. The ending had its own at 1.2s and Eleven Years had none at
+   all. main.js adds .visible as each one comes up the screen. */
+.fade-step {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-step.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Section titles and the prose under them, for the sections that open on
+   a heading. */
+#eleven-years h2,
+#year-2024 h2,
+.scrolly-step h2 {
+  font-size: var(--fs-section-title);
+  margin-bottom: 0.6em;
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: normal;
+  letter-spacing: 1px;
+  color: white;
+}
+
+/* 90% white as a colour rather than as opacity: an id's opacity outranks
+   the fade-step classes, so the paragraph would never have faded in. */
+#eleven-years p,
+#year-2024 > .page-width p {
+  font-size: var(--fs-body);
+  max-width: var(--measure-body);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* the small-window notice, hidden by default */
+.minsize {
+  display: none;
+}
+
+/* Desktop only. Under 1024 wide or 640 tall the counters, the drawing and
+   the year bar no longer have room side by side and above one another,
+   and a phone would want a different layout rather than a smaller one.
+   The gate used to be 1200x600, which was both too wide and too short:
+   narrow desktop windows were turned away, and at 600 tall the fixed 650px
+   drawing ran under the nav and off the bottom of the screen. */
+@media only screen and (max-width: 1023px), only screen and (max-height: 639px) {
+  .minsize {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: var(--z-minsize);
+    text-align: center;
+    padding: 20px;
+  }
+
+  body {
+    overflow: hidden;
+  }
+}
+
+/* The same ground and layer for every section after the intro, whose
+   own background is the ripple field. */
+#sequence,
+#eleven-years,
+#year-2024,
+#epilogue {
+  background-color: #0F1A32; /* the page background */
+  z-index: var(--z-section);
+  position: relative;
+}
+
+/* ---------- scenes ---------- */
+/* The nav's cut to a far section: the page dips to its own background
+   under the nav, moves, and comes back up. */
+.scene-cut {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: #0F1A32;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.scene-cut.is-on {
+  opacity: 1;
+  transition-duration: 0.16s;
+}
+
+/* main.js scrubs each scene's opacity with the scroll. A scene that is not
+   leading takes no pointer, so a tooltip cannot be raised on a drawing that
+   is not there. */
+.scene--away {
+  pointer-events: none;
+}
+
+/* ---------- tooltip ---------- */
+/* Shared by the incidents, the cross and the year discs. It was styled
+   inline in the markup, at 12px in 85% white on an 85% background, which
+   read as grey type on a smoky panel. 14px, near-white, and a panel solid
+   enough that the rings under it do not show through the words. */
+#tooltip {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  padding: 7px 10px;
+  border-radius: 4px;
+  background: rgba(5, 14, 35, 0.94);
+  color: rgba(255, 255, 255, 0.95);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 14px;
+  line-height: 1.45;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}

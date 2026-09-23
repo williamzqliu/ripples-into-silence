@@ -1,0 +1,103 @@
+/* nav.css
+
+   The bar that sticks once the intro is over, and its links. main.js
+   (core/nav.js) shows it, lights the current section, and does the jumps. */
+
+nav {
+  font-family: 'Bebas Neue', sans-serif;
+}
+
+#main-nav {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  min-height: var(--nav-h);
+  background: #050E23;
+  z-index: var(--z-nav);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1em 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--page-max);
+  padding: 0 var(--page-pad);
+}
+
+/* The title carries the bar; the links sit back from it. Two classes,
+   because .nav-link comes later in the file and would otherwise size and
+   dim the title with the rest. */
+.nav-link.nav-title {
+  margin-right: 60px;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: #FFFFFF;
+}
+
+#main-nav.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Six links at 20px pure white, 40px apart, weighed as much as the title
+   and read as one block. Smaller, tracked a little wider so the small caps
+   stay open, at 60% white, and closer together; the section being read is
+   the one at full white. */
+.nav-content {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* each link starts here */
+.nav-link {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    color 0.5s ease;
+  transition-delay:
+    0.5s,           /* opacity */
+    0.5s,           /* transform */
+    0s;             /* color */
+}
+
+/* reveal */
+.nav-link.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#main-nav.sticky-top {
+  position: sticky;
+  top: 0;
+  bottom: auto;
+  opacity: 1;
+  pointer-events: auto;
+  box-shadow: 0 0px 0px rgba(0,0,0,0);
+  transition: all 0.8s ease;
+}
+
+.nav-link.is-current {
+  color: #FFFFFF;
+}
+
+/* hover */
+.nav-link:hover {
+  color: #fbc900;
+}
