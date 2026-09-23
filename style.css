@@ -742,6 +742,10 @@ h1, h2, h3, h4 {
 
 #details {
   scroll-margin-top: -80px; /* set against the nav bar height */
+  /* A little more air after the scrollytelling: 128 here and 120 below
+     the last step, where it was 64 and 120. On a short screen it comes
+     down with the height, so 640 tall is not left half empty. */
+  padding-top: clamp(64px, 16vh, 128px);
 }
 
 
