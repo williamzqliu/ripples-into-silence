@@ -65,9 +65,14 @@ function updateScenes() {
   });
 
   let lead = 0, leadOpacity = -1;
+  // What fades is a scene's content, never its ground. Fading the whole
+  // section faded its opaque background with it, and a scene waiting to
+  // come in was then a transparent hole straight through to the ripple
+  // field, which is fixed behind the whole page: ripples showed under the
+  // nav, where the record would be, brighter than in the intro itself.
   const opacity = SCENES.map((scene, i) => {
     const o = arrived[i] * (1 - (arrived[i + 1] || 0));
-    scene.style.opacity = o.toFixed(3);
+    for (const child of scene.children) child.style.opacity = o.toFixed(3);
     if (o > leadOpacity) { leadOpacity = o; lead = i; }
     return o;
   });
