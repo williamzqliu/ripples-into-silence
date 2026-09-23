@@ -1186,19 +1186,19 @@ svg {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 2.2cqw;
-  height: 2.2cqw;
-  margin: -1.1cqw 0 0 -1.1cqw;
+  width: 3cqw;
+  height: 3cqw;
+  margin: -1.5cqw 0 0 -1.5cqw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(224, 52, 59, 0.75) 0%,
-    rgba(224, 52, 59, 0.35) 45%, rgba(224, 52, 59, 0) 70%);
+  background: radial-gradient(circle, rgba(232, 56, 62, 1) 0%,
+    rgba(232, 56, 62, 0.7) 40%, rgba(232, 56, 62, 0) 72%);
   animation: epilogue-pulse 3s cubic-bezier(0.25, 0.5, 0.35, 1) infinite;
 }
 
 @keyframes epilogue-pulse {
   0%   { transform: scale(1); opacity: 1; }
-  85%  { transform: scale(5); opacity: 0; }
-  100% { transform: scale(5); opacity: 0; }
+  85%  { transform: scale(4.5); opacity: 0; }
+  100% { transform: scale(4.5); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
