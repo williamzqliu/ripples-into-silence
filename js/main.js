@@ -143,7 +143,7 @@ if (scrollyContainer) scrollyContainer.style.setProperty('--steps', scrollySteps
 
 // The first step fades in once the pinned pair has come this far up the
 // screen on its way into place.
-const ARRIVE_AT = 0.75;
+const ARRIVE_AT = 0.6;
 
 function updateScrolly() {
   if (!scrollySteps.length || !scrollyContainer) return;
@@ -154,13 +154,19 @@ function updateScrolly() {
   const box = scrollyContainer.getBoundingClientRect();
   const stickyTop = parseFloat(getComputedStyle(scrollyGraphic).top) || 0;
   const pinned = box.height - frame.height;        // px of scroll spent pinned
-  const into = stickyTop - box.top;                // px past the pin point
+
+  // One run, from the pair arriving to it coming unstuck, shared evenly.
+  // While rising, the frame sits at the top of its box, so the box's top
+  // says where the pair is in both phases. The first step used to get the
+  // whole rise on top of its share: 860px of scroll against 500.
+  const start = vh * ARRIVE_AT;
+  const run = (start - stickyTop) + pinned;
+  const u = start - box.top;
 
   let active;
-  if (frame.top > vh * ARRIVE_AT) active = -1;      // not here yet
-  else if (into < 0) active = 0;                    // rising into place
-  else if (into > pinned + 0.5) active = n;         // coming unstuck: all read
-  else active = Math.min(n - 1, Math.floor(into / (pinned / n)));
+  if (u < 0) active = -1;                           // not here yet
+  else if (u > run + 0.5) active = n;               // coming unstuck: all read
+  else active = Math.min(n - 1, Math.floor(u / (run / n)));
 
   scrollySteps.forEach((step, i) => {
     step.classList.toggle('active', i === active);
@@ -173,6 +179,47 @@ function updateScrolly() {
 window.addEventListener('scroll', updateScrolly, { passive: true });
 window.addEventListener('resize', updateScrolly);
 updateScrolly();
+
+// The diagrams share a 700 by 700 frame, but not where they are drawn in
+// it: the 130km and corridor drawings sit in its lower half, centred
+// about 130 units below the middle, so they hung low beside a centred
+// paragraph. Each is measured once from its own SVG and moved so its drawn
+// centre is the frame's, which survives a re-export from Figma.
+async function centreDiagram(img) {
+  try {
+    const text = await (await fetch(img.getAttribute('src'))).text();
+    const holder = document.createElement('div');
+    holder.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden';
+    holder.innerHTML = text;
+    document.body.appendChild(holder);
+    const svg = holder.querySelector('svg');
+    const vb = svg.viewBox.baseVal;
+    svg.setAttribute('width', vb.width);
+    svg.setAttribute('height', vb.height);
+
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    svg.querySelectorAll('path, circle, ellipse, rect, line, polygon, polyline, text').forEach(el => {
+      const fill = el.getAttribute('fill');
+      const stroke = el.getAttribute('stroke');
+      if (fill === 'none' && (!stroke || stroke === 'none')) return;
+      const b = el.getBBox();
+      // A rect the size of the frame is a background, not part of the drawing.
+      if (el.tagName === 'rect' && b.width >= vb.width - 10 && b.height >= vb.height - 10) return;
+      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
+      x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
+    });
+    holder.remove();
+    if (!isFinite(x0)) return;
+
+    const fx = (vb.x + vb.width / 2 - (x0 + x1) / 2) / vb.width;
+    const fy = (vb.y + vb.height / 2 - (y0 + y1) / 2) / vb.height;
+    img.style.setProperty('--fx', fx.toFixed(4));
+    img.style.setProperty('--fy', fy.toFixed(4));
+  } catch (err) {
+    // Left where Figma put it. Off-centre is better than missing.
+  }
+}
+scrollyImgs.forEach(centreDiagram);
 
 // The 206 against the 45,997 was drafted here as an isotype grid and left
 // unfinished, writing into markup that was commented out, so it threw on

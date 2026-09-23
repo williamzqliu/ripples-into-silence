@@ -710,8 +710,11 @@ h1, h2, h3, h4 {
      At the full column it crowded the paragraph and filled the screen. */
   --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4 * 0.75), 60vh);
   /* Scroll given to each step while the text and the diagram are pinned.
-     --steps is set from main.js, from the number of steps in the markup. */
-  --step-scroll: 70vh;
+     70vh was heavy going: 1860px for three paragraphs, the first holding
+     for 860 of it. main.js also counts the pair's rise into place, and
+     shares the whole run evenly, so at 720px tall each step gets about
+     300px. --steps is set from main.js, from the markup. */
+  --step-scroll: 30vh;
   --steps: 3;
   min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
 
@@ -798,7 +801,9 @@ h1, h2, h3, h4 {
   left: 50%;
   width: var(--g);
   height: var(--g);
-  translate: -50% -50%;
+  /* --fx and --fy move the drawing's own centre onto the frame's, as a
+     fraction of the frame. Set by main.js, measured from each SVG. */
+  translate: calc(-50% + var(--fx, 0) * var(--g)) calc(-50% + var(--fy, 0) * var(--g));
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.8s ease;
