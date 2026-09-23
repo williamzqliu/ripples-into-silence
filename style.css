@@ -1224,7 +1224,7 @@ svg {
    which is kept for what the pointer is on. */
 .year-disc--worst .year-disc__frame,
 .disc-lightbox--worst .year-disc__frame {
-  stroke: rgba(255, 255, 255, 0.6);
+  stroke: rgba(255, 255, 255, 0.38);
   stroke-dasharray: none;
 }
 
