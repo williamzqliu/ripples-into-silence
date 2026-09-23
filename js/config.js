@@ -108,10 +108,13 @@ export const RADIUS_HOLD = 1500;
 
 // ------------------------------------------------------------------ pacing
 
-// The opening three, drawn slowly and with a label, so a reader sees that
-// one path is one incident before ninety-one more arrive.
+// The opening three, drawn slower than the rest and with a label, so a
+// reader sees that one path is one incident before ninety-one more arrive.
+// A quarter speed is three and a third seconds in the air, which was fine
+// when the next one was six seconds behind it on a timer. Released by
+// scroll it is three seconds of the reader's own gesture unanswered.
 export const INITIAL_INCIDENTS = 3;
-export const INITIAL_SPEED = 0.25;
+export const INITIAL_SPEED = 0.6;     // 1.4s, against 0.8s for the rest
 
 export const MAX_CURRENT = 5;         // paths allowed in flight at once
 

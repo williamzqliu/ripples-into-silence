@@ -149,8 +149,16 @@ export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuck
     const scrubbing = Math.abs(gap) > SCRUB_AHEAD;
 
     if (gap > 0) {
-      const n = scrubbing ? Math.min(gap, 40) : (inFlight < MAX_CURRENT ? 1 : 0);
-      for (let k = 0; k < n; k++) release(scrubbing);
+      if (scrubbing) {
+        for (let k = 0; k < Math.min(gap, 40); k++) release(true);
+      } else {
+        // A full sky is not a reason to stop. Releasing nothing until a path
+        // landed held the scroll for as long as the slowest thing in the air,
+        // which with the slow openers was three seconds of a page that had
+        // stopped answering. The mark goes down without the flight instead:
+        // the record stays level with the reader either way.
+        release(inFlight >= MAX_CURRENT);
+      }
     } else {
       for (let k = 0; k < (scrubbing ? Math.min(-gap, 40) : 1); k++) retract();
     }
