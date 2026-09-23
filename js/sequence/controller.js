@@ -18,6 +18,16 @@ export async function runSceneIntro() {
     // 1. the canvas everything is drawn on
     drawCanvas();
 
+    // The record, read before anything is drawn rather than awaited between
+    // the counters fading in and the first path, which put a network wait in
+    // the middle of the choreography.
+    const {
+        allYears,
+        yearEventCounts,
+        firstBatch,
+        remainingBuckets
+    } = await loadAndProcessData();
+
     // 2. the island outline and its name, started together
     const svgPromise = showIslandSVG();     // island, shrink, cross
     const labelPromise = showIslandLabel(); // the name, in and out
@@ -44,13 +54,6 @@ export async function runSceneIntro() {
     await fadeInUI();
 
     // 8. and then the incidents themselves
-    const {
-        allYears,
-        yearEventCounts,
-        firstBatch,
-        remainingBuckets
-    } = await loadAndProcessData();
-
     initYearProgressBar(allYears);
     startLinearProgressBar();
 

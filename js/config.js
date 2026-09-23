@@ -59,6 +59,11 @@ export const DISTANCE_RINGS_KM = [25, 10];
 // a ring. The fifty kilometre circle is 2px, and these stay under it.
 export const DISTANCE_RING_STROKE = 1.5;
 
+// Daylight between a ring label and the ring it names. Five is what the
+// outer one can afford: the fifty kilometre circle leaves twenty-five
+// pixels of frame above it and the label is eighteen tall.
+export const RING_LABEL_GAP = 5;
+
 // Paths are released in a shuffled round robin over this many angular
 // sectors, so consecutive incidents arrive from different directions.
 export const ANGLE_BUCKETS = 20;
@@ -118,16 +123,18 @@ export const RIPPLE_INNER_OPACITY_STEPS = [
 
 export const LABEL_FONT = "'EB Garamond', Georgia, serif";
 export const LABEL_SIZE = 15;         // the km readout and the death count
-export const LABEL_OFFSET = 26;       // px from the path, perpendicular
+// How far the near edge of the label sits from the thing it is clearing:
+// the path it belongs to, the mark it names, or another label. Measured to
+// the edge of the text, not to its centre. See placeLabel in renderPath.
+export const LABEL_OFFSET = 14;
+export const LABEL_GAP = 8;
 
-// Near the bottom of the circle the perpendicular offset alone leaves the
-// label sitting on the path it belongs to. These nudge it clear, by angle
-// band in radians, highest band first.
-export const LABEL_NUDGES = [
-  { fromAngle: 3.25, dx: -8, dy: 5 },
-  { fromAngle: 3.0, dx: 0, dy: 5 },
-  { fromAngle: -Infinity, dx: -15, dy: 10 },
-];
+// The disc keeps growing and fading after the label appears, out to three
+// times the mark. Asking the label to clear all of that throws it seventy
+// pixels away from a mark it is supposed to be attached to, and by then the
+// disc is a quarter opaque and blurred. This is the radius that still reads
+// as solid while the label is up.
+export const LABEL_MARK_CLEAR = 1.8;
 
 export const LABEL_FADE = 300;        // ms, in and out
 export const LABEL_HOLD = 800;        // ms the death count stays up

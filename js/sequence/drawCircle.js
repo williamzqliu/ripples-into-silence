@@ -4,8 +4,11 @@ import {
   cx, cy,
   LAUNCH_RADIUS, RADIUS_KM,
   RANGE_CIRCLE_STROKE,
-  DISTANCE_RINGS_KM, DISTANCE_RING_STROKE, radiusFractionFor, LABEL_FONT
+  DISTANCE_RINGS_KM, DISTANCE_RING_STROKE, RING_LABEL_GAP,
+  radiusFractionFor, LABEL_FONT
 } from "../config.js";
+
+import { unit, halfBox, pushOut } from "./labelGeometry.js";
 
 // Resolves when the fade-in is over, so the opening can be sequenced.
 function drawCircle(delay = 0) {
@@ -70,11 +73,19 @@ function drawDistanceRings(delay) {
 // These sat at 10px and 28% white, directly on the dashes, which made them
 // guesswork. Bigger, brighter, clear of the stroke, and painted over a
 // hairline of the page colour so no dash runs through a letter.
+//
+// They stay at the top of their own rings. Walking them round to somewhere
+// no mark ever lands was tried and thrown away: twenty-three of the
+// ninety-four incidents land within thirty pixels of the ten kilometre
+// ring, which is the densest water in the figure, and there is no angle on
+// it that stays clear. Rotating the whole ruler off the vertical saves two
+// touches out of three and costs the alignment that makes the three numbers
+// read as one scale. So the marks draw over the labels where they meet: the
+// marks are the record, these are the ruler beside it.
 function ringLabel(svg, r, km, delay) {
-  svg.append("text")
-    .attr("x", cx)
-    .attr("y", cy - r - 9)
+  const text = svg.append("text")
     .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "central")
     .attr("fill", "rgba(255,255,255,0.5)")
     .attr("stroke", "#0F1A32")
     .attr("stroke-width", 3)
@@ -83,7 +94,16 @@ function ringLabel(svg, r, km, delay) {
     .style("font-family", LABEL_FONT)
     .style("font-variant-numeric", "tabular-nums lining-nums")
     .attr("opacity", 0)
-    .text(`${km} km`)
+    .text(`${km} km`);
+
+  // Just outside its own ring, measured from the text's own box rather
+  // than by a fixed nine pixels, so the daylight survives a change of size.
+  const spot = pushOut({ x: cx, y: cy }, unit(-Math.PI / 2), r,
+    halfBox(text.node()), RING_LABEL_GAP);
+
+  text
+    .attr("x", spot.x)
+    .attr("y", spot.y)
     .lower()
     .transition()
     .delay(delay)

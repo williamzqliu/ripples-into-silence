@@ -6,22 +6,75 @@
 
 import {
   cx, cy,
+  FRAME_WIDTH, FRAME_HEIGHT,
   LAUNCH_RADIUS, LAUNCHING_SPEED, RADIUS_KM,
   RIPPLE_INNER_STROKE, RIPPLE_TRANS_DURATION,
   RIPPLE_OUTER_OPA_ORG, RIPPLE_SHOWING,
   RIPPLE_OUTER_FADING_DURATION, RIPPLE_OUTER_ENLARGE,
   RIPPLE_INNER_OPACITY_STEPS, RIPPLE_BLUR_MAX,
-  LABEL_FONT, LABEL_SIZE, LABEL_OFFSET, LABEL_NUDGES, LABEL_FADE, LABEL_HOLD
+  LABEL_FONT, LABEL_SIZE, LABEL_OFFSET, LABEL_GAP, LABEL_MARK_CLEAR,
+  LABEL_FADE, LABEL_HOLD
 } from "../config.js";
 
-// Where the travelling label sits relative to the head of its path:
-// perpendicular to the path, then nudged clear in the angle bands where the
-// perpendicular alone drops it onto the path itself.
-function labelOffset(angle) {
-  const nudge = LABEL_NUDGES.find(n => angle >= n.fromAngle);
+import {
+  unit, halfBox, pushOut, boxAt, inFrame, overlaps, overlapsDisc
+} from "./labelGeometry.js";
+
+// ---------------------------------------------------------------- placing
+//
+// The old rule put the centre of the label a fixed twenty-six pixels
+// perpendicular to the path, with three hand-set nudges for the angle bands
+// where that was not enough. It was not enough because twenty-six pixels is
+// measured to the centre of a box sixty pixels wide: whenever the
+// perpendicular ran horizontally, half the label was still lying on top of
+// whatever it was meant to be clearing. Hence "206 dead" sitting inside its
+// own mark. labelGeometry holds the rule that replaces it.
+
+// Every mark whose disc is still solid on screen. A count has to clear the
+// mark it names, and it has to clear the two or three that landed just
+// before it, which are the ones nearest to it.
+const liveMarks = new Set();
+
+/** Every other piece of text already on the canvas: the three ring labels,
+    and the labels of the paths still in flight. */
+function otherText(node) {
+  const svg = node.ownerSVGElement;
+  if (!svg) return [];
+  // `.leaving` is on the labels that are already fading out, including the
+  // travelling one this count is replacing. Making room for text that will
+  // be gone in three hundred milliseconds pushes the count away for nothing.
+  return Array.from(svg.querySelectorAll("text:not(.leaving)"))
+    .filter(t => t !== node)
+    .map(t => t.getBBox());
+}
+
+/** Perpendicular first, either side, then straight out and straight in.
+    Angle is the path's own, measured from the centre of the frame. */
+function placeLabel(node, own, angle) {
+  const box = halfBox(node);
+  const dirs = [angle + Math.PI / 2, angle - Math.PI / 2, angle, angle + Math.PI]
+    .map(unit);
+  const taken = otherText(node);
+  // The own mark is cleared by the distance itself, so testing it again here
+  // would only risk failing on the rounding.
+  const discs = Array.from(liveMarks).filter(m => m !== own);
+
+  let fallback = null;
+  for (const u of dirs) {
+    const c = pushOut(own, u, own.r * LABEL_MARK_CLEAR, box, LABEL_GAP);
+    const b = boxAt(c, box);
+    if (!fallback) fallback = c;
+    if (!inFrame(b)) continue;
+    if (taken.some(t => overlaps(b, t, LABEL_GAP))) continue;
+    if (discs.some(m => overlapsDisc(b, m, m.r * LABEL_MARK_CLEAR + LABEL_GAP))) continue;
+    return c;
+  }
+
+  // Nowhere clean. Keep it on the canvas and let it land where it lands:
+  // an overlap that can be read past beats a label cropped by the frame.
   return {
-    dx: Math.cos(angle + Math.PI / 2) * LABEL_OFFSET + nudge.dx,
-    dy: Math.sin(angle + Math.PI / 2) * LABEL_OFFSET + nudge.dy,
+    x: Math.min(Math.max(fallback.x, box.w + 2), FRAME_WIDTH - box.w - 2),
+    y: Math.min(Math.max(fallback.y, box.h + 2), FRAME_HEIGHT - box.h - 2),
   };
 }
 
@@ -36,8 +89,13 @@ function labelStyle(selection) {
     .attr("fill", "#ffffff")
     .attr("font-size", LABEL_SIZE)
     .attr("font-weight", "500")
-    .attr("stroke", "rgba(0,0,0,0.5)")
-    .attr("stroke-width", 0.6)
+    /* Painted behind the glyphs rather than over them. Without paint-order
+       the halo eats into the letterforms, which is the opposite of the job,
+       and at 0.6 of a transparent black it was not covering anything
+       anyway. The page colour at 3 is what the ring labels use. */
+    .attr("stroke", "#0F1A32")
+    .attr("stroke-width", 3)
+    .attr("paint-order", "stroke")
     .style("opacity", 0)
     .style("pointer-events", "none")
     .style("font-family", LABEL_FONT)
@@ -52,8 +110,6 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   const yStart = cy + Math.sin(d.angle) * fullR;
   const xEnd = cx + Math.cos(d.angle) * visibleR;
   const yEnd = cy + Math.sin(d.angle) * visibleR;
-
-  const offset = labelOffset(d.angle);
 
   // The path fades in along its own length rather than being drawn solid,
   // so the head reads as the thing moving.
@@ -70,15 +126,23 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
     .attr("stroke-linecap", "round")
     .attr("opacity", 0.9);
 
-  let label;
+  // Perpendicular to its own path, clear of the line by the width of the
+  // text. Worked out once at launch: the label travels with the head, and
+  // re-solving it every frame would have it twitching from side to side.
+  let label, offset = { dx: 0, dy: 0 };
   if (showLabel) {
-    label = labelStyle(layer.append("text")).text("...");
+    label = labelStyle(layer.append("text")).text(`${RADIUS_KM.toFixed(2)} km`);
+    const box = halfBox(label.node());
+    const u = unit(d.angle + Math.PI / 2);
+    const at = pushOut({ x: 0, y: 0 }, u, LABEL_OFFSET, box, LABEL_GAP);
+    offset = { dx: at.x, dy: at.y };
   }
 
   let progress = 0;
   let phase = "forward";
   let flashDrawn = false;
   let labelFadedIn = false;
+  let fadeInTimer = null;
 
   // Progress is advanced by elapsed time, not by a fixed step per frame.
   // The fixed step tied the animation to the display's refresh rate, so the
@@ -136,9 +200,13 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
 
         // Once, not once per frame: the flag used to be declared inside this
         // branch, so every frame scheduled another fade-in.
+        // Held so the handover below can cancel it. A fast path lands before
+        // this fires, and the fade-in it then schedules interrupts the
+        // fade-out, leaving the distance label on screen for good with the
+        // count sitting underneath it.
         if (!labelFadedIn) {
           labelFadedIn = true;
-          setTimeout(() => {
+          fadeInTimer = setTimeout(() => {
             label.transition().duration(200).style("opacity", 1);
           }, 200);
         }
@@ -163,14 +231,27 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
       if (t >= 1 && !flashDrawn) {
         flashDrawn = true;
 
+        // Registered whether or not this path carries a label: ninety-one of
+        // the ninety-four do not, and their discs are in the way just the
+        // same. The ripple below takes it off again when it has faded.
+        const mark = { x: xEnd, y: yEnd, r: d.radius };
+        liveMarks.add(mark);
+
         // The distance label hands over to the count of people lost.
         if (showLabel) {
-          label.transition().duration(LABEL_FADE).style("opacity", 0).remove();
+          clearTimeout(fadeInTimer);
+          label.classed("leaving", true)
+            .transition().duration(LABEL_FADE).style("opacity", 0).remove();
 
-          labelStyle(layer.append("text"))
-            .attr("x", xEnd + offset.dx)
-            .attr("y", yEnd + offset.dy)
-            .text(`${d.dead} dead`)
+          // The count is static, so it can be solved properly: clear of the
+          // mark it names, clear of the ring labels and of any other mark
+          // still on screen, and inside the frame.
+          const count = labelStyle(layer.append("text")).text(`${d.dead} dead`);
+          const spot = placeLabel(count.node(), mark, d.angle);
+
+          count
+            .attr("x", spot.x)
+            .attr("y", spot.y)
             .transition().duration(LABEL_FADE).style("opacity", 1)
             .transition().delay(LABEL_HOLD).duration(LABEL_FADE).style("opacity", 0)
             .remove();
@@ -206,6 +287,8 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           .attr("opacity", 0)
           .tween("blur", () => t =>
             outer.style("filter", `blur(${(t * RIPPLE_BLUR_MAX).toFixed(2)}px)`))
+          .on("end", () => liveMarks.delete(mark))
+          .on("interrupt", () => liveMarks.delete(mark))
           .remove();
 
         path.remove();
