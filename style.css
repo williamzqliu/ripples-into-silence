@@ -172,15 +172,13 @@ img {
 #viz-section {
   scroll-margin-top: 60px;
 
-  /* Somewhere to stand. The sequence runs for over a minute and this
-     section used to be 1.09 screens tall, which gave the sticky frame
-     inside it 128 pixels of travel: less scroll than any other section in
-     the piece, for the one thing the piece is about. At four and a half
-     screens the frame stays pinned for about three and a half, which is
-     what the arrivals field gets, and a reader who wants past still gets
-     past. The rest of the run is handled by the sequence standing down
-     when the section leaves the screen, not by making the page taller. */
-  min-height: 450vh;
+  /* The travel the record is released against. Every pixel of it now does
+     something: the frame is pinned and scrolling lands incidents, so the
+     length is paid for rather than just endured. Four and a half screens
+     of a frame that did not answer was too much of both; three is a little
+     over two screens of travel, which puts an incident down about every
+     dozen pixels. */
+  min-height: 300vh;
 }
 
 
@@ -442,6 +440,15 @@ img {
   top: var(--nav-h);
   z-index: var(--z-viz);
   height: calc(100vh - var(--nav-h));
+
+  /* Nothing in the frame is text to be read off the page. Dragging across
+     it was selecting the counters and the axis labels and leaving an I-beam
+     over a drawing, which says "this is a paragraph". The tooltip targets
+     set their own pointer. */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+
   display: flex;
   justify-content: space-between;
   align-items: flex-start;

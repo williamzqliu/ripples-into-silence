@@ -1,10 +1,7 @@
 // js/sequence/yearProgressBar.js
 
-import { isOnScene } from "./onScene.js";
-
 let allYears = [];
 let yearMap = [];
-let totalDuration = 60000;
 
 // Each year sits at a hand-set fraction of the bar rather than an even
 // division, because the years hold very different numbers of incidents.
@@ -109,64 +106,37 @@ function layoutYearLabels() {
     items.forEach(d => d.label.style("left", `${Math.round(d.x)}px`));
 }
 
-// ----- the bar itself, filling at a constant rate
-export function startLinearProgressBar(duration = totalDuration) {
-    totalDuration = duration;
+// ----- the bar itself
+//
+// It used to fill on a sixty second clock of its own, which made it a
+// second opinion about where the sequence had got to rather than a reading
+// of it: the two were kept in step by a table of per-year millisecond
+// fudges. It is set from how much of the record is on screen, so there is
+// nothing left to keep in step.
+export function setBarProgress(fraction) {
     const bar = d3.select("#year-progress-fill").node();
-
-    // The bar is read against the paths, and the paths stop going out when
-    // the section is off screen, so the bar has to stop with them. On wall
-    // clock time it filled while the record stood still and a reader coming
-    // back found 2024 under a bar that said 2019.
-    let elapsed = 0;
-    let lastFrame = null;
-
-    function animate(now) {
-        const step = lastFrame === null ? 0 : now - lastFrame;
-        lastFrame = now;
-        if (isOnScene()) elapsed += step;
-
-        const progress = Math.min(elapsed / totalDuration, 1);
-        bar.style.width = `${progress * 100}%`;
-
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            // once the bar is full, fade the last year out too
-            const activeLabel = d3.select(".year-pop.active");
-            if (!activeLabel.empty()) {
-                activeLabel.classed("active", false).classed("inactive", true);
-            }
-            setTimeout(() => {
-                // hand it over to the fading class
-                d3.select("#year-progress-fill").classed("fade-out", true);
-              }, 1000); // a second after the bar finishes
-              
-        }
-    }
-
-    requestAnimationFrame(animate);
+    if (!bar) return;
+    bar.style.width = `${Math.min(Math.max(fraction, 0), 1) * 100}%`;
 }
 
 // ----- highlighting the year on screen
+//
+// Also a reading of where the record has got to rather than a sequence of
+// events, so scrolling back puts the years back.
+let shownYear = null;
+
 export function updateProgress(currentYearIndex) {
     if (!yearMap.length) return;
+    if (currentYearIndex === shownYear) return;
+    shownYear = currentYearIndex;
 
-    // walk the labels and move each to its new state
     yearMap.forEach((d, i) => {
         if (i < currentYearIndex) {
             d.label.classed("hidden", false).classed("inactive", true).classed("active", false);
         } else if (i > currentYearIndex) {
             d.label.classed("hidden", true).classed("inactive", false).classed("active", false);
-        }
-    });
-
-    // wait for the outgoing year to fade before bringing the next one up
-    const transitionDelay = 300;
-    setTimeout(() => {
-        const d = yearMap[currentYearIndex];
-        if (d) {
+        } else {
             d.label.classed("hidden", false).classed("inactive", false).classed("active", true);
         }
-    }, transitionDelay);
+    });
 }

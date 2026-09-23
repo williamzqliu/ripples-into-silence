@@ -16,11 +16,7 @@ import { drawPaths } from "./drawPaths.js";
 import { loadAndProcessData } from "./dataProcessing.js";
 import { whenOnScene, wait } from "./onScene.js";
 import { RADIUS_HOLD } from "../config.js";
-import {
-    initYearProgressBar,
-    updateProgress,
-    startLinearProgressBar
-} from "./yearProgressBar.js";
+import { initYearProgressBar } from "./yearProgressBar.js";
 
 import { showIsland } from "./showIsland.js";
 
@@ -57,14 +53,9 @@ export async function runSceneIntro() {
     await whenOnScene();
     await fadeInUI();
 
-    // 6. and then the incidents themselves
+    // 6. and then the record, which the reader releases by scrolling
     await whenOnScene();
     initYearProgressBar(allYears);
-    startLinearProgressBar();
-
-    setTimeout(() => {
-        updateProgress(0);
-    }, 2000);
 
     drawPaths({
         allYears,

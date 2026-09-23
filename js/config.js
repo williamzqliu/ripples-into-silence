@@ -101,23 +101,28 @@ export const ISLAND_SHRINK = 900;     // onto the cross, which grows in step
 export const CIRCLE_OPEN = 1400;
 export const RING_STAGGER = 220;
 
-// How long the radius line's reading is left up before the counters arrive.
-export const RADIUS_HOLD = 3200;
+// The radius line opens over 1.6s and holds its reading. The counters come
+// up while it is still on screen rather than after it, which is what made
+// the opening feel like a list of things happening one at a time.
+export const RADIUS_HOLD = 1500;
 
 // ------------------------------------------------------------------ pacing
 
-export const INITIAL_INCIDENTS = 3;   // released slowly, one at a time
-// The last of the dead air. Everything before this is now continuous, so
-// three seconds of a finished, motionless frame was the one gap left in
-// the opening. It does not buy anything: the frame has already been read
-// by the time the counters finish arriving.
-export const FIRST_DELAY = 1200;      // ms before the first one
-export const INITIAL_DELAY = 6000;    // ms between those first few
-export const INITIAL_SPEED = 0.25;    // and they travel slowly as well
+// The opening three, drawn slowly and with a label, so a reader sees that
+// one path is one incident before ninety-one more arrive.
+export const INITIAL_INCIDENTS = 3;
+export const INITIAL_SPEED = 0.25;
 
 export const MAX_CURRENT = 5;         // paths allowed in flight at once
-export const MIN_GAP = 400;           // floor on the gap once accelerated
-export const LAUNCH_INTERVAL = 50;    // how often the scheduler looks
+
+// Share of the section's scroll the opening ceremony holds before the
+// record starts being released against it.
+export const CEREMONY_SHARE = 0.18;
+
+// How far the release may fall behind the scroll before the marks are put
+// straight down instead of flown in. A reader who is this far ahead is
+// moving through the record, not watching it.
+export const SCRUB_AHEAD = 6;
 
 // Path progress per frame at 60Hz. renderPath turns this into progress per
 // millisecond, so the tuning survives on a display of any refresh rate.
@@ -189,22 +194,3 @@ export const ARRIVALS_2024 = 45997;
 export const ARRIVALS_SOURCE =
   "Arrivals: Italian Red Cross via InfoMigrants, 13 January 2025";
 
-// ------------------------------------------------------------------- stats
-
-export const UPDATE_RATE = 850;
-export const UPDATE_SPEED_YEAR = 675;
-export const UPDATE_SPEED = 500;
-export const START_YEAR = 2014;
-
-// The year advances when its last incident lands, which is not the same
-// moment as the year reading well on screen. These shift individual years so
-// the progress bar and the paths stay in step.
-export const YEAR_ADVANCE_DELAY = 1200;
-export const YEAR_DELAY_OVERRIDES = {
-  2017: -2000,
-  2018: 0,
-  2019: 1000,
-  2020: 1500,
-  2021: 1000,
-  2022: 1000,
-};

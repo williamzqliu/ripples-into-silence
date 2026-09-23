@@ -102,7 +102,16 @@ function labelStyle(selection) {
     .style("font-variant-numeric", "tabular-nums lining-nums");
 }
 
-export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 1, onEnd }) {
+export function renderPath({
+  d, gradId, defs, layer,
+  showLabel = false, speed = 1, instant = false, onEnd
+}) {
+  // Everything this incident draws goes in one group, so scrolling back
+  // can take the whole thing off with a single remove. It used to append
+  // the line, the label, the hover target and the ripple straight onto the
+  // shared layer, which was fine while the record only went forwards.
+  const item = layer.append("g").attr("class", "incident");
+
   const fullR = LAUNCH_RADIUS;
   const visibleR = fullR * d.disappearRatio;
 
@@ -120,7 +129,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   grad.append("stop").attr("offset", "0%").attr("stop-color", "white").attr("stop-opacity", 0);
   grad.append("stop").attr("offset", "100%").attr("stop-color", "white").attr("stop-opacity", 1);
 
-  const path = layer.append("line")
+  const path = item.append("line")
     .attr("stroke", `url(#${gradId})`)
     .attr("stroke-width", 2)
     .attr("stroke-linecap", "round")
@@ -131,7 +140,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   // re-solving it every frame would have it twitching from side to side.
   let label, offset = { dx: 0, dy: 0 };
   if (showLabel) {
-    label = labelStyle(layer.append("text")).text(`${RADIUS_KM.toFixed(2)} km`);
+    label = labelStyle(item.append("text")).text(`${RADIUS_KM.toFixed(2)} km`);
     const box = halfBox(label.node());
     const u = unit(d.angle + Math.PI / 2);
     const at = pushOut({ x: 0, y: 0 }, u, LABEL_OFFSET, box, LABEL_GAP);
@@ -157,7 +166,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
 
   // An invisible circle over the landing point, so the incident stays
   // inspectable after its path has gone.
-  const hoverCircle = layer.append("circle")
+  const hoverCircle = item.append("circle")
     .attr("cx", xEnd)
     .attr("cy", yEnd)
     .attr("r", d.radius + 8)
@@ -229,6 +238,15 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
       grad.attr("x1", xShrink).attr("y1", yShrink).attr("x2", xEnd).attr("y2", yEnd);
 
       if (t >= 1 && !flashDrawn) {
+        land();
+        return;
+      }
+    }
+
+    if (!flashDrawn && item.node().isConnected) requestAnimationFrame(animate);
+  }
+
+  function land() {
         flashDrawn = true;
 
         // Registered whether or not this path carries a label: ninety-one of
@@ -246,7 +264,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           // The count is static, so it can be solved properly: clear of the
           // mark it names, clear of the ring labels and of any other mark
           // still on screen, and inside the frame.
-          const count = labelStyle(layer.append("text")).text(`${d.dead} dead`);
+          const count = labelStyle(item.append("text")).text(`${d.dead} dead`);
           const spot = placeLabel(count.node(), mark, d.angle);
 
           count
@@ -257,7 +275,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
             .remove();
         }
 
-        const rippleGroup = layer.append("g").attr("transform", `translate(${xEnd}, ${yEnd})`);
+        const rippleGroup = item.append("g").attr("transform", `translate(${xEnd}, ${yEnd})`);
 
         // The ring stays. The disc spreads and fades.
         rippleGroup.append("circle")
@@ -296,13 +314,17 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
         setTimeout(() => {
           if (onEnd) onEnd();
         }, 500);
-
-        return;
-      }
-    }
-
-    if (!flashDrawn) requestAnimationFrame(animate);
   }
 
-  requestAnimationFrame(animate);
+  // Scrubbing. Past a handful of pending incidents the reader is moving
+  // through the record rather than watching it, and forty paths in the air
+  // at once is noise rather than speed, so the mark goes straight down.
+  if (instant) {
+    path.remove();
+    land();
+  } else {
+    requestAnimationFrame(animate);
+  }
+
+  return item.node();
 }

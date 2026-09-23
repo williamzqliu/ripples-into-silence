@@ -1,35 +1,22 @@
 // js/sequence/fadeUI.js
+//
+// The frame the record is read in: the two counters and the year bar. They
+// used to arrive one at a time, a second apart, which took three seconds
+// to put up three empty labels and was three seconds of the opening in
+// which nothing was happening that the reader had to watch. They are one
+// thing, so they arrive as one.
+
+const FADE = 900;
 
 export function fadeInUI() {
     return new Promise(resolve => {
-        // top left first
-        d3.select("#incident-count")
-            .transition().duration(800).style("opacity", 1);
+        d3.selectAll([
+            "#incident-count", "#left .label",
+            "#death-count", "#right .label",
+            "#year-progress-bar", "#year-pop-labels",
+        ].join(", "))
+            .transition().duration(FADE).style("opacity", 1);
 
-        d3.select("#left .label")
-            .transition().duration(800).style("opacity", 1);
-
-        // top right a second later
-        setTimeout(() => {
-            d3.select("#death-count")
-                .transition().duration(800).style("opacity", 1);
-
-            d3.select("#right .label")
-                .transition().duration(800).style("opacity", 1);
-        }, 1000);
-
-        // and the year bar at the bottom after that
-        setTimeout(() => {
-            d3.select("#year-progress-bar")
-                .transition().duration(800).style("opacity", 1);
-
-            d3.select("#year-pop-labels")
-                .transition().duration(800).style("opacity", 1);
-        }, 2000);
-
-        // resolved once all three are up
-        setTimeout(() => {
-            resolve();
-        }, 3000);
+        setTimeout(resolve, FADE);
     });
 }
