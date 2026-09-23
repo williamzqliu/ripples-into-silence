@@ -1082,27 +1082,48 @@ svg {
 }
 
 /* ---------- ending ---------- */
+/* The last screen of the page is the epilogue, whole: its text and the
+   island centred between the nav and the credits, which are part of the
+   scene. It used to run 956px with the credits after it, so at the end
+   of the page, 815 tall, the first line had scrolled up under the nav. */
+#epilogue {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: var(--nav-h) 0 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .epilogue-wrapper {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
-  padding: 80px var(--page-pad);
+  padding: 40px var(--page-pad);
   gap: 40px;
 }
 
+/* A little closer set than it was, 1.8 and 40px, so the five paragraphs
+   and the credits fit one laptop screen. */
 .epilogue-text {
   flex: 1;
   color: white;
   font-size: var(--fs-body);
   font-family: 'EB Garamond', Georgia, serif;
-  line-height: 1.8;
+  line-height: 1.65;
 }
 
 /* The entrance is .fade-step's, shared with Eleven Years. */
 .epilogue-text p {
-  margin-bottom: 40px;
+  margin-bottom: 28px;
+}
+
+.epilogue-text p:last-child {
+  margin-bottom: 0;
 }
 
 .epilogue-image {
@@ -1130,6 +1151,8 @@ svg {
    under a text that is set on the left. The credit in the titles' Bebas,
    the sources in the text's serif. */
 #footer-credit {
+  box-sizing: border-box;
+  width: 100%;
   max-width: var(--page-max);
   margin: 0 auto;
   padding: 0 var(--page-pad) 28px;
