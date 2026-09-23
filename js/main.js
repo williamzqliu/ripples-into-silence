@@ -67,8 +67,12 @@ window.addEventListener('scroll', () => {
 
   const windowH = window.innerHeight;
 
+  // The stagger counts within a group, not down the whole page: numbered
+  // globally, the ending's paragraphs would have waited on Eleven Years'.
   const steps = document.querySelectorAll('.fade-step');
-  steps.forEach((step, i) => {
+  steps.forEach((step) => {
+    const i = [...step.parentElement.children]
+      .filter(c => c.classList.contains('fade-step')).indexOf(step);
     const rect = step.getBoundingClientRect();
     const triggerPoint = windowH * 0.95 - i * 15;
     if (rect.top < triggerPoint) {

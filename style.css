@@ -103,13 +103,41 @@ img {
   display: block;
 }
 
+/* Vertical rhythm only. Every section keeps its content in its own
+   1200 box with the page padding inside it; the 2em a side this used to
+   add stacked on top of that, so under 1264 wide the main animation,
+   Eleven Years and the ending sat 32px in from the nav and the
+   scrollytelling, and Eleven Years' discs ran off the right at 1024. */
 .section {
-  padding: 4em 2em;
+  padding: 4em 0;
 }
 
 .content {
   max-width: 800px;
   margin: 0 auto;
+}
+
+/* The page's content box: 1200 with the page padding inside it, the same
+   edge the nav, the scrollytelling, the year discs and the ending sit on. */
+.page-width {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad);
+}
+
+/* One entrance for the prose outside the pinned sections: up forty pixels
+   as it fades in, over the 0.8s the intro's lines and the scrollytelling's
+   steps take. The ending had its own at 1.2s and Eleven Years had none at
+   all. main.js adds .visible as each one comes up the screen. */
+.fade-step {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.fade-step.visible {
+  opacity: 1;
+  transform: none;
 }
 
 /* the small-window notice, hidden by default */
@@ -717,11 +745,17 @@ h1, h2, h3, h4 {
 }
 
 
+/* 90% white as a colour rather than as opacity: an id's opacity outranks
+   the fade-step classes, so the paragraph would never have faded in. */
 #details p,
 #reflection p {
   font-size: var(--fs-body);
   max-width: var(--measure-body);
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.details-2024 {
+  margin-top: 72px;
 }
 
 .scrolly-text {
@@ -1021,16 +1055,9 @@ svg {
   line-height: 1.8;
 }
 
+/* The entrance is .fade-step's, shared with Eleven Years. */
 .epilogue-text p {
   margin-bottom: 40px;
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 1.2s ease;
-}
-
-.epilogue-text p.visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .epilogue-image {
@@ -1104,14 +1131,8 @@ svg {
   align-items: center;
   /* 48 on a wide screen, closing to 28 at 1024 so the three still fit. */
   gap: clamp(28px, calc(28px + (100vw - 1024px) * 0.05), 48px);
-  /* The page's width, not the 800px text column it sits in. Laid out it
-     needed 1062px, so inside 800 it ran off to the right: 131px off
-     centre on a wide screen, and on anything under 1440 the page scrolled
-     sideways. Centred on the column by its own half-width. */
-  width: min(calc(var(--page-max) - 2 * var(--page-pad)),
-             calc(100vw - 2 * var(--page-pad) - 16px));
-  margin: 72px 0 0 50%;
-  translate: -50% 0;
+  /* The full content box, which is now its parent's width. */
+  margin-top: 72px;
 }
 
 .year-discs__col {
