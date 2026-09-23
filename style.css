@@ -81,8 +81,25 @@ body {
 #incident-count,
 #death-count,
 h1, h2, h3, h4,
-nav, .scroll-icon, .year-label, #year-value {
+nav, .year-label, #year-value {
   font-family: 'Bebas Neue', sans-serif;
+}
+
+/* Display type is there to be read, not copied. Dragging over a heading or
+   a nav item selected it and left an I-beam over lettering set at 64px,
+   which reads as an invitation to edit. The prose underneath stays
+   selectable, because that is the part anyone would want to quote. */
+h1, h2, h3, h4,
+nav,
+.label {
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+/* Except the nav, which is links. */
+.nav-link {
+  cursor: pointer;
 }
 
 img {
