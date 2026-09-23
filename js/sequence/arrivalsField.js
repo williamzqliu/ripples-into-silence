@@ -96,6 +96,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   const noteEl = section.querySelector(".arrivals__note");
   let shownCount = null;
   let captionState = null;
+  let noteTimer = null;
+  const NOTE_FADE_MS = 300;       // the note's transition in style.css
 
   const rows = await d3.csv("./data/lampedusa_nearby_incidents.csv");
   const dead2024 = rows.filter(r => r["Incident Year"] === "2024");
@@ -348,11 +350,22 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     // come all the way down to the 206 it names.
     const state = count > people.length ? "all" : "dead";
     if (noteEl && state !== captionState) {
+      const first = captionState === null;
       captionState = state;
-      noteEl.textContent = state === "all"
+      const text = state === "all"
         ? "Everyone who set out for Lampedusa in 2024 and reached this water. " +
           "One dot is one person."
         : "The 206 who died or went missing before reaching the island.";
+      // Out, swap, in; on the first draw the markup already says it.
+      clearTimeout(noteTimer);
+      if (first) noteEl.textContent = text;
+      else {
+        noteEl.classList.add("is-swapping");
+        noteTimer = setTimeout(() => {
+          noteEl.textContent = text;
+          noteEl.classList.remove("is-swapping");
+        }, NOTE_FADE_MS);
+      }
     }
   }
 
