@@ -1052,6 +1052,7 @@ svg {
   font-size: 56px;
   font-variant-numeric: lining-nums tabular-nums;
   color: #FBC900;
+  margin-right: 0.12em;       /* a word space at 24px sat tight on a 56px figure */
 }
 
 /* One line, always: the longer of the two notes is 690px at this size and
