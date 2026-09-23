@@ -1126,24 +1126,53 @@ svg {
 }
 
 
+/* On the epilogue's left edge, the page's content box, rather than centred
+   under a text that is set on the left. The credit in the titles' Bebas,
+   the sources in the text's serif. */
 #footer-credit {
-  text-align: center;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--page-pad) 28px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+#footer-credit p {
+  margin: 0;
+}
+
+#footer-credit p + p {
+  margin-top: 6px;
+}
+
+.footer-credit__by {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.3); /* semi-transparent white */
-  padding: 0 0 20px;
   letter-spacing: 1px;
   line-height: 1.7;
+}
+
+.footer-credit__sources {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 #footer-credit a {
   color: inherit;
   text-decoration: underline;
   text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+/* The name a little brighter than the line it is on. */
+#footer-credit a.footer-credit__name {
+  color: rgba(255, 255, 255, 0.65);
 }
 
 #footer-credit a:hover {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 
