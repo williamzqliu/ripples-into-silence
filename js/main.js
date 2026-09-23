@@ -352,7 +352,7 @@ function fitEpilogueImage() {
 // One at a time as the scene arrives, then the credits. The wait before
 // each is the time to read the one before it, roughly, with a held breath
 // before "But seeing is not reaching." and before "But 206 did not."
-const EPILOGUE_WAITS = [500, 1400, 1300, 1700, 1600, 2000, 2700, 1800, 1800];
+const EPILOGUE_WAITS = [300, 750, 700, 950, 850, 1050, 1400, 950, 900];
 const epilogueScene = document.getElementById('epilogue');
 const epilogueLines = epilogueScene ? [...epilogueScene.querySelectorAll('.epilogue-line')] : [];
 const reducedMotion = window.matchMedia &&
