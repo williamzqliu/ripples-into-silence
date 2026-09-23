@@ -49,6 +49,7 @@ const pending = new Set();
 function checkDiscs() {
   const vh = window.innerHeight;
   for (const node of pending) {
+    if (node.closest('.scene--away')) continue;   // wait for its scene
     const r = node.getBoundingClientRect();
     if (r.top < vh * PLAY_AT && r.bottom > 0) {
       pending.delete(node);
@@ -58,6 +59,7 @@ function checkDiscs() {
 }
 window.addEventListener("scroll", checkDiscs, { passive: true });
 window.addEventListener("resize", checkDiscs);
+window.addEventListener("scenechange", checkDiscs);
 
 export async function drawYearDiscs(containerId) {
   const root = d3.select(containerId);

@@ -40,7 +40,50 @@ let armed = false;
 // anything to hold anybody for. The section is long enough to stand in now
 // and the sequence waits for the reader instead. See sequence/onScene.js.
 
+// ---------- scenes
+//
+// The page is six scenes, and only one of them is on screen at a time. Each
+// used to scroll in under the last, so the next section's heading came up
+// the screen while the reader was still in the one before. Now a scene is
+// hidden until its top edge comes up past FADE_FROM of the screen, and
+// between there and FADE_TO it crossfades with the scene before it, the
+// two opacities always summing to one. The fade is scrubbed by the scroll,
+// not played on a timer: stop half way and it holds half way, scroll back
+// and it runs backwards.
+const SCENES = ['#ripple-bg-wrapper', '#sequence', '#context', '#eleven-years', '#year-2024', '#epilogue']
+  .map(s => document.querySelector(s)).filter(Boolean);
+const FADE_FROM = 0.65;
+const FADE_TO = 0.25;
+let currentScene = -1;
+
+function updateScenes() {
+  const vh = window.innerHeight;
+  const arrived = SCENES.map((scene, i) => {
+    if (i === 0) return 1;
+    const top = scene.getBoundingClientRect().top;
+    return Math.min(Math.max((vh * FADE_FROM - top) / (vh * (FADE_FROM - FADE_TO)), 0), 1);
+  });
+
+  let lead = 0, leadOpacity = -1;
+  SCENES.forEach((scene, i) => {
+    const o = arrived[i] * (1 - (arrived[i + 1] || 0));
+    scene.style.opacity = o.toFixed(3);
+    if (o > leadOpacity) { leadOpacity = o; lead = i; }
+  });
+
+  // Entrances inside a scene wait for it to lead: a paragraph that floats
+  // in, or a disc that plays, while its scene is still transparent has
+  // finished before anyone could see it.
+  if (lead !== currentScene) {
+    currentScene = lead;
+    SCENES.forEach((scene, i) => scene.classList.toggle('scene--away', i !== lead));
+    window.dispatchEvent(new Event('scenechange'));
+  }
+}
+window.addEventListener('resize', updateScenes);
+
 window.addEventListener('scroll', () => {
+  updateScenes();
   const nav = document.querySelector('#main-nav');
   const navLinks = document.querySelectorAll('#main-nav .nav-link');
   const navTop = nav.getBoundingClientRect().top;
@@ -88,7 +131,7 @@ window.addEventListener('scroll', () => {
       .filter(c => c.classList.contains('fade-step')).indexOf(step);
     const rect = step.getBoundingClientRect();
     const triggerPoint = windowH * 0.95 - i * 15;
-    if (rect.top < triggerPoint) {
+    if (rect.top < triggerPoint && !step.closest('.scene--away')) {
       step.classList.add('visible');
     }
   });

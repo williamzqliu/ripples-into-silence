@@ -685,6 +685,14 @@ h1, h2, h3, h4 {
 }
 
 
+/* ---------- scenes ---------- */
+/* main.js scrubs each scene's opacity with the scroll. A scene that is not
+   leading takes no pointer, so a tooltip cannot be raised on a drawing that
+   is not there. */
+.scene--away {
+  pointer-events: none;
+}
+
 /* ---------- tooltip ---------- */
 /* Shared by the incidents, the cross and the year discs. It was styled
    inline in the markup, at 12px in 85% white on an 85% background, which
