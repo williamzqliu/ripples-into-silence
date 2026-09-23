@@ -12,11 +12,19 @@
 
 import { ARRIVALS_2024, ARRIVALS_SOURCE, LABEL_FONT } from "../config.js";
 
+// Each cause is a block of its own, labelled where it stands. They used to
+// share one block, told apart by four shapes, a disc, a half disc, a bowtie
+// and a ring, read off a legend underneath: a code to learn for 26 of the
+// 206, and the half discs ran on in the drowned's last row. The labels say
+// what the record says, in IOM's categories: "Vehicle accident / death
+// linked to hazardous transport", "Harsh environmental conditions / lack of
+// adequate shelter, food, water", "Sickness / lack of access to adequate
+// healthcare".
 const CAUSES = [
-  { key: "Drowning", label: "Drowning", shape: "disc" },
-  { key: "Vehicle accident", label: "Vehicle accident", shape: "half" },
-  { key: "Harsh environmental", label: "Harsh conditions", shape: "bowtie" },
-  { key: "Sickness", label: "Sickness", shape: "ring" },
+  { key: "Drowning", label: "drowned" },
+  { key: "Vehicle accident", label: "died in hazardous transport" },
+  { key: "Harsh environmental", label: "died of exposure, hunger or thirst" },
+  { key: "Sickness", label: "died of sickness, without care" },
 ];
 
 const DEAD_COLOUR = "#FFFFFF";
@@ -123,26 +131,46 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       octx.fill();
     }
 
-    // Where the 206 end up: one block per cause, in the order of the legend,
-    // set on the left edge the heading and the text above are set on.
+    // Where the 206 end up: a block per cause, one under the next, on the
+    // left edge the heading and the text above are set on. Each block's
+    // label sits after its first row, so it is read with the block.
     const markR = Math.max(3.5, Math.min(7, w / 150));
     const gap = markR * 3.1;
+    const blockGap = gap * 1.6;          // between one cause and the next
     const gridCols = Math.max(10, Math.min(30, Math.floor((w * 0.55) / gap)));
-    const gridRows = Math.ceil(people.length / gridCols);
     const gx = markR;
-    // The legend hangs below the grid, so the pair is centred together rather
-    // than the grid alone, which left a hole between it and the heading.
-    const legendH = markR * 4.4 * (CAUSES.length + 1) + markR * 7;
-    const gy = (h - (gridRows - 1) * gap - legendH) / 2;
 
-    people.forEach((p, i) => {
-      const src = cellXY(deadCells[i]);
-      p.x0 = src.x; p.y0 = src.y;
-      p.x1 = gx + (i % gridCols) * gap;
-      p.y1 = gy + Math.floor(i / gridCols) * gap;
-    });
+    const blocks = [];
+    let rowsAbove = 0, gapsAbove = 0;
+    for (const cause of CAUSES) {
+      const n = people.filter(p => p.cause === cause.key).length;
+      if (!n) continue;
+      blocks.push({ cause, n, row: rowsAbove, gaps: gapsAbove,
+        firstRow: Math.min(n, gridCols) });
+      rowsAbove += Math.ceil(n / gridCols);
+      gapsAbove += 1;
+    }
+    // Centred with the source line under it.
+    const sourceH = gap * 2.4;
+    const blocksH = (rowsAbove - 1) * gap + (blocks.length - 1) * blockGap;
+    const gy = (h - blocksH - sourceH) / 2;
+    const rowY = (b, k) => gy + (b.row + k) * gap + b.gaps * blockGap;
 
-    field = { pitch, dotR, markR, offscreen: off, gridRows, gx, gy, gap };
+    let i = 0;
+    for (const b of blocks) {
+      for (let k = 0; k < b.n; k++, i++) {
+        const p = people[i];
+        const src = cellXY(deadCells[i]);
+        p.x0 = src.x; p.y0 = src.y;
+        p.x1 = gx + (k % gridCols) * gap;
+        p.y1 = rowY(b, Math.floor(k / gridCols));
+      }
+      b.labelX = gx + (b.firstRow - 1) * gap + markR + gap * 0.9;
+      b.labelY = rowY(b, 0);
+    }
+    const sourceY = gy + blocksH + sourceH;
+
+    field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks, sourceY };
   }
 
   const ease = t => t * t * (3 - 2 * t);
@@ -172,19 +200,15 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     const r = field.dotR + (field.markR - field.dotR) * move;
 
     ctx.fillStyle = DEAD_COLOUR;
-    ctx.strokeStyle = DEAD_COLOUR;
-    ctx.lineWidth = Math.max(1, r * 0.34);
-
     for (const p of people) {
       const x = p.x0 + (p.x1 - p.x0) * move;
       const y = p.y0 + (p.y1 - p.y0) * move;
-      const shape = move > 0.55
-        ? CAUSES.find(c => c.key === p.cause).shape
-        : "disc";
-      mark(ctx, shape, x, y, r);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    legend(ctx, w, h, ease(clamp01((progress - 0.82) / 0.18)));
+    labels(ctx, ease(clamp01((progress - 0.82) / 0.18)));
 
     const count = Math.round(total - (total - people.length) * gone);
     if (countEl && count !== shownCount) {
@@ -204,56 +228,25 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
   }
 
-  function mark(c, shape, x, y, r) {
-    c.beginPath();
-    if (shape === "disc") {
-      c.arc(x, y, r, 0, Math.PI * 2);
-      c.fill();
-    } else if (shape === "half") {
-      c.arc(x, y, r, Math.PI, 0);
-      c.closePath();
-      c.fill();
-    } else if (shape === "bowtie") {
-      c.moveTo(x - r, y - r); c.lineTo(x + r, y - r);
-      c.lineTo(x - r, y + r); c.lineTo(x + r, y + r);
-      c.closePath();
-      c.fill();
-    } else {
-      c.arc(x, y, r * 0.78, 0, Math.PI * 2);
-      c.stroke();
-    }
-  }
-
-  function legend(c, w, h, alpha) {
+  // The number in white, what happened in the text's white after it.
+  function labels(c, alpha) {
     if (alpha < 0.01) return;
-    const counts = new Map();
-    for (const p of people) counts.set(p.cause, (counts.get(p.cause) || 0) + 1);
-
-    const r = Math.max(3.5, Math.min(7, w / 150));
-    const lineH = r * 4.4;
-    const top = field.gy + (field.gridRows - 1) * field.gap + r * 7;
-    const x = field.gx - r;       // the marks line up with the grid's first column
-
     c.save();
     c.globalAlpha = alpha;
-    c.font = `${Math.max(15, r * 2.3)}px ${LABEL_FONT}`;
-    c.textBaseline = "middle";
-
-    CAUSES.forEach((cause, i) => {
-      const y = top + i * lineH;
-      c.fillStyle = DEAD_COLOUR;
-      c.strokeStyle = DEAD_COLOUR;
-      c.lineWidth = Math.max(1, r * 0.34);
-      mark(c, cause.shape, x + r, y, r);
-
-      c.fillStyle = "rgba(255,255,255,0.55)";
-      c.textAlign = "left";
-      c.fillText(`${counts.get(cause.key) || 0}  ${cause.label}`, x + r * 3.4, y);
-    });
-
-    c.fillStyle = "rgba(255,255,255,0.3)";
     c.textAlign = "left";
-    c.fillText(ARRIVALS_SOURCE, x + r, top + CAUSES.length * lineH + lineH * 0.4);
+    c.textBaseline = "middle";
+    const size = 18;
+    for (const b of field.blocks) {
+      c.font = `${size}px ${LABEL_FONT}`;
+      c.fillStyle = DEAD_COLOUR;
+      const num = `${b.n} `;
+      c.fillText(num, b.labelX, b.labelY);
+      c.fillStyle = "rgba(255,255,255,0.7)";
+      c.fillText(b.cause.label, b.labelX + c.measureText(num).width, b.labelY);
+    }
+    c.font = `15px ${LABEL_FONT}`;
+    c.fillStyle = "rgba(255,255,255,0.4)";
+    c.fillText(ARRIVALS_SOURCE, field.gx - field.markR, field.sourceY);
     c.restore();
   }
 
