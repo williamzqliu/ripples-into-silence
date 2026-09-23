@@ -125,6 +125,17 @@ export const LABEL_NUDGES = [
 export const LABEL_FADE = 300;        // ms, in and out
 export const LABEL_HOLD = 800;        // ms the death count stays up
 
+// ------------------------------------------------------- background field
+
+// The ambient ripples behind the cover and the intro. A ceiling on how many
+// can be alive at once, so a slow machine degrades by thinning the field
+// rather than by falling over: the loop asks for up to nine at a time and
+// each lives about two seconds, so twelve is the working number and this is
+// the wall behind it.
+export const BG_MAX_LIVE = 90;
+export const BG_TICK_MIN = 300;   // ms between batches
+export const BG_TICK_MAX = 800;
+
 // --------------------------------------------------------------- arrivals
 
 // The only figure on this page that is not in the incident record. The
