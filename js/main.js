@@ -141,9 +141,17 @@ const scrollyGraphic = document.querySelector('.scrolly-graphic');
 const scrollyContainer = scrollyGraphic && scrollyGraphic.parentElement;
 if (scrollyContainer) scrollyContainer.style.setProperty('--steps', scrollySteps.length);
 
-// The first step fades in once the pinned pair has come this far up the
-// screen on its way into place.
-const ARRIVE_AT = 0.6;
+// The first step starts to come up as soon as the pair is on screen. It
+// used to wait until the pair was 60% of the way up, so the pair rose
+// through the bottom of the screen invisible, 290px of scroll at 720 tall
+// and 435px at 1080, straight after the main animation: an empty screen
+// that read as the end of the page, and the first paragraph went by
+// under a reader who had started scrolling faster.
+const ARRIVE_AT = 1;
+
+// The step that was up last time, so a step coming up out of nothing can
+// skip the wait that is only there to let another paragraph leave first.
+let lastActive = -1;
 
 function updateScrolly() {
   if (!scrollySteps.length || !scrollyContainer) return;
@@ -167,6 +175,18 @@ function updateScrolly() {
   if (u < 0) active = -1;                           // not here yet
   else if (u > run + 0.5) active = n;               // coming unstuck: all read
   else active = Math.min(n - 1, Math.floor(u / (run / n)));
+
+  if (active !== lastActive) {
+    const fromBlank = !(lastActive >= 0 && lastActive < n);
+    scrollySteps.forEach(s => s.classList.remove('from-blank'));
+    scrollyImgs.forEach(i => i.classList.remove('from-blank'));
+    if (fromBlank && scrollySteps[active]) {
+      scrollySteps[active].classList.add('from-blank');
+      const img = scrollyImgs.find(i => i.dataset.for === scrollySteps[active].dataset.img);
+      if (img) img.classList.add('from-blank');
+    }
+    lastActive = active;
+  }
 
   scrollySteps.forEach((step, i) => {
     step.classList.toggle('active', i === active);

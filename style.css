@@ -710,11 +710,11 @@ h1, h2, h3, h4 {
      At the full column it crowded the paragraph and filled the screen. */
   --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4 * 0.75), 60vh);
   /* Scroll given to each step while the text and the diagram are pinned.
-     main.js also counts the pair's rise into place and shares the whole
-     run evenly, so at 720px tall each step gets about 190px, two notches
-     of a wheel. 70vh was 1860px for three paragraphs and 30vh was still
-     heavy going. --steps is set from main.js, from the markup. */
-  --step-scroll: 15vh;
+     main.js also counts the pair's rise into place, from the moment it is
+     on screen, and shares the whole run evenly. The rise is the larger
+     part and content is moving through it, so the pinned stretch is kept
+     short. --steps is set from main.js, from the markup. */
+  --step-scroll: 8vh;
   --steps: 3;
   min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
 
@@ -777,6 +777,13 @@ h1, h2, h3, h4 {
   transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
 }
 
+/* Coming up out of nothing there is no paragraph to wait for, and the
+   wait only delayed the first thing a reader sees after the main
+   animation. */
+.scrolly-step.active.from-blank {
+  transition-delay: 0s;
+}
+
 /* Sticky, not fixed. A fixed element floats over the whole document, so
    this one needed a scroll listener and a 0.6s fade to get it out of the
    way, and during that fade, and any frame the listener had not caught up
@@ -824,6 +831,11 @@ h1, h2, h3, h4 {
 .scrolly-img.visible {
   opacity: 1;
   transition: opacity 0.6s ease 0.4s;
+}
+
+/* Still a tenth of a second behind its paragraph. */
+.scrolly-img.visible.from-blank {
+  transition-delay: 0.1s;
 }
 
 
