@@ -40,6 +40,12 @@ const ARRIVED_COLOUR = "#FBC900";
 // view and one or two of them white.
 const CLOSE_PITCH = 34;
 
+// Close up, the frame's edges cut through dots, and a row of half dots
+// along the top and the bottom read as a mistake. The edges fade out over
+// this many pixels instead, narrowing as the view draws back, to none by
+// the time the whole field, which fits, is on screen.
+const FEATHER = 48;
+
 // The scroll through the track, 0 to 1: the close-up holds, draws back, the
 // whole field holds, the arrivals fade, the 206 sort, the labels come in.
 const ZOOM_FROM_AT = 0.04;
@@ -207,6 +213,24 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   const ease = t => t * t * (3 - 2 * t);
   const clamp01 = v => Math.max(0, Math.min(1, v));
 
+  // Fade what is drawn to nothing at the frame's edges, px wide.
+  function featherEdges(w, h, px) {
+    if (px < 0.5) return;
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-in";
+    for (const [x1, y1, len] of [[w, 0, w], [0, h, h]]) {
+      const g = ctx.createLinearGradient(0, 0, x1, y1);
+      const f = Math.min(0.5, px / len);
+      g.addColorStop(0, "rgba(0,0,0,0)");
+      g.addColorStop(f, "rgba(0,0,0,1)");
+      g.addColorStop(1 - f, "rgba(0,0,0,1)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+    ctx.restore();
+  }
+
   // Every dot inside the view at zoom z, drawn as one path, and how many
   // people that is. Near the end of the draw back, where the view holds
   // most of the field and a path of forty thousand arcs takes 18ms, the
@@ -293,6 +317,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       ctx.arc(x, y, r, 0, Math.PI * 2);
     }
     ctx.fill();
+
+    if (zoomed) featherEdges(w, h, FEATHER * Math.log(z) / Math.log(field.zoomFrom));
 
     labels(ctx, ease(clamp01((progress - LABELS_AT) / (1 - LABELS_AT))));
 
