@@ -127,7 +127,7 @@ export function startLinearProgressBar(duration = totalDuration) {
         if (isOnScene()) elapsed += step;
 
         const progress = Math.min(elapsed / totalDuration, 1);
-        bar.style.width = `${progress * 100}%`;
+        bar.style.transform = `scaleX(${progress})`;
         // Asked for early by the handover, so the number is lit at the
         // moment the fill reaches it rather than 300ms (about 6px) after.
         lightYearUnderFill(Math.min(progress + HANDOVER_MS / totalDuration, 1));

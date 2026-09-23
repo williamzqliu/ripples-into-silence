@@ -110,6 +110,14 @@ window.addEventListener('scroll', () => {
 
 window.addEventListener('load', () => {
   armed = true;
+  // A refresh restores the scroll position and can put the reader straight
+  // onto the section. The only check at that position ran below, during
+  // module evaluation, when nothing may start yet, so nothing did until the
+  // reader scrolled. Check again now, and once more after the browser has
+  // had time to finish restoring the position. animationStarted keeps the
+  // second check from starting it twice.
+  requestAnimationFrame(() => window.dispatchEvent(new Event('scroll')));
+  setTimeout(() => window.dispatchEvent(new Event('scroll')), 300);
 });
 
 // run the scroll handler once, for the position we loaded at

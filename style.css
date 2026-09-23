@@ -579,10 +579,17 @@ h1, h2, h3, h4 {
   top: 0;
   left: 0;
   height: 100%;
-  width: 0%;
+  /* Full width and scaled, not sized. The bar moves about 18px a second,
+     and a width is painted to whole pixels, so it went forward in visible
+     one-pixel steps; a transform is composited and moves by fractions of
+     one. It also had a 0.1s transition on width, which the per-frame
+     update restarted every frame, so it never finished one. */
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform;
   background-color: white;
   opacity: 0.7;
-  transition: width 0.1s linear;
 }
 
 #year-progress-fill.fade-out {
