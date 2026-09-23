@@ -125,44 +125,48 @@ window.dispatchEvent(new Event('scroll'));
 
 // ---------- scrollytelling
 //
-// Which step owns the screen is worked out from where the steps are. It
-// used to be an IntersectionObserver per step with hand-set root margins,
-// and the middle step's were -60% top and bottom: a band of minus twenty
-// per cent, so it only ever turned on by accident. The image changed by
-// swapping one element's src and waiting for it to load, behind a 0.1s
-// fade, which read as a cut. There is one image per step now, and the
-// change is a crossfade.
+// The text and the diagram are pinned side by side on one centre line and
+// the section's scroll is divided between the steps: each gets
+// --step-scroll of it, and the change is a crossfade on both sides.
+//
+// It used to be an IntersectionObserver per step with hand-set root
+// margins. The middle step's were -60% top and bottom, a band of minus
+// twenty per cent, so it only turned on by accident; the image changed by
+// swapping one element's src behind a 0.1s fade, which read as a cut; and
+// the paragraphs scrolled past the pinned diagram, so they were level with
+// it for an instant and drifted away from it for the rest of their turn.
 const scrollySteps = [...document.querySelectorAll('.scrolly-step')];
 const scrollyImgs = [...document.querySelectorAll('.scrolly-img')];
 const scrollyGraphic = document.querySelector('.scrolly-graphic');
+const scrollyContainer = scrollyGraphic && scrollyGraphic.parentElement;
+if (scrollyContainer) scrollyContainer.style.setProperty('--steps', scrollySteps.length);
 
-// A step takes over when its top comes above this line.
-const TAKE_OVER_AT = 0.6;
-// The last paragraph counts as read once its bottom is above this one.
-const READ_AT = 0.3;
+// The first step fades in once the pinned pair has come this far up the
+// screen on its way into place.
+const ARRIVE_AT = 0.75;
 
 function updateScrolly() {
-  if (!scrollySteps.length || !scrollyGraphic) return;
+  if (!scrollySteps.length || !scrollyContainer) return;
   const vh = window.innerHeight;
+  const n = scrollySteps.length;
 
-  let active = -1;
-  scrollySteps.forEach((step, i) => {
-    if (step.getBoundingClientRect().top < vh * TAKE_OVER_AT) active = i;
-  });
-
-  const last = scrollySteps[scrollySteps.length - 1].getBoundingClientRect();
-  const textActive = last.bottom < vh * READ_AT ? scrollySteps.length : active;
-
-  scrollySteps.forEach((step, i) => {
-    step.classList.toggle('active', i === textActive);
-    step.classList.toggle('past', i < textActive);
-  });
-
-  // The diagram fades out the moment it comes unstuck and starts to leave
-  // with the section, and back in if the reader comes back up to it.
+  const frame = scrollyGraphic.getBoundingClientRect();
+  const box = scrollyContainer.getBoundingClientRect();
   const stickyTop = parseFloat(getComputedStyle(scrollyGraphic).top) || 0;
-  const leaving = scrollyGraphic.getBoundingClientRect().top < stickyTop - 0.5;
-  const id = !leaving && scrollySteps[active] ? scrollySteps[active].dataset.img : null;
+  const pinned = box.height - frame.height;        // px of scroll spent pinned
+  const into = stickyTop - box.top;                // px past the pin point
+
+  let active;
+  if (frame.top > vh * ARRIVE_AT) active = -1;      // not here yet
+  else if (into < 0) active = 0;                    // rising into place
+  else if (into > pinned + 0.5) active = n;         // coming unstuck: all read
+  else active = Math.min(n - 1, Math.floor(into / (pinned / n)));
+
+  scrollySteps.forEach((step, i) => {
+    step.classList.toggle('active', i === active);
+    step.classList.toggle('past', i < active);
+  });
+  const id = scrollySteps[active] ? scrollySteps[active].dataset.img : null;
   scrollyImgs.forEach(img => img.classList.toggle('visible', img.dataset.for === id));
 }
 

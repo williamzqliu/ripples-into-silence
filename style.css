@@ -650,9 +650,7 @@ h1, h2, h3, h4 {
      fixed ripple layer showed. Padding holds the same space and paints it.
      Horizontal padding is set here rather than on .scrolly-section below,
      because that is the same element and an id beats a class. */
-  /* The bottom 290px lives inside the text column instead (see
-     .scrolly-text), so the gap before Eleven Years is unchanged. */
-  padding: 290px 0 0;
+  padding: 290px 0;
   position: relative;
   z-index: var(--z-section);
 }
@@ -707,6 +705,16 @@ h1, h2, h3, h4 {
 /* Same shape as .nav-inner: a 1200 box with the page padding inside it, so
    the content edge lands where every other block's does. */
 .scrolly-container {
+  /* The diagram: three quarters of its 40% column, so it has air on both
+     sides and stands off the text, and no taller than 60% of the screen.
+     At the full column it crowded the paragraph and filled the screen. */
+  --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4 * 0.75), 60vh);
+  /* Scroll given to each step while the text and the diagram are pinned.
+     --steps is set from main.js, from the number of steps in the markup. */
+  --step-scroll: 70vh;
+  --steps: 3;
+  min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
+
   display: flex;
   width: 100%;
   max-width: var(--page-max);
@@ -714,28 +722,33 @@ h1, h2, h3, h4 {
   padding: 0 var(--page-pad);
 }
 
+/* Pinned, the same box as the diagram beside it: same top, same height,
+   so the two stick and come unstuck on the same pixel and share one centre
+   line the whole time. The paragraphs used to scroll past a pinned
+   diagram, so they only lined up with it for an instant and spent the rest
+   of their turn drifting up and away from it. */
 .scrolly-text {
-  display: flex;
-  flex-direction: column;
-  gap: 240px; /* the paragraphs need room to take turns */
+  position: sticky;
+  top: calc(50vh - var(--g) / 2);
+  align-self: flex-start;
+  height: var(--g);
   padding-right: 60px; /* keeps the text off the frame beside it */
-  /* The section's bottom padding, moved in here. The diagram is sticky
-     inside this column and lets go when the column ends, and the last
-     paragraph ended almost at once: the corridor diagram was up for 160px
-     of scroll before it left. Room below the paragraph keeps it pinned
-     while that paragraph is read. */
-  padding-bottom: 290px;
   max-width: calc(var(--measure-body) + 60px);
 }
 
 
 
-/* The same float-in the intro and the ending use: up forty pixels as it
-   fades in. A step that has been read goes the same distance on upwards as
-   it fades, so the text is always moving the way the page is. These used
-   to sit at 0.4 and snap to 1 in 0.3s, a different gesture from every
-   other paragraph on the page. */
+/* Stacked on the centre line, one at a time. The same float-in the intro
+   and the ending use, up forty pixels as it fades in; a step that has been
+   read goes the same distance on upwards as it fades out, so the change
+   reads in the direction the page is moving. A paragraph taller than the
+   box overflows it evenly above and below and stays centred. */
 .scrolly-step {
+  position: absolute;
+  left: 0;
+  right: 60px;
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
   flex-direction: column;
   font-size: var(--fs-body);
@@ -760,10 +773,7 @@ h1, h2, h3, h4 {
    with, it painted over the section below. Sticky is clipped to its own
    container: it cannot reach another section to begin with. */
 .scrolly-graphic {
-  /* As wide as its column, and no taller than 70% of the screen. The
-     diagrams are square SVGs with no size of their own, so they were
-     drawing at a default 224px in a 448px column. */
-  --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4), 70vh);
+  /* Sized by --g on .scrolly-container, shared with the text. */
   position: sticky;
   top: calc(50vh - var(--g) / 2);
   align-self: flex-start;
