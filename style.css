@@ -1009,7 +1009,9 @@ svg {
   position: relative;
   z-index: var(--z-section);
   background-color: #0F1A32;
-  height: 320vh;
+  /* 320 before the field opened close up and drew back; the draw back is
+     the extra hundred. */
+  height: 420vh;
   padding: 0;
 }
 

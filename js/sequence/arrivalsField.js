@@ -2,9 +2,15 @@
 //
 // 2024, at one dot per person. 45,997 people reached Lampedusa and 206 did
 // not, so the field holds 46,203 dots and the 206 are 0.45 per cent of it.
-// At the top of the section they cannot be picked out, which is the point:
-// the arrivals are what gets counted. Scrolling fades the 45,997 away and
-// the 206 stay behind, then sort themselves by what killed them.
+//
+// It opens close up, on a few hundred people, each a dot large enough to be
+// one person, and one of them white. Scrolling draws back until the whole
+// field is on screen and the count has climbed to 46,203, and by then the
+// white ones cannot be picked out, which is the point: the arrivals are what
+// gets counted. It used to open on the whole field, 46,203 dots two pixels
+// across, which read as a sheet of yellow cloth. Scrolling on fades the
+// 45,997 away and the 206 stay behind, then sort themselves by what killed
+// them.
 //
 // One dot is one person the whole way down. Nothing is rescaled, so the
 // second half is the same field with most of it taken out, not a second
@@ -30,6 +36,20 @@ const CAUSES = [
 const DEAD_COLOUR = "#FFFFFF";
 const ARRIVED_COLOUR = "#FBC900";
 
+// The close-up: dots this far apart, about 11px across, a few hundred in
+// view and one or two of them white.
+const CLOSE_PITCH = 34;
+
+// The scroll through the track, 0 to 1: the close-up holds, draws back, the
+// whole field holds, the arrivals fade, the 206 sort, the labels come in.
+const ZOOM_FROM_AT = 0.04;
+const ZOOM_TO_AT = 0.40;
+const FADE_FROM_AT = 0.48;
+const FADE_TO_AT = 0.66;
+const MOVE_FROM_AT = 0.62;
+const MOVE_TO_AT = 0.90;
+const LABELS_AT = 0.86;
+
 // Deterministic, so the same person is in the same place on every load.
 function mulberry32(a) {
   return function () {
@@ -54,9 +74,9 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   const canvas = document.querySelector(canvasSelector);
   if (!section || !canvas) return;
 
-  // The heading counts what is actually on screen: it runs down from 46,203
-  // to 206 as the arrivals fade, on the same curve, so the number and the
-  // field always agree. It used to jump from one to the other half way.
+  // The heading counts what is actually on screen: up to 46,203 as the view
+  // draws back, then down to 206 as the arrivals fade, on the same curve, so
+  // the number and the field always agree.
   const countEl = section.querySelector(".arrivals__num");
   // And it is the colour of what it counts: the arrivals' yellow, turning to
   // the white of the 206 as they are left alone in the field.
@@ -110,6 +130,15 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
 
     const isDead = new Uint8Array(total);
     deadCells.forEach(c => { isDead[c] = 1; });
+
+    // The close-up is centred on the white dot nearest the middle.
+    const mid = { x: w / 2, y: h / 2 };
+    let anchor = null, best = Infinity;
+    for (const c of deadCells) {
+      const x = originX + (c % cols) * pitch, y = originY + Math.floor(c / cols) * pitch;
+      const d = (x - mid.x) ** 2 + (y - mid.y) ** 2;
+      if (d < best) { best = d; anchor = { x, y }; }
+    }
 
     const cellXY = (c) => ({
       x: originX + (c % cols) * pitch,
@@ -171,11 +200,55 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
     const sourceY = top + sourceY0;
 
-    field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks, sourceY };
+    field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks, sourceY,
+      cols, originX, originY, isDead, anchor, zoomFrom: CLOSE_PITCH / pitch };
   }
 
   const ease = t => t * t * (3 - 2 * t);
   const clamp01 = v => Math.max(0, Math.min(1, v));
+
+  // Every dot inside the view at zoom z, drawn as one path, and how many
+  // people that is. Near the end of the draw back, where the view holds
+  // most of the field and a path of forty thousand arcs takes 18ms, the
+  // bitmap is scaled up instead, and the dots are only counted.
+  const BITMAP_BELOW = 1.4;
+  function drawZoomed(z, w, h) {
+    const paint = z >= BITMAP_BELOW;
+    if (!paint) {
+      const { anchor, offscreen } = field;
+      ctx.save();
+      ctx.setTransform(dpr * z, 0, 0, dpr * z,
+        dpr * anchor.x * (1 - z), dpr * anchor.y * (1 - z));
+      ctx.drawImage(offscreen, 0, 0, w, h);
+      ctx.restore();
+    }
+    const { pitch, cols, originX, originY, isDead, anchor, dotR } = field;
+    const r = dotR * z;
+    const x0 = anchor.x + (-r - anchor.x) / z, x1 = anchor.x + (w + r - anchor.x) / z;
+    const y0 = anchor.y + (-r - anchor.y) / z, y1 = anchor.y + (h + r - anchor.y) / z;
+    const c0 = Math.max(0, Math.ceil((x0 - originX) / pitch));
+    const c1 = Math.min(cols - 1, Math.floor((x1 - originX) / pitch));
+    const r0 = Math.max(0, Math.ceil((y0 - originY) / pitch));
+    const r1 = Math.floor((y1 - originY) / pitch);
+
+    let seen = 0;
+    ctx.fillStyle = ARRIVED_COLOUR;
+    ctx.beginPath();
+    for (let row = r0; row <= r1; row++) {
+      for (let col = c0; col <= c1; col++) {
+        const c = row * cols + col;
+        if (c >= total) break;
+        seen++;
+        if (!paint || isDead[c]) continue;
+        const sx = anchor.x + (originX + col * pitch - anchor.x) * z;
+        const sy = anchor.y + (originY + row * pitch - anchor.y) * z;
+        ctx.moveTo(sx + r, sy);
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      }
+    }
+    if (paint) ctx.fill();
+    return seen;
+  }
 
   function draw(progress) {
     if (!field) return;
@@ -184,10 +257,21 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
+    // The view draws back from the close-up to the whole field, at a steady
+    // rate in scale rather than in size, so it does not rush at the end.
+    const zoomT = ease(clamp01((progress - ZOOM_FROM_AT) / (ZOOM_TO_AT - ZOOM_FROM_AT)));
+    const z = Math.pow(field.zoomFrom, 1 - zoomT);
+    const zoomed = z > 1.0005;
+    const toScreen = (x, y) => zoomed
+      ? [field.anchor.x + (x - field.anchor.x) * z, field.anchor.y + (y - field.anchor.y) * z]
+      : [x, y];
+
     // The arrivals hold, then go.
-    const gone = ease(clamp01((progress - 0.30) / 0.28));
+    const gone = ease(clamp01((progress - FADE_FROM_AT) / (FADE_TO_AT - FADE_FROM_AT)));
     const fade = 1 - gone;
-    if (fade > 0.002) {
+    let seen = total;
+    if (zoomed) seen = drawZoomed(z, w, h);
+    else if (fade > 0.002) {
       ctx.save();
       ctx.globalAlpha = fade;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -197,21 +281,23 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
 
     // The 206 travel to their places and grow into their marks.
-    const move = ease(clamp01((progress - 0.52) / 0.36));
-    const r = field.dotR + (field.markR - field.dotR) * move;
+    const move = ease(clamp01((progress - MOVE_FROM_AT) / (MOVE_TO_AT - MOVE_FROM_AT)));
+    const r = zoomed ? field.dotR * z : field.dotR + (field.markR - field.dotR) * move;
 
     ctx.fillStyle = DEAD_COLOUR;
+    ctx.beginPath();
     for (const p of people) {
-      const x = p.x0 + (p.x1 - p.x0) * move;
-      const y = p.y0 + (p.y1 - p.y0) * move;
-      ctx.beginPath();
+      const [x, y] = toScreen(p.x0 + (p.x1 - p.x0) * move, p.y0 + (p.y1 - p.y0) * move);
+      if (x < -r || x > w + r || y < -r || y > h + r) continue;
+      ctx.moveTo(x + r, y);
       ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
     }
+    ctx.fill();
 
-    labels(ctx, ease(clamp01((progress - 0.82) / 0.18)));
+    labels(ctx, ease(clamp01((progress - LABELS_AT) / (1 - LABELS_AT))));
 
-    const count = Math.round(total - (total - people.length) * gone);
+    const count = zoomed ? seen
+      : Math.round(total - (total - people.length) * gone);
     if (countEl && count !== shownCount) {
       shownCount = count;
       countEl.textContent = count.toLocaleString("en-US");
