@@ -188,9 +188,8 @@ export const BG_TICK_MAX = 800;
 // 2024, on 1,095 boats, per the Italian Red Cross, which runs the reception
 // centre there. For scale, UNHCR puts sea arrivals for the whole of Italy
 // that year at 66,617.
+// Credited in the footer, with the incident record.
 export const ARRIVALS_2024 = 45997;
-export const ARRIVALS_SOURCE =
-  "Arrivals: Italian Red Cross via InfoMigrants, 13 January 2025";
 
 // ------------------------------------------------------------------- stats
 

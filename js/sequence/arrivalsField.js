@@ -16,7 +16,7 @@
 // second half is the same field with most of it taken out, not a second
 // chart drawn at a different rate.
 
-import { ARRIVALS_2024, ARRIVALS_SOURCE, LABEL_FONT } from "../config.js";
+import { ARRIVALS_2024, LABEL_FONT } from "../config.js";
 
 // Each cause is a block of its own, labelled where it stands. They used to
 // share one block, told apart by four shapes, a disc, a half disc, a bowtie
@@ -201,8 +201,7 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       blocks.push({ cause, n, labelY: y, firstY: y + labelH });
       y += labelH + (rowsN - 1) * gap + blockGap;
     }
-    const sourceY0 = y - blockGap + gap * 2.4;
-    const top = (h - sourceY0) / 2;
+    const top = (h - (y - blockGap)) / 2;
 
     let i = 0;
     for (const b of blocks) {
@@ -217,9 +216,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
         p.y1 = b.firstY + Math.floor(k / gridCols) * gap;
       }
     }
-    const sourceY = top + sourceY0;
 
-    field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks, sourceY,
+    field = { pitch, dotR, markR, offscreen: off, gx, gap, blocks,
       cols, originX, originY, isDead, anchor, zoomFrom: CLOSE_PITCH / pitch };
   }
 
@@ -385,9 +383,6 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       c.fillStyle = "rgba(255,255,255,0.7)";
       c.fillText(b.cause.label, b.labelX + c.measureText(num).width, b.labelY);
     }
-    c.font = `15px ${LABEL_FONT}`;
-    c.fillStyle = "rgba(255,255,255,0.4)";
-    c.fillText(ARRIVALS_SOURCE, field.gx - field.markR, field.sourceY);
     c.restore();
   }
 
