@@ -8,24 +8,38 @@
 //
 // This replaces a chart whose eleven-year series was written into the source
 // by hand and matched the data in one year out of eleven.
+//
+// The discs are all one size, in rows of four, three and four, the middle row
+// set between the others. 2024 used to be drawn large between two columns of
+// small ones; it is now the last of the run like any other year, and any year
+// can be opened large, with its rings and a figure for every mark.
 
 import {
   RADIUS_KM, radiusFractionFor,
   GOLDEN_ANGLE, CROSS_COLOUR,
-  RIPPLE_INNER_OPACITY_STEPS
+  RIPPLE_INNER_OPACITY_STEPS,
+  DISTANCE_RINGS_KM
 } from "../config.js";
 
 import { loadAndProcessData } from "./dataProcessing.js";
 
-// The disc the year with the most incidents has to stay legible in. 66 is
-// the most the three columns hold at 1024 wide.
-const SMALL_R = 66;
-const FOCUS_R = 155;
-const FOCUS_YEAR = 2024;
+// Rows, top to bottom. On an eight column grid each disc spans two, and a
+// shorter row is inset by one column a disc short, which sets it between
+// the discs of the row above.
+const ROWS = [4, 3, 4];
+const GRID_COLUMNS = 8;
 
-// The smallest mark, in px. At a small disc's scale a five-death incident
-// came out a pixel and a half across.
-const MIN_MARK = 1.8;
+// Drawing units. The small discs are drawn at a radius of 100 and the open
+// one at 300, the main sequence's own, so its marks are the sequence's size.
+// CSS sets how large either is on screen.
+const SMALL_R = 100;
+const LARGE_R = 300;
+
+// The smallest mark, in drawing units. At a small disc's scale a five-death
+// incident came out a pixel and a half across.
+const MIN_MARK = 2.6;
+
+const HOT = "#FBC900";
 
 // Each disc plays the main sequence in miniature as it comes on screen: the
 // circle opens out of the cross, then the year's incidents come in one by
@@ -79,19 +93,19 @@ export async function drawYearDiscs(containerId) {
       .forEach((d, k) => { d.discAngle = (k * GOLDEN_ANGLE) % (2 * Math.PI); });
   }
 
-  const focus = years.filter(y => y === FOCUS_YEAR);
-  const rest = years.filter(y => y !== FOCUS_YEAR);
-  const half = Math.ceil(rest.length / 2);
-
   const grid = root.append("div").attr("class", "year-discs");
-  const left = grid.append("div").attr("class", "year-discs__col");
-  const mid = grid.append("div").attr("class", "year-discs__focus");
-  const right = grid.append("div").attr("class", "year-discs__col");
 
-  // The figures sit on the outside of each column, as the storyboard has them.
-  rest.slice(0, half).forEach(y => cell(left, y, byYear.get(y), SMALL_R, "left"));
-  focus.forEach(y => cell(mid, y, byYear.get(y), FOCUS_R, "below"));
-  rest.slice(half).forEach(y => cell(right, y, byYear.get(y), SMALL_R, "right"));
+  // Row by row, in year order; any years past the eleven go on in fours.
+  let i = 0, row = 0;
+  while (i < years.length) {
+    const count = Math.min(ROWS[row] ?? 4, years.length - i);
+    const inset = (GRID_COLUMNS / 2 - count);
+    for (let k = 0; k < count; k++, i++) {
+      const y = years[i];
+      cell(grid, y, byYear.get(y), 1 + inset + k * 2);
+    }
+    row++;
+  }
 
   // The cells carry .fade-step, which main.js reveals on scroll, and the
   // discs play on scroll. Both checks may already have run before these
@@ -99,38 +113,63 @@ export async function drawYearDiscs(containerId) {
   window.dispatchEvent(new Event("scroll"));
 }
 
-// One year: the figures beside the disc, or under it for the focus year.
-function cell(parent, year, rows, r, labelSide) {
+function figures(rows) {
   const dead = d3.sum(rows, d => d.dead);
-  const box = parent.append("div")
-    .attr("class", `year-disc year-disc--${labelSide} fade-step`);
+  return `${rows.length} ${rows.length === 1 ? "incident" : "incidents"}<br />` +
+    `${dead} dead or missing`;
+}
 
-  const text = `
-    <div class="year-disc__year">${year}</div>
-    <div class="year-disc__figures">
-      ${rows.length} ${rows.length === 1 ? "incident" : "incidents"}<br />
-      ${dead} dead or missing
-    </div>`;
+// One year: the disc, with its year and figures under it. The whole cell
+// opens the year large.
+function cell(grid, year, rows, column) {
+  const box = grid.append("div")
+    .attr("class", "year-disc fade-step")
+    .style("grid-column", `${column} / span 2`)
+    .attr("role", "button")
+    .attr("tabindex", 0)
+    .attr("aria-label", `Open ${year}`);
 
-  if (labelSide === "left") box.append("div").attr("class", "year-disc__label").html(text);
   const holder = box.append("div").attr("class", "year-disc__plot");
-  if (labelSide !== "left") box.append("div").attr("class", "year-disc__label").html(text);
+  box.append("div").attr("class", "year-disc__label").html(`
+    <div class="year-disc__year">${year}</div>
+    <div class="year-disc__figures">${figures(rows)}</div>`);
 
-  const play = disc(holder, rows, r, year);
+  const play = disc(holder, rows, year, SMALL_R);
   const node = box.node();
   if (REDUCED) play(true);
   else { node.__play = () => play(false); pending.add(node); }
+
+  const open = () => openYear(year, rows, node);
+  box.on("click", open)
+    .on("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+    });
 }
 
 function ringOpacity(dead) {
   return RIPPLE_INNER_OPACITY_STEPS.find(s => dead <= s.upTo).opacity;
 }
 
-function disc(holder, rows, r, year) {
-  const pad = 2;
+function showTip(event, d) {
+  d3.select("#tooltip")
+    .html(`${d.year}<br>${d.distance.toFixed(1)} km from Lampedusa` +
+          `<br>${d.dead} dead or missing`)
+    .style("left", `${event.pageX + 10}px`)
+    .style("top", `${event.pageY - 20}px`)
+    .style("opacity", 1);
+}
+
+function hideTip() {
+  d3.select("#tooltip").style("opacity", 0);
+}
+
+// One disc, drawn at radius r in its own units. The large one also carries
+// the sequence's 25 and 10 kilometre rings, and a label on each.
+function disc(holder, rows, year, r) {
+  const big = r === LARGE_R;
+  const pad = big ? 24 : 3;       // the large one's pad holds the 50 km label
   const size = (r + pad) * 2;
   const svg = holder.append("svg")
-    .attr("width", size).attr("height", size)
     .attr("viewBox", `0 0 ${size} ${size}`)
     .attr("role", "img")
     .attr("aria-label",
@@ -139,22 +178,40 @@ function disc(holder, rows, r, year) {
 
   const c = size / 2;
   const scale = r / 300;          // the main sequence draws this at 300px
-  const big = r > 100;
+  const u = big ? 1 : 1.3;        // stroke units: the small disc is drawn down
 
   // The fifty kilometre frame, the same dashed circle as the sequence.
   // Starts closed: it opens out of the cross when the disc plays.
   const frame = svg.append("circle")
+    .attr("class", "year-disc__frame")
     .attr("cx", c).attr("cy", c).attr("r", 0)
     .attr("fill", "none")
-    .attr("stroke", "rgba(255,255,255,0.18)")
-    .attr("stroke-width", 1)
-    .attr("stroke-dasharray", big ? "6 6" : "3 4");
+    .attr("stroke-width", (big ? 2 : 1.2) * u)
+    .attr("stroke-dasharray", big ? "6 6" : "4 5");
 
-  // Each mark used to be a white dot at the end of a faint line held from
-  // the rim, "the path it came in on", which at this size read as a shoal of
-  // tadpoles swimming for the middle. The line only appears in flight now,
-  // as it does in the sequence, and what stays is the sequence's own mark:
-  // a solid core and the ring it leaves, as bright as the loss is large.
+  const rings = big ? DISTANCE_RINGS_KM.map(km => {
+    const rr = r * radiusFractionFor(km);
+    return svg.append("circle")
+      .attr("cx", c).attr("cy", c).attr("r", rr)
+      .attr("fill", "none")
+      .attr("stroke", "rgba(255,255,255,0.14)")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-dasharray", "4 6")
+      .attr("opacity", 0);
+  }) : [];
+
+  const ringLabels = big ? [RADIUS_KM, ...DISTANCE_RINGS_KM].map(km => {
+    const rr = km === RADIUS_KM ? r : r * radiusFractionFor(km);
+    return svg.append("text")
+      .attr("class", "year-disc__ring-label")
+      .attr("x", c).attr("y", c - rr - 6)
+      .attr("text-anchor", "middle")
+      .text(`${km} km`)
+      .attr("opacity", 0);
+  }) : [];
+
+  // Each mark is the sequence's own: a solid core and the ring it leaves,
+  // as bright as the loss is large. The line only appears in flight.
   //
   // One group per mark, made now and drawn furthest first, so the marks
   // nearest the island sit on top whatever order they land in.
@@ -169,46 +226,44 @@ function disc(holder, rows, r, year) {
         rimX: c + Math.cos(d.discAngle) * r,
         rimY: c + Math.sin(d.discAngle) * r,
         r: Math.max(MIN_MARK, d.radius * scale),
-        g: svg.append("g"),
+        g: svg.append("g").attr("class", "year-disc__mark"),
       };
     });
 
-  for (const m of marks) {
+  // Hover targets, over everything, smallest last so a small mark inside a
+  // large one can still be reached. The mark under the pointer goes yellow.
+  for (const m of [...marks].sort((a, b) => b.r - a.r)) {
     svg.append("circle")
-      .attr("cx", m.x).attr("cy", m.y).attr("r", m.r * 1.9 + 3)
+      .attr("cx", m.x).attr("cy", m.y).attr("r", m.r * 1.9 + 3 * u)
       .attr("fill", "transparent")
       .style("cursor", "pointer")
-      .on("mousemove", (event) => {
-        d3.select("#tooltip")
-          .html(`${m.d.year}<br>${m.d.distance.toFixed(1)} km from Lampedusa` +
-                `<br>${m.d.dead} dead or missing`)
-          .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY - 20}px`)
-          .style("opacity", 1);
-      })
-      .on("mouseleave", () => d3.select("#tooltip").style("opacity", 0));
+      .on("mouseenter", () => m.g.classed("is-hot", true))
+      .on("mousemove", (event) => showTip(event, m.d))
+      .on("mouseleave", () => { m.g.classed("is-hot", false); hideTip(); });
   }
 
   // Lampedusa, the same cross the sequence marks it with.
-  const arm = big ? 5 : 3;
-  const cross = svg.append("g").attr("opacity", 0);
+  const arm = big ? 8 : 4;
+  const cross = svg.append("g").attr("opacity", 0).style("pointer-events", "none");
   cross.append("line").attr("x1", c - arm).attr("y1", c).attr("x2", c + arm).attr("y2", c)
-    .attr("stroke", CROSS_COLOUR).attr("stroke-width", 1.5);
+    .attr("stroke", CROSS_COLOUR).attr("stroke-width", 1.5 * u);
   cross.append("line").attr("x1", c).attr("y1", c - arm).attr("x2", c).attr("y2", c + arm)
-    .attr("stroke", CROSS_COLOUR).attr("stroke-width", 1.5);
+    .attr("stroke", CROSS_COLOUR).attr("stroke-width", 1.5 * u);
 
   // The mark as it stays: the core, and the ring around it.
   function settle(m, animate) {
     const core = m.g.append("circle")
+      .attr("class", "year-disc__core")
       .attr("cx", m.x).attr("cy", m.y)
       .attr("r", animate ? 0 : m.r)
       .attr("fill", "#FFFFFF").attr("fill-opacity", 0.9);
     const ring = m.g.append("circle")
+      .attr("class", "year-disc__ring")
       .attr("cx", m.x).attr("cy", m.y)
       .attr("r", animate ? m.r : m.r * 1.9)
       .attr("fill", "none")
       .attr("stroke", "#FFFFFF")
-      .attr("stroke-width", big ? 1 : 0.75)
+      .attr("stroke-width", (big ? 1.2 : 0.75) * u)
       .attr("stroke-opacity", animate ? 0 : ringOpacity(m.d.dead));
     if (!animate) return;
 
@@ -232,12 +287,18 @@ function disc(holder, rows, r, year) {
     if (instant) {
       frame.attr("r", r);
       cross.attr("opacity", 0.75);
+      rings.forEach(g => g.attr("opacity", 1));
+      ringLabels.forEach(t => t.attr("opacity", 1));
       marks.forEach(m => settle(m, false));
       return;
     }
 
     frame.transition().duration(OPEN_MS).ease(d3.easeCubicOut).attr("r", r);
     cross.transition().duration(OPEN_MS * 0.7).attr("opacity", 0.75);
+    rings.forEach((g, k) => g.transition().delay(OPEN_MS * 0.4 + k * 150)
+      .duration(OPEN_MS).attr("opacity", 1));
+    ringLabels.forEach((t, k) => t.transition().delay(OPEN_MS * 0.4 + k * 150)
+      .duration(OPEN_MS).attr("opacity", 1));
 
     // In the order they happened, which is the order the rows are in.
     const byDate = marks.slice().sort((a, b) => rows.indexOf(a.d) - rows.indexOf(b.d));
@@ -247,7 +308,7 @@ function disc(holder, rows, r, year) {
         .attr("x1", m.rimX).attr("y1", m.rimY)
         .attr("x2", m.rimX).attr("y2", m.rimY)
         .attr("stroke", "rgba(255,255,255,0.55)")
-        .attr("stroke-width", big ? 1.2 : 0.8)
+        .attr("stroke-width", (big ? 1.5 : 0.8) * u)
         .attr("stroke-linecap", "round");
       line.transition()
         .delay(OPEN_MS * 0.6 + i * step)
@@ -259,4 +320,86 @@ function disc(holder, rows, r, year) {
         .on("end", () => { line.remove(); settle(m, true); });
     });
   };
+}
+
+// ---------- one year, opened large
+//
+// A layer over the page, not a scene of its own: the page stays where it was
+// under it, and the wheel and the scroll keys are held while it is open so
+// the scenes do not move behind it.
+
+let lightbox = null;
+let returnFocus = null;
+const CLOSE_MS = 300;
+
+function buildLightbox() {
+  const box = d3.select("body").append("div")
+    .attr("class", "disc-lightbox")
+    .attr("role", "dialog")
+    .attr("aria-modal", "true")
+    .attr("aria-labelledby", "disc-lightbox-year")
+    .attr("hidden", "");
+
+  const panel = box.append("div").attr("class", "disc-lightbox__panel");
+  panel.append("div").attr("class", "disc-lightbox__plot");
+  const text = panel.append("div").attr("class", "disc-lightbox__text");
+  text.append("h3").attr("id", "disc-lightbox-year").attr("class", "disc-lightbox__year");
+  text.append("p").attr("class", "disc-lightbox__figures");
+  text.append("p").attr("class", "disc-lightbox__key")
+    .text("How far out a mark sits is how far from Lampedusa the incident was; " +
+          "its size is how many people were lost. Point at a mark for its figures.");
+  box.append("button")
+    .attr("class", "disc-lightbox__close")
+    .attr("type", "button")
+    .attr("aria-label", "Close")
+    .html("&times;")
+    .on("click", closeYear);
+
+  // A click on the backdrop closes; one on the disc or the text does not.
+  box.on("click", (event) => { if (event.target === box.node()) closeYear(); });
+
+  const node = box.node();
+  node.addEventListener("wheel", e => e.preventDefault(), { passive: false });
+  node.addEventListener("touchmove", e => e.preventDefault(), { passive: false });
+  return box;
+}
+
+function onKey(event) {
+  if (event.key === "Escape") { closeYear(); return; }
+  if ([" ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown"].includes(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function openYear(year, rows, from) {
+  if (!lightbox) lightbox = buildLightbox();
+  returnFocus = from;
+  hideTip();
+
+  lightbox.select(".disc-lightbox__year").text(year);
+  lightbox.select(".disc-lightbox__figures").html(figures(rows));
+  const plot = lightbox.select(".disc-lightbox__plot").html("");
+  const play = disc(plot, rows, year, LARGE_R);
+
+  const node = lightbox.node();
+  node.hidden = false;
+  node.getBoundingClientRect();              // so the opening is transitioned
+  lightbox.classed("is-open", true);
+  document.addEventListener("keydown", onKey);
+  lightbox.select(".disc-lightbox__close").node().focus({ preventScroll: true });
+  play(REDUCED);
+}
+
+function closeYear() {
+  if (!lightbox || !lightbox.classed("is-open")) return;
+  hideTip();
+  lightbox.classed("is-open", false);
+  document.removeEventListener("keydown", onKey);
+  const node = lightbox.node();
+  setTimeout(() => {
+    if (lightbox.classed("is-open")) return;  // opened again meanwhile
+    node.hidden = true;
+    lightbox.select(".disc-lightbox__plot").html("");
+  }, CLOSE_MS);
+  if (returnFocus) returnFocus.focus({ preventScroll: true });
 }
