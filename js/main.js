@@ -65,11 +65,24 @@ function updateScenes() {
   });
 
   let lead = 0, leadOpacity = -1;
-  SCENES.forEach((scene, i) => {
+  const opacity = SCENES.map((scene, i) => {
     const o = arrived[i] * (1 - (arrived[i + 1] || 0));
     scene.style.opacity = o.toFixed(3);
     if (o > leadOpacity) { leadOpacity = o; lead = i; }
+    return o;
   });
+
+  // The ripple field is fixed to the viewport, outside the first scene, so
+  // it does not fade with it on its own. It used to stay at full strength
+  // until the cover and the intro were entirely off the screen, and with
+  // the next scene translucent through its crossfade the ripples showed
+  // through the record. It is the first scene's now, at the first scene's
+  // opacity, and its loop stands down once that is zero.
+  const ripples = document.getElementById('ripple-background');
+  if (ripples) {
+    ripples.style.opacity = opacity[0].toFixed(3);
+    ripples.classList.toggle('hidden', opacity[0] < 0.01);
+  }
 
   // Entrances inside a scene wait for it to lead: a paragraph that floats
   // in, or a disc that plays, while its scene is still transparent has
@@ -146,21 +159,8 @@ window.addEventListener('scroll', () => {
     }
   });
 
-  const rippleBG = document.getElementById("ripple-background");
-  const cover = document.getElementById("cover");
-  const intro = document.getElementById("intro");
-
-  const coverRect = cover.getBoundingClientRect();
-  const introRect = intro.getBoundingClientRect();
-
-  const coverInView = coverRect.bottom > 0 && coverRect.top < windowH;
-  const introInView = introRect.bottom > 0 && introRect.top < windowH;
-
-  if (coverInView || introInView) {
-    rippleBG.classList.remove("hidden");
-  } else {
-    rippleBG.classList.add("hidden");
-  }
+  // The ripple field's visibility is set in updateScenes, with the scene
+  // it belongs to.
 });
 
 // The opening used to have a second way in: a poll that watched the nav,
