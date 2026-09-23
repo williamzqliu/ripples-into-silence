@@ -72,7 +72,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* No smooth scrolling here: the nav's jumps are main.js's, which glide
+     when the section is near and cut when it is far. */
   /* No blinking caret anywhere on the page. With caret browsing on, a
      click in any text leaves one flashing in it, which on titles and over
      the drawing reads as a field waiting to be typed in. Text stays
@@ -206,7 +207,6 @@ img {
 }
 
 #sequence {
-  scroll-margin-top: 60px;
 
   /* Room to stop in, and no more. At 1.09 screens the sticky frame had
      128px of travel and was gone before anyone could settle on it; two
@@ -689,6 +689,23 @@ h1, h2, h3, h4 {
 
 
 /* ---------- scenes ---------- */
+/* The nav's cut to a far section: the page dips to its own background
+   under the nav, moves, and comes back up. */
+.scene-cut {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-nav) - 1);
+  background: #0F1A32;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.scene-cut.is-on {
+  opacity: 1;
+  transition-duration: 0.16s;
+}
+
 /* main.js scrubs each scene's opacity with the scroll. A scene that is not
    leading takes no pointer, so a tooltip cannot be raised on a drawing that
    is not there. */
@@ -750,7 +767,6 @@ h1, h2, h3, h4 {
 }
 
 #eleven-years {
-  scroll-margin-top: -80px; /* set against the nav bar height */
   /* A little more air after the scrollytelling: 128 here and 120 below
      the last step, where it was 64 and 120. On a short screen it comes
      down with the height, so 640 tall is not left half empty. */
