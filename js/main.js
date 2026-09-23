@@ -206,13 +206,14 @@ const scrollyGraphic = document.querySelector('.scrolly-graphic');
 const scrollyContainer = scrollyGraphic && scrollyGraphic.parentElement;
 if (scrollyContainer) scrollyContainer.style.setProperty('--steps', scrollySteps.length);
 
-// The first step starts to come up as soon as the pair is on screen. It
-// used to wait until the pair was 60% of the way up, so the pair rose
-// through the bottom of the screen invisible, 290px of scroll at 720 tall
-// and 435px at 1080, straight after the main animation: an empty screen
-// that read as the end of the page, and the first paragraph went by
-// under a reader who had started scrolling faster.
-const ARRIVE_AT = 1;
+// The steps run on the scene's clock. They used to start when the pair
+// came on screen at the bottom, which was right before scenes existed; with
+// the scene hidden until its top is above FADE_FROM and not fully up until
+// FADE_TO, the first paragraph spent its whole turn, 250px of scroll at
+// 1897x815, with its scene at 26% or less, and the second had 30px fully
+// seen. Now the first step shows while the scene fades in, and the three
+// share the scroll from the moment the scene is fully up to the moment the
+// pair comes unstuck.
 
 // On the way out the last step and its diagram stay up and scroll away
 // with the section, and only fade once the pair is this far up the screen.
@@ -237,17 +238,21 @@ function updateScrolly() {
   const stickyTop = parseFloat(getComputedStyle(scrollyGraphic).top) || 0;
   const pinned = box.height - frame.height;        // px of scroll spent pinned
 
-  // One run, from the pair arriving to it coming unstuck, shared evenly.
-  // While rising, the frame sits at the top of its box, so the box's top
-  // says where the pair is in both phases. The first step used to get the
-  // whole rise on top of its share: 860px of scroll against 500.
-  const start = vh * ARRIVE_AT;
-  const run = (start - stickyTop) + pinned;
-  const u = start - box.top;
+  // Measured on the section, the thing the scene fade is measured on. While
+  // the pair rises it sits at the top of its box, below the section's top
+  // padding; it pins when the box reaches stickyTop and comes unstuck
+  // `pinned` px later.
+  const section = scrollyContainer.parentElement;
+  const secTop = section.getBoundingClientRect().top;
+  const padTop = parseFloat(getComputedStyle(section).paddingTop) || 0;
+  const fullyUp = vh * FADE_TO;                      // where the scene is at 1
+  const u = fullyUp - secTop;                        // 0 as the scene arrives
+  const run = fullyUp - (stickyTop - padTop - pinned);
 
   let active;
-  if (u < 0) active = -1;                           // not here yet
-  else if (u > run + 0.5) {                         // come unstuck
+  if (secTop > vh * FADE_FROM) active = -1;          // scene not arriving yet
+  else if (u < 0) active = 0;                        // fading in, with step one
+  else if (u > run + 0.5) {                          // come unstuck
     active = frame.bottom < vh * LEAVE_AT ? n : n - 1;
   }
   else active = Math.min(n - 1, Math.floor(u / (run / n)));
