@@ -11,13 +11,14 @@
 //
 // The discs are all one size, in rows of four, three and four, the middle row
 // set between the others. 2024 used to be drawn large between two columns of
-// small ones; it is now the last of the run like any other year, and any year
+// small ones, which read as more incidents when 2023 holds twice as many. It
+// is the same size now, and marked for what it does hold: the most lives
+// lost in any year, in a solid frame with a line under its figures. Any year
 // can be opened large, with its rings and a figure for every mark.
 
 import {
   RADIUS_KM, radiusFractionFor,
   GOLDEN_ANGLE, CROSS_COLOUR,
-  RIPPLE_INNER_OPACITY_STEPS,
   DISTANCE_RINGS_KM
 } from "../config.js";
 
@@ -39,7 +40,11 @@ const LARGE_R = 300;
 // incident came out a pixel and a half across.
 const MIN_MARK = 2.6;
 
-const HOT = "#FBC900";
+// No text in the open disc comes out under this on screen.
+const MIN_TEXT_PX = 14;
+const RING_LABEL_UNITS = 15;
+
+const WORST_NOTE = "The most lives lost in any year";
 
 // Each disc plays the main sequence in miniature as it comes on screen: the
 // circle opens out of the cross, then the year's incidents come in one by
@@ -93,6 +98,9 @@ export async function drawYearDiscs(containerId) {
       .forEach((d, k) => { d.discAngle = (k * GOLDEN_ANGLE) % (2 * Math.PI); });
   }
 
+  // The year the most people were lost, found rather than written in.
+  const worst = d3.greatest(years, y => d3.sum(byYear.get(y), d => d.dead));
+
   const grid = root.append("div").attr("class", "year-discs");
 
   // Row by row, in year order; any years past the eleven go on in fours.
@@ -102,7 +110,7 @@ export async function drawYearDiscs(containerId) {
     const inset = (GRID_COLUMNS / 2 - count);
     for (let k = 0; k < count; k++, i++) {
       const y = years[i];
-      cell(grid, y, byYear.get(y), 1 + inset + k * 2);
+      cell(grid, y, byYear.get(y), 1 + inset + k * 2, y === worst);
     }
     row++;
   }
@@ -119,11 +127,15 @@ function figures(rows) {
     `${dead} dead or missing`;
 }
 
+function note(isWorst) {
+  return isWorst ? `<div class="year-disc__note">${WORST_NOTE}</div>` : "";
+}
+
 // One year: the disc, with its year and figures under it. The whole cell
 // opens the year large.
-function cell(grid, year, rows, column) {
+function cell(grid, year, rows, column, isWorst) {
   const box = grid.append("div")
-    .attr("class", "year-disc fade-step")
+    .attr("class", `year-disc fade-step${isWorst ? " year-disc--worst" : ""}`)
     .style("grid-column", `${column} / span 2`)
     .attr("role", "button")
     .attr("tabindex", 0)
@@ -132,22 +144,18 @@ function cell(grid, year, rows, column) {
   const holder = box.append("div").attr("class", "year-disc__plot");
   box.append("div").attr("class", "year-disc__label").html(`
     <div class="year-disc__year">${year}</div>
-    <div class="year-disc__figures">${figures(rows)}</div>`);
+    <div class="year-disc__figures">${figures(rows)}</div>${note(isWorst)}`);
 
   const play = disc(holder, rows, year, SMALL_R);
   const node = box.node();
   if (REDUCED) play(true);
   else { node.__play = () => play(false); pending.add(node); }
 
-  const open = () => openYear(year, rows, node);
+  const open = () => openYear(year, rows, node, isWorst);
   box.on("click", open)
     .on("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
     });
-}
-
-function ringOpacity(dead) {
-  return RIPPLE_INNER_OPACITY_STEPS.find(s => dead <= s.upTo).opacity;
 }
 
 function showTip(event, d) {
@@ -206,12 +214,15 @@ function disc(holder, rows, year, r) {
       .attr("class", "year-disc__ring-label")
       .attr("x", c).attr("y", c - rr - 6)
       .attr("text-anchor", "middle")
+      .attr("font-size", RING_LABEL_UNITS)
       .text(`${km} km`)
       .attr("opacity", 0);
   }) : [];
 
-  // Each mark is the sequence's own: a solid core and the ring it leaves,
-  // as bright as the loss is large. The line only appears in flight.
+  // Each mark is a solid disc, as large as the loss. The thin ring the
+  // sequence leaves round each one, as bright as the loss is large, said
+  // again what the size says, so it is not drawn here. The line only
+  // appears in flight.
   //
   // One group per mark, made now and drawn furthest first, so the marks
   // nearest the island sit on top whatever order they land in.
@@ -234,7 +245,7 @@ function disc(holder, rows, year, r) {
   // large one can still be reached. The mark under the pointer goes yellow.
   for (const m of [...marks].sort((a, b) => b.r - a.r)) {
     svg.append("circle")
-      .attr("cx", m.x).attr("cy", m.y).attr("r", m.r * 1.9 + 3 * u)
+      .attr("cx", m.x).attr("cy", m.y).attr("r", m.r + 4 * u)
       .attr("fill", "transparent")
       .style("cursor", "pointer")
       .on("mouseenter", () => m.g.classed("is-hot", true))
@@ -250,26 +261,16 @@ function disc(holder, rows, year, r) {
   cross.append("line").attr("x1", c).attr("y1", c - arm).attr("x2", c).attr("y2", c + arm)
     .attr("stroke", CROSS_COLOUR).attr("stroke-width", 1.5 * u);
 
-  // The mark as it stays: the core, and the ring around it.
+  // The mark as it stays.
   function settle(m, animate) {
     const core = m.g.append("circle")
       .attr("class", "year-disc__core")
       .attr("cx", m.x).attr("cy", m.y)
       .attr("r", animate ? 0 : m.r)
       .attr("fill", "#FFFFFF").attr("fill-opacity", 0.9);
-    const ring = m.g.append("circle")
-      .attr("class", "year-disc__ring")
-      .attr("cx", m.x).attr("cy", m.y)
-      .attr("r", animate ? m.r : m.r * 1.9)
-      .attr("fill", "none")
-      .attr("stroke", "#FFFFFF")
-      .attr("stroke-width", (big ? 1.2 : 0.75) * u)
-      .attr("stroke-opacity", animate ? 0 : ringOpacity(m.d.dead));
     if (!animate) return;
 
     core.transition().duration(220).ease(d3.easeCubicOut).attr("r", m.r);
-    ring.transition().duration(500).ease(d3.easeCubicOut)
-      .attr("r", m.r * 1.9).attr("stroke-opacity", ringOpacity(m.d.dead));
     // and the splash, which spreads and goes
     m.g.append("circle")
       .attr("cx", m.x).attr("cy", m.y).attr("r", m.r)
@@ -345,6 +346,7 @@ function buildLightbox() {
   const text = panel.append("div").attr("class", "disc-lightbox__text");
   text.append("h3").attr("id", "disc-lightbox-year").attr("class", "disc-lightbox__year");
   text.append("p").attr("class", "disc-lightbox__figures");
+  text.append("p").attr("class", "disc-lightbox__note");
   text.append("p").attr("class", "disc-lightbox__key")
     .text("How far out a mark sits is how far from Lampedusa the incident was; " +
           "its size is how many people were lost. Point at a mark for its figures.");
@@ -371,19 +373,35 @@ function onKey(event) {
   }
 }
 
-function openYear(year, rows, from) {
+// The ring labels are drawn in the disc's own units, so on a short screen,
+// where the disc is drawn small, they are raised until they come out at
+// MIN_TEXT_PX.
+function fitRingLabels() {
+  const svg = lightbox && lightbox.select(".disc-lightbox__plot svg").node();
+  if (!svg || lightbox.node().hidden) return;
+  const units = svg.viewBox.baseVal.width / svg.getBoundingClientRect().width;
+  d3.select(svg).selectAll(".year-disc__ring-label")
+    .attr("font-size", Math.max(RING_LABEL_UNITS, MIN_TEXT_PX * units));
+}
+window.addEventListener("resize", fitRingLabels);
+
+function openYear(year, rows, from, isWorst) {
   if (!lightbox) lightbox = buildLightbox();
   returnFocus = from;
   hideTip();
 
   lightbox.select(".disc-lightbox__year").text(year);
   lightbox.select(".disc-lightbox__figures").html(figures(rows));
+  lightbox.select(".disc-lightbox__note").text(isWorst ? WORST_NOTE : "")
+    .attr("hidden", isWorst ? null : "");
+  lightbox.classed("disc-lightbox--worst", !!isWorst);
   const plot = lightbox.select(".disc-lightbox__plot").html("");
   const play = disc(plot, rows, year, LARGE_R);
 
   const node = lightbox.node();
   node.hidden = false;
   node.getBoundingClientRect();              // so the opening is transitioned
+  fitRingLabels();
   lightbox.classed("is-open", true);
   document.addEventListener("keydown", onKey);
   lightbox.select(".disc-lightbox__close").node().focus({ preventScroll: true });

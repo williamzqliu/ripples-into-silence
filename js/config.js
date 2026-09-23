@@ -11,7 +11,7 @@ export const FRAME_HEIGHT = 650;
 
 // The drawing is scaled down to fit smaller windows (see drawCanvas), and
 // its labels with it. No label is allowed to come out smaller than this.
-export const MIN_TEXT_PX = 12;
+export const MIN_TEXT_PX = 14;
 
 export const cx = FRAME_WIDTH / 2;
 export const cy = FRAME_HEIGHT / 2;
