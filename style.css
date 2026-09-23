@@ -189,13 +189,13 @@ img {
 #viz-section {
   scroll-margin-top: 60px;
 
-  /* The travel the record is released against. Every pixel of it now does
-     something: the frame is pinned and scrolling lands incidents, so the
-     length is paid for rather than just endured. Four and a half screens
-     of a frame that did not answer was too much of both; three is a little
-     over two screens of travel, which puts an incident down about every
-     dozen pixels. */
-  min-height: 300vh;
+  /* Room to stop in. At 1.09 screens the sticky frame had 128px of travel
+     and was gone before anyone could settle on it; at four and a half it
+     was screen after screen of scrolling that did nothing. Two gives about
+     a screen of pinned travel. The animation runs on its own clock and
+     pauses when the section leaves the screen (sequence/onScene.js), so the
+     length only has to be enough to stop in, not enough to hold the film. */
+  min-height: 200vh;
 }
 
 

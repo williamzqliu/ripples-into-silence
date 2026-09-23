@@ -1,182 +1,84 @@
 // js/sequence/drawPaths.js
 //
-// The release schedule.
-//
-// It used to be a clock: three incidents six seconds apart, then a
-// setInterval handing out the remaining ninety-one every four hundred
-// milliseconds, about seventy seconds of film in a section a reader passes
-// through in three. Scrolling did nothing at all while it ran, which is a
-// strange thing for the centrepiece of a scrollytelling page to do. The
-// reader's one control was connected to nothing, so a pinned frame that
-// would not respond read as the page having stopped working.
-//
-// Where the reader is in the section is now how much of the record has
-// been released. Scroll down and the incidents land, the counters climb
-// and the year turns over; scroll back up and they go again. A slow scroll
-// releases them one at a time and you watch each path come in. A flick
-// puts them straight down without the flight, because forty paths in the
-// air at once is noise rather than speed.
+// The release schedule. The first few incidents go out one at a time and
+// travel slowly, so a viewer has time to see that one path is one incident.
+// After that the scheduler takes over and the gap closes to MIN_GAP, which
+// is what turns the later years into something you watch accumulate.
 
 import {
-  ANGLE_BUCKETS, INITIAL_SPEED, MAX_CURRENT,
-  CEREMONY_SHARE, SCRUB_AHEAD
+  ANGLE_BUCKETS, LAUNCH_INTERVAL,
+  INITIAL_DELAY, INITIAL_SPEED, FIRST_DELAY, MAX_CURRENT, MIN_GAP
 } from "../config.js";
 
-import { renderPath } from "./renderPath.js";
-import { intro_defs, intro_layer } from "./drawCanvas.js";
-import { sceneProgress } from "./onScene.js";
-import { setTotals } from "./updateStats.js";
-import { setBarProgress, updateProgress } from "./yearProgressBar.js";
-
-/** The whole record in the order it is released: the three legible openers
-    first, then a round robin over the angular sectors so consecutive
-    incidents arrive from different directions. This was walked lazily by
-    the old scheduler; releasing by scroll needs it flat and up front,
-    because the reader can ask for the fortieth one directly. */
-function releaseOrder(firstBatch, remainingBuckets) {
-  const order = [...firstBatch];
-  const buckets = remainingBuckets.map(b => [...b]);
-  const sectors = d3.shuffle(d3.range(ANGLE_BUCKETS));
-
-  let pointer = 0;
-  let left = buckets.reduce((n, b) => n + b.length, 0);
-  while (left > 0) {
-    const bucket = buckets[sectors[pointer]];
-    pointer = (pointer + 1) % ANGLE_BUCKETS;
-    if (bucket.length) {
-      order.push(bucket.shift());
-      left--;
-    }
-  }
-  return order;
-}
-
-/** Which year label belongs at each point in the release. The year used to
-    be advanced as a side effect of incidents landing, with a table of
-    per-year millisecond offsets nudging the label back into step. Worked
-    out up front it is just a lookup, it cannot drift, and it reverses. */
-function yearIndexPerRelease(order, allYears, yearEventCounts) {
-  const out = [];
-  let index = 0;
-  let sinceTurn = 0;
-
-  for (let i = 0; i < order.length; i++) {
-    sinceTurn++;
-    out.push(index);
-    if (sinceTurn >= yearEventCounts[allYears[index]] && index < allYears.length - 1) {
-      index++;
-      sinceTurn = 0;
-    }
-  }
-  return out;
-}
+import { launchPathWithStats } from "./launchPathWithStats.js";
+import { isOnScene, whenOnScene, wait } from "./onScene.js";
 
 export function drawPaths({ allYears, yearEventCounts, firstBatch, remainingBuckets }) {
-  const order = releaseOrder(firstBatch, remainingBuckets);
-  const yearAt = yearIndexPerRelease(order, allYears, yearEventCounts);
-  const total = order.length;
-
-  // One entry per incident on screen, in release order, each holding the
-  // group renderPath drew it into.
-  const shown = [];
-  let deaths = 0;
-  let inFlight = 0;
+  let active = 0;
+  let lastLaunchTime = 0;
   let gradCount = 0;
-  let pumping = false;
 
-  function release(instant) {
-    const i = shown.length;
-    const d = order[i];
-    const opener = i < firstBatch.length;
+  const sectorOrder = d3.shuffle(d3.range(ANGLE_BUCKETS));
+  let sectorPointer = 0;
 
-    // Closed once, whether the path finished its flight or was scrolled
-    // back off the screen mid-air. Counting only the ones that land leaks
-    // the tally upwards every time a reader scrolls back through a path
-    // still travelling, and once it reaches MAX_CURRENT the release stops
-    // letting anything else out at all.
-    const entry = { d, node: null, open: true };
-    entry.close = () => {
-      if (!entry.open) return;
-      entry.open = false;
-      inFlight--;
-    };
-
-    inFlight++;
-    entry.node = renderPath({
+  // One launch, whichever phase asks for it. The two phases differ only in
+  // whether the path carries a label and how fast it travels.
+  function launch(d, { showLabel = false, speed = 1 } = {}) {
+    active++;
+    launchPathWithStats({
       d,
       gradId: `grad${gradCount++}`,
-      defs: intro_defs,
-      layer: intro_layer,
-      showLabel: opener && !instant,
-      speed: opener ? INITIAL_SPEED : 1,
-      instant,
-      onEnd: entry.close,
+      allYears,
+      yearEventCounts,
+      showLabel,
+      speed,
+      onComplete: () => active--,
     });
-
-    shown.push(entry);
-    deaths += d.dead;
   }
 
-  function retract() {
-    const last = shown.pop();
-    if (!last) return;
-    deaths -= last.d.dead;
-    last.close();
-    // renderPath's own loop stops once the group is off the document, so
-    // there is no timer left to chase down here.
-    if (last.node) last.node.remove();
-  }
+  // Phase one: the slow opening. Three incidents, six seconds apart, each
+  // one waiting for the reader to be there for it. Written as a loop rather
+  // than a setTimeout wrapping a setInterval, because a schedule that can
+  // pause has to be able to say where it paused.
+  async function launchInitial() {
+    await wait(FIRST_DELAY);
 
-  // The opening ceremony owns the first stretch of the section. The record
-  // is mapped onto what is left, so scrolling during the island and the
-  // circle does not bank incidents that have nowhere to land yet.
-  function recordProgress() {
-    const p = sceneProgress();
-    return Math.min(Math.max((p - CEREMONY_SHARE) / (1 - CEREMONY_SHARE), 0), 1);
-  }
-
-  function pump() {
-    const target = Math.round(recordProgress() * total);
-    const gap = target - shown.length;
-
-    if (gap === 0) {
-      pumping = false;
-      return;
+    for (const d of firstBatch) {
+      await whenOnScene();
+      launch(d, { showLabel: true, speed: INITIAL_SPEED });
+      await wait(INITIAL_DELAY);
     }
 
-    // One a frame while the reader is close behind, so each path is seen
-    // arriving. Further behind than that and they go down as marks.
-    const scrubbing = Math.abs(gap) > SCRUB_AHEAD;
+    launchGrouped();
+  }
 
-    if (gap > 0) {
-      if (scrubbing) {
-        for (let k = 0; k < Math.min(gap, 40); k++) release(true);
-      } else {
-        // A full sky is not a reason to stop. Releasing nothing until a path
-        // landed held the scroll for as long as the slowest thing in the air,
-        // which with the slow openers was three seconds of a page that had
-        // stopped answering. The mark goes down without the flight instead:
-        // the record stays level with the reader either way.
-        release(inFlight >= MAX_CURRENT);
+  // Phase two: round robin over the angular sectors, so consecutive paths
+  // arrive from different directions instead of stacking up in one place.
+  function launchGrouped() {
+    const interval = setInterval(() => {
+      // Ninety-one of the ninety-four go out here, over about half a
+      // minute. Off screen the queue simply stops moving, so a reader who
+      // leaves and comes back finds the record where they left it rather
+      // than finished without them.
+      if (!isOnScene()) return;
+
+      const now = Date.now();
+      if (active >= MAX_CURRENT || now - lastLaunchTime < MIN_GAP) return;
+
+      for (let tries = 0; tries < ANGLE_BUCKETS; tries++) {
+        const bucket = remainingBuckets[sectorOrder[sectorPointer]];
+        sectorPointer = (sectorPointer + 1) % ANGLE_BUCKETS;
+
+        if (bucket.length > 0) {
+          lastLaunchTime = now;
+          launch(bucket.shift());
+          break;
+        }
       }
-    } else {
-      for (let k = 0; k < (scrubbing ? Math.min(-gap, 40) : 1); k++) retract();
-    }
 
-    setTotals(shown.length, deaths);
-    setBarProgress(shown.length / total);
-    updateProgress(shown.length ? yearAt[shown.length - 1] : 0);
-
-    requestAnimationFrame(pump);
+      if (remainingBuckets.every(b => b.length === 0)) clearInterval(interval);
+    }, LAUNCH_INTERVAL);
   }
 
-  function kick() {
-    if (pumping) return;
-    pumping = true;
-    requestAnimationFrame(pump);
-  }
-
-  window.addEventListener("scroll", kick, { passive: true });
-  window.addEventListener("resize", kick);
-  kick();
+  launchInitial();
 }

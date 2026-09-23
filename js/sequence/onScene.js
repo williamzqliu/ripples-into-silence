@@ -45,15 +45,3 @@ export function whenOnScene() {
 export function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-/** How far through the pinned section the reader is, 0 to 1. This is what
-    the record is released against, so it is the one number the counters,
-    the year bar and the marks on screen all come from. */
-export function sceneProgress() {
-  const el = document.querySelector(SECTION);
-  if (!el) return 0;
-  const rect = el.getBoundingClientRect();
-  const travel = rect.height - window.innerHeight;
-  if (travel <= 0) return 0;
-  return Math.min(Math.max(-rect.top / travel, 0), 1);
-}

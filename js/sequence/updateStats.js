@@ -1,43 +1,81 @@
 // js/sequence/updateStats.js
 //
-// The two running counters in the corners.
-//
-// They used to be incremented, one call per incident, each with its own
-// animation state and a module-level running total. That only works while
-// the record can go one way. It is released by scroll now, and scroll goes
-// back, so the counters are set from how many incidents are on screen
-// rather than nudged by the last one to arrive.
+// The two running counters in the corners, and the year they belong to.
 
-const format = d3.format(",d");
+import { updateProgress } from "./yearProgressBar.js";
+import { state } from "./state.js";
+import { YEAR_ADVANCE_DELAY, YEAR_DELAY_OVERRIDES } from "../config.js";
 
-let shownIncidents = 0;
-let shownDeaths = 0;
-let target = { incidents: 0, deaths: 0 };
-let frame = null;
+// Kept at module level rather than read back off the DOM, because the
+// counters animate and the text on screen is mid-interpolation most of the
+// time.
+let totalIncidents = 0;
+let totalDeaths = 0;
 
-// Fast enough to feel attached to the scroll, slow enough that the digits
-// are legible on the way. A d3 transition per incident was restarting
-// itself several times a second under a steady scroll and never arriving.
-const CATCH_UP = 0.18;
+export function updateIncidentCount() {
+    const from = totalIncidents;
+    const to = ++totalIncidents;
+    const format = d3.format("d");
 
-export function setTotals(incidents, deaths) {
-  target = { incidents, deaths };
-  if (frame === null) frame = requestAnimationFrame(step);
+    d3.select("#incident-count")
+        .transition().duration(800)
+        .tween("text", function () {
+            const interp = d3.interpolateNumber(from, to);
+            return function (t) {
+                this.textContent = format(interp(t));
+            };
+        });
 }
 
-function step() {
-  shownIncidents += (target.incidents - shownIncidents) * CATCH_UP;
-  shownDeaths += (target.deaths - shownDeaths) * CATCH_UP;
+// The death count runs on its own loop rather than a d3 transition, so that
+// incidents landing while it is still counting raise the target instead of
+// cancelling the animation and restarting it.
+let currentAnimatedValue = 0;
+let targetValue = 0;
+let animationFrameId = null;
 
-  const doneI = Math.abs(target.incidents - shownIncidents) < 0.5;
-  const doneD = Math.abs(target.deaths - shownDeaths) < 0.5;
-  if (doneI) shownIncidents = target.incidents;
-  if (doneD) shownDeaths = target.deaths;
+export function updateDeathCount(d) {
+    targetValue = totalDeaths += d.dead;
 
-  const incident = document.getElementById("incident-count");
-  const death = document.getElementById("death-count");
-  if (incident) incident.textContent = format(Math.round(shownIncidents));
-  if (death) death.textContent = format(Math.round(shownDeaths));
+    if (animationFrameId !== null) return;
 
-  frame = (doneI && doneD) ? null : requestAnimationFrame(step);
+    const element = d3.select("#death-count").node();
+    const duration = 500;
+    let start = null;
+
+    function animate(timestamp) {
+        if (!start) start = timestamp;
+        const t = Math.min((timestamp - start) / duration, 1);
+        const eased = t * (2 - t);
+
+        const current = currentAnimatedValue + (targetValue - currentAnimatedValue) * eased;
+        element.textContent = Math.floor(current).toLocaleString();
+
+        if (t < 1) {
+            animationFrameId = requestAnimationFrame(animate);
+        } else {
+            currentAnimatedValue = targetValue;
+            element.textContent = targetValue.toLocaleString();
+            animationFrameId = null;
+        }
+    }
+
+    // A beat behind the incident counter, so the two do not move as one.
+    setTimeout(() => {
+        animationFrameId = requestAnimationFrame(animate);
+    }, 100);
+}
+
+// The year turns over when its last incident has landed.
+export function updateYearProgress(allYears, yearEventCounts) {
+    const launched = state.countLaunch();
+    const currentYear = allYears[state.yearIndex];
+
+    if (launched < yearEventCounts[currentYear]) return;
+
+    const newIndex = state.advanceYear();
+    if (newIndex >= allYears.length) return;
+
+    const delay = YEAR_DELAY_OVERRIDES[allYears[newIndex]] || 0;
+    setTimeout(() => updateProgress(newIndex), YEAR_ADVANCE_DELAY + delay);
 }
