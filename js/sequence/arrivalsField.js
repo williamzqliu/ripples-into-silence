@@ -41,10 +41,13 @@ const ARRIVED_COLOUR = "#FBC900";
 const CLOSE_PITCH = 34;
 
 // Close up, the frame's edges cut through dots, and a row of half dots
-// along the top and the bottom read as a mistake. The edges fade out over
-// this many pixels instead, narrowing as the view draws back, to none by
-// the time the whole field, which fits, is on screen.
-const FEATHER = 48;
+// along the top and the bottom read as a mistake. The edges fade out
+// instead, over this share of the frame's shorter side, narrowing as the
+// view draws back, to none by the time the whole field, which fits, is on
+// screen. At 48px, a row and a half, the fade dimmed the outer two rows
+// evenly and the field read as a raised platform with bevelled edges; this
+// wide and eased, it reads as the field going on into the dark.
+const FEATHER = 0.2;
 
 // The scroll through the track, 0 to 1: the close-up holds, draws back, the
 // whole field holds, the arrivals fade, the 206 sort, the labels come in.
@@ -127,12 +130,17 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     const originX = (w - cols * pitch) / 2 + pitch / 2;
     const originY = (h - rowsN * pitch) / 2 + pitch / 2;
 
-    // Which cells in the field are the 206. Spread evenly through the whole
-    // field rather than clustered, because they are not a block of the year.
+    // Which cells in the field are the 206: drawn at random, from a fixed
+    // seed. They used to be one to each run of 224 cells, and a row of the
+    // field is about 224 cells long, so close up they stood in a column.
     const rnd = mulberry32(20241231);
-    const slot = total / people.length;
-    const deadCells = people.map((_, i) => Math.min(total - 1,
-      Math.floor(i * slot + rnd() * slot)));
+    const cells = new Int32Array(total);
+    for (let c = 0; c < total; c++) cells[c] = c;
+    const deadCells = people.map((_, i) => {
+      const j = i + Math.floor(rnd() * (total - i));
+      const c = cells[j]; cells[j] = cells[i]; cells[i] = c;
+      return c;
+    });
 
     const isDead = new Uint8Array(total);
     deadCells.forEach(c => { isDead[c] = 1; });
@@ -218,13 +226,15 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     if (px < 0.5) return;
     ctx.save();
     ctx.globalCompositeOperation = "destination-in";
+    const smooth = t => t * t * (3 - 2 * t);
     for (const [x1, y1, len] of [[w, 0, w], [0, h, h]]) {
       const g = ctx.createLinearGradient(0, 0, x1, y1);
       const f = Math.min(0.5, px / len);
-      g.addColorStop(0, "rgba(0,0,0,0)");
-      g.addColorStop(f, "rgba(0,0,0,1)");
-      g.addColorStop(1 - f, "rgba(0,0,0,1)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
+      for (let k = 0; k <= 6; k++) {
+        const t = k / 6, a = smooth(t).toFixed(3);
+        g.addColorStop(f * t, `rgba(0,0,0,${a})`);
+        g.addColorStop(1 - f * t, `rgba(0,0,0,${a})`);
+      }
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, w, h);
     }
@@ -318,7 +328,8 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
     ctx.fill();
 
-    if (zoomed) featherEdges(w, h, FEATHER * Math.log(z) / Math.log(field.zoomFrom));
+    if (zoomed) featherEdges(w, h,
+      FEATHER * Math.min(w, h) * Math.log(z) / Math.log(field.zoomFrom));
 
     labels(ctx, ease(clamp01((progress - LABELS_AT) / (1 - LABELS_AT))));
 
