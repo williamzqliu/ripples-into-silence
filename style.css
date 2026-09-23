@@ -173,19 +173,6 @@ img {
   }
 }
 
-#main-nav {
-  position: sticky;
-  top: 0;
-  width: 100%;
-  min-height: var(--nav-h);
-  background: #050E23;
-  z-index: var(--z-nav);
-  display: flex;
-  justify-content: center; /* centre the contents */
-  align-items: center;
-  padding: 1em 0;
-}
-
 .nav-inner {
   display: flex;
   align-items: center;
@@ -195,15 +182,14 @@ img {
   padding: 0 var(--page-pad);
 }
 
-.nav-title {
-  margin-right: 60px;         
-}
-
-.nav-content {
-  display: flex;
-  gap: 40px;
-  justify-content: center;
-  align-items: center;
+/* The title carries the bar; the links sit back from it. Two classes,
+   because .nav-link comes later in the file and would otherwise size and
+   dim the title with the rest. */
+.nav-link.nav-title {
+  margin-right: 60px;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: #FFFFFF;
 }
 
 
@@ -411,6 +397,7 @@ img {
   position: sticky;
   top: 0;
   width: 100%;
+  min-height: var(--nav-h);
   background: #050E23;
   z-index: var(--z-nav);
   display: flex;
@@ -427,10 +414,13 @@ img {
   pointer-events: auto;
 }
 
-/* inner container */
+/* Six links at 20px pure white, 40px apart, weighed as much as the title
+   and read as one block. Smaller, tracked a little wider so the small caps
+   stay open, at 60% white, and closer together; the section being read is
+   the one at full white. */
 .nav-content {
   display: flex;
-  gap: 40px;
+  gap: 28px;
   align-items: center;
   justify-content: center;
 }
@@ -438,9 +428,9 @@ img {
 /* each link starts here */
 .nav-link {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 1px;
-  color: white;
+  font-size: 15px;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
   opacity: 0;
   transform: translateY(10px);
@@ -469,6 +459,10 @@ img {
   pointer-events: auto;
   box-shadow: 0 0px 0px rgba(0,0,0,0);
   transition: all 0.8s ease;
+}
+
+.nav-link.is-current {
+  color: #FFFFFF;
 }
 
 /* hover */

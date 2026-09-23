@@ -69,6 +69,17 @@ window.addEventListener('scroll', () => {
 
   const windowH = window.innerHeight;
 
+  // Light the link for the section being read: the one across a line a
+  // third of the way down the screen.
+  const line = windowH * 0.35;
+  navLinks.forEach(link => {
+    const href = link.getAttribute('href');
+    if (link.classList.contains('nav-title') || !href || href === '#') return;
+    const target = document.querySelector(href);
+    const r = target && target.getBoundingClientRect();
+    link.classList.toggle('is-current', !!r && r.top <= line && r.bottom > line);
+  });
+
   // The stagger counts within a group, not down the whole page: numbered
   // globally, the ending's paragraphs would have waited on Eleven Years'.
   const steps = document.querySelectorAll('.fade-step');
