@@ -1176,7 +1176,6 @@ svg {
   border-radius: 50%;
   background: #FFFFFF;
   border: 0.55cqw solid #C0272D;
-  box-shadow: 0 0 0 0.35cqw rgba(5, 14, 35, 0.75);
 }
 
 /* A live marker: a red ring goes out from the town and fades, over and
