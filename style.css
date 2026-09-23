@@ -1146,14 +1146,15 @@ svg {
 
 /* Rows of four, three and four on an eight column grid, each disc two
    columns wide, the middle row set between the others (yearDiscs.js places
-   them). The disc is as wide as its cell, and no taller than 22% of
-   the screen, so the three rows come close to one screen on a laptop. */
+   them). The three rows, discs and figures, fit one screen under the nav:
+   the figures and the gaps take 250px, and the discs share what is left
+   less a little air, up to 200px: 160px at 815 tall, 200 from 935. */
 .year-discs {
-  --disc: min(100%, 200px, 22vh);
+  --disc: min(100%, 200px, max(100px, calc((100vh - var(--nav-h) - 270px) / 3)));
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   column-gap: clamp(16px, calc(16px + (100vw - 1024px) * 0.04), 32px);
-  row-gap: clamp(20px, 4vh, 40px);
+  row-gap: clamp(14px, 2.4vh, 28px);
   margin-top: 64px;
 }
 
@@ -1161,7 +1162,7 @@ svg {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   cursor: pointer;
   outline: none;
 }
@@ -1183,15 +1184,16 @@ svg {
 
 .year-disc__year {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 22px;
+  font-size: 20px;
+  line-height: 1.2;
   letter-spacing: 1px;
   color: rgba(255, 255, 255, 0.85);
   transition: color 0.2s ease;
 }
 
 .year-disc__figures {
-  font-size: 15px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.35;
   color: rgba(255, 255, 255, 0.55);
 }
 
