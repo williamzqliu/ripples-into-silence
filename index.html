@@ -150,10 +150,14 @@
         </div>
       </div>
 
-      <!-- the frame it swaps -->
-      <div class="scrolly-graphic">
-        <img id="scrolly-image-back" class="fade-img" src="" alt="" />
-        <img id="scrolly-image-front" class="fade-img" src="./assets/img-distance.svg" alt="Lampedusa Overview" />
+      <!-- One image per step, stacked, so a change of step is a crossfade:
+           the new one fades in over the old one fading out. It used to be a
+           single element whose src was swapped. The diagrams repeat what
+           the paragraphs say, so they are hidden from screen readers. -->
+      <div class="scrolly-graphic" aria-hidden="true">
+        <img class="scrolly-img" data-for="img-distance" src="./assets/img-distance.svg" alt="" />
+        <img class="scrolly-img" data-for="img-130" src="./assets/img-130.svg" alt="" />
+        <img class="scrolly-img" data-for="img-corridor" src="./assets/img-corridor.svg" alt="" />
       </div>
     </div>
   </section>

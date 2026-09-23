@@ -123,70 +123,52 @@ window.addEventListener('load', () => {
 // run the scroll handler once, for the position we loaded at
 window.dispatchEvent(new Event('scroll'));
 
-const scrollySteps = document.querySelectorAll('.scrolly-step');
-const imgFront = document.getElementById('scrolly-image-front');
-const imgBack = document.getElementById('scrolly-image-back');
+// ---------- scrollytelling
+//
+// Which step owns the screen is worked out from where the steps are. It
+// used to be an IntersectionObserver per step with hand-set root margins,
+// and the middle step's were -60% top and bottom: a band of minus twenty
+// per cent, so it only ever turned on by accident. The image changed by
+// swapping one element's src and waiting for it to load, behind a 0.1s
+// fade, which read as a cut. There is one image per step now, and the
+// change is a crossfade.
+const scrollySteps = [...document.querySelectorAll('.scrolly-step')];
+const scrollyImgs = [...document.querySelectorAll('.scrolly-img')];
 const scrollyGraphic = document.querySelector('.scrolly-graphic');
 
-let currentImage = ''; // which scrollytelling frame is up
+// A step takes over when its top comes above this line.
+const TAKE_OVER_AT = 0.6;
+// The last paragraph counts as read once its bottom is above this one.
+const READ_AT = 0.3;
 
-if (scrollySteps.length && imgFront && imgBack && scrollyGraphic) {
-  // The graphic used to be hidden from here, because it was fixed and would
-  // otherwise float over the rest of the page. It is sticky now, so its own
-  // container keeps it in place and this listener could only get the timing
-  // wrong at the section's edges.
+function updateScrolly() {
+  if (!scrollySteps.length || !scrollyGraphic) return;
+  const vh = window.innerHeight;
 
-  // swap the image as each paragraph takes over
-  scrollySteps.forEach((step, index) => {
-    let topMargin = '-60%';
-    let bottomMargin = '-60%';
-  
-    // the first frame waits until its paragraph is well into view
-    if (index === 0) {
-      topMargin = '-40%'; 
-      bottomMargin = '-30%';
-    }
-  
-    // and the last one lets go early
-    if (index === scrollySteps.length - 1) {
-      topMargin = '-40%'; 
-      bottomMargin = '-40%';
-    }
-  
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          scrollySteps.forEach(step => step.classList.remove('active'));
-          entry.target.classList.add('active');
-  
-          const imgId = entry.target.dataset.img;
-          const newSrc = `./assets/${imgId}.svg`;
-  
-          if (newSrc === currentImage) return;
-          currentImage = newSrc;
-  
-          imgBack.src = imgFront.src;
-          imgBack.classList.add('visible');
-          imgFront.classList.remove('visible');
-  
-          imgFront.src = newSrc;
-          imgFront.alt = imgId;
-  
-          imgFront.onload = () => {
-            imgFront.classList.add('visible');
-            imgBack.classList.remove('visible');
-          };
-        }
-      });
-    }, {
-      rootMargin: `${topMargin} 0px ${bottomMargin} 0px`,
-      threshold: 0
-    });
-  
-    observer.observe(step);
+  let active = -1;
+  scrollySteps.forEach((step, i) => {
+    if (step.getBoundingClientRect().top < vh * TAKE_OVER_AT) active = i;
   });
-  
+
+  const last = scrollySteps[scrollySteps.length - 1].getBoundingClientRect();
+  const textActive = last.bottom < vh * READ_AT ? scrollySteps.length : active;
+
+  scrollySteps.forEach((step, i) => {
+    step.classList.toggle('active', i === textActive);
+    step.classList.toggle('past', i < textActive);
+  });
+
+  // The diagram fades out the moment it comes unstuck and starts to leave
+  // with the section, and back in if the reader comes back up to it.
+  const stickyTop = parseFloat(getComputedStyle(scrollyGraphic).top) || 0;
+  const leaving = scrollyGraphic.getBoundingClientRect().top < stickyTop - 0.5;
+  const id = !leaving && scrollySteps[active] ? scrollySteps[active].dataset.img : null;
+  scrollyImgs.forEach(img => img.classList.toggle('visible', img.dataset.for === id));
 }
+
+window.addEventListener('scroll', updateScrolly, { passive: true });
+window.addEventListener('resize', updateScrolly);
+updateScrolly();
 
 // The 206 against the 45,997 was drafted here as an isotype grid and left
 // unfinished, writing into markup that was commented out, so it threw on

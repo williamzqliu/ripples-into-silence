@@ -18,6 +18,11 @@
   --measure-body: 32em;
   --measure-intro: 660px;
 
+  /* Section titles. These were all 2em, which is 32px under the 16px body
+     and 40px inside a scrollytelling step, whose text is set at 20px, so
+     the three step titles came out a size larger than Eleven Years. */
+  --fs-section-title: 32px;
+
   /* The nav is sticky, so anything pinning under it has to know how tall
      it is rather than guess at it with a negative margin. */
   --nav-h: 64px;
@@ -66,6 +71,12 @@
 
 html {
   scroll-behavior: smooth;
+  /* No blinking caret anywhere on the page. With caret browsing on, a
+     click in any text leaves one flashing in it, which on titles and over
+     the drawing reads as a field waiting to be typed in. Text stays
+     selectable. There are no inputs here; one added later wants
+     caret-color: auto back. */
+  caret-color: transparent;
 }
 
 
@@ -85,22 +96,6 @@ nav, .year-label, #year-value {
   font-family: 'Bebas Neue', sans-serif;
 }
 
-/* Display type is there to be read, not copied. Dragging over a heading or
-   a nav item selected it and left an I-beam over lettering set at 64px,
-   which reads as an invitation to edit. The prose underneath stays
-   selectable, because that is the part anyone would want to quote. */
-h1, h2, h3, h4,
-nav,
-.label {
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
-}
-
-/* Except the nav, which is links. */
-.nav-link {
-  cursor: pointer;
-}
 
 img {
   max-width: 100%;
@@ -457,14 +452,6 @@ img {
   z-index: var(--z-viz);
   height: calc(100vh - var(--nav-h));
 
-  /* Nothing in the frame is text to be read off the page. Dragging across
-     it was selecting the counters and the axis labels and leaving an I-beam
-     over a drawing, which says "this is a paragraph". The tooltip targets
-     set their own pointer. */
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
-
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -663,7 +650,9 @@ h1, h2, h3, h4 {
      fixed ripple layer showed. Padding holds the same space and paints it.
      Horizontal padding is set here rather than on .scrolly-section below,
      because that is the same element and an id beats a class. */
-  padding: 290px 0;
+  /* The bottom 290px lives inside the text column instead (see
+     .scrolly-text), so the gap before Eleven Years is unchanged. */
+  padding: 290px 0 0;
   position: relative;
   z-index: var(--z-section);
 }
@@ -671,7 +660,7 @@ h1, h2, h3, h4 {
 #details h2,
 #reflection h2,
 .scrolly-step h2 {
-  font-size: 2em;
+  font-size: var(--fs-section-title);
   margin-bottom: 0.6em;
   font-family: 'Bebas Neue', sans-serif;
   font-weight: normal;
@@ -730,25 +719,39 @@ h1, h2, h3, h4 {
   flex-direction: column;
   gap: 240px; /* the paragraphs need room to take turns */
   padding-right: 60px; /* keeps the text off the frame beside it */
+  /* The section's bottom padding, moved in here. The diagram is sticky
+     inside this column and lets go when the column ends, and the last
+     paragraph ended almost at once: the corridor diagram was up for 160px
+     of scroll before it left. Room below the paragraph keeps it pinned
+     while that paragraph is read. */
+  padding-bottom: 290px;
   max-width: calc(var(--measure-body) + 60px);
 }
 
 
 
-.scrolly-step {
-  font-size: var(--fs-body);
-  line-height: 1.7;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-}
-
+/* The same float-in the intro and the ending use: up forty pixels as it
+   fades in. A step that has been read goes the same distance on upwards as
+   it fades, so the text is always moving the way the page is. These used
+   to sit at 0.4 and snap to 1 in 0.3s, a different gesture from every
+   other paragraph on the page. */
 .scrolly-step {
   display: flex;
   flex-direction: column;
+  font-size: var(--fs-body);
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scrolly-step.past {
+  transform: translateY(-40px);
 }
 
 .scrolly-step.active {
   opacity: 1;
+  transform: none;
 }
 
 /* Sticky, not fixed. A fixed element floats over the whole document, so
@@ -757,10 +760,14 @@ h1, h2, h3, h4 {
    with, it painted over the section below. Sticky is clipped to its own
    container: it cannot reach another section to begin with. */
 .scrolly-graphic {
+  /* As wide as its column, and no taller than 70% of the screen. The
+     diagrams are square SVGs with no size of their own, so they were
+     drawing at a default 224px in a 448px column. */
+  --g: min(calc((min(100vw, var(--page-max)) - 2 * var(--page-pad)) * 0.4), 70vh);
   position: sticky;
-  top: calc(50vh - 175px);
+  top: calc(50vh - var(--g) / 2);
   align-self: flex-start;
-  height: 350px;
+  height: var(--g);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -773,37 +780,22 @@ h1, h2, h3, h4 {
 
 
 
-.scrolly-graphic img {
-  width: auto;    
-  height: auto;
-  max-width: 300px;  
-  max-height: 300px; 
-  transition: opacity 0.4s ease;
-  opacity: 0;
-  display: block;
-  margin: 0 auto;
-}
-
-
-.scrolly-graphic img.loaded {
-  opacity: 1;
-}
-
-.fade-img {
+/* Stacked and crossfaded. Over the same 0.8s as the text, so the diagram
+   and its paragraph change together. */
+.scrolly-img {
   position: absolute;
-  left: 50%;
   top: 50%;
+  left: 50%;
+  width: var(--g);
+  height: var(--g);
   translate: -50% -50%;
-  max-width: 350px;
-  max-height: 350px;
-  width: auto;
-  height: auto;
+  object-fit: contain;
   opacity: 0;
-  transition: opacity 0.1s ease;
+  transition: opacity 0.8s ease;
   display: block;
 }
 
-.fade-img.visible {
+.scrolly-img.visible {
   opacity: 1;
 }
 
