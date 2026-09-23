@@ -800,8 +800,12 @@ h1, h2, h3, h4 {
 
 
 
-/* Stacked and crossfaded. Over the same 0.8s as the text, so the diagram
-   and its paragraph change together. */
+/* Stacked and crossfaded. The outgoing diagram fades over 0.8s from the
+   moment the step changes. The incoming one waits 0.4s and comes up over
+   0.6s, so it follows its paragraph by a tenth of a second (the text
+   waits 0.3s for the last paragraph to go) and still overlaps the old
+   diagram on the way. Without the wait it was up before the words it
+   illustrates. */
 .scrolly-img {
   position: absolute;
   top: 50%;
@@ -819,6 +823,7 @@ h1, h2, h3, h4 {
 
 .scrolly-img.visible {
   opacity: 1;
+  transition: opacity 0.6s ease 0.4s;
 }
 
 
