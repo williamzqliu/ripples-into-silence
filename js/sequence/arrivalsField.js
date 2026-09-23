@@ -97,7 +97,7 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
   let shownCount = null;
   let captionState = null;
   let noteTimer = null;
-  const NOTE_FADE_MS = 300;       // the note's transition in style.css
+  const NOTE_FADE_MS = 150;       // the note's transition in style.css
 
   const rows = await d3.csv("./data/lampedusa_nearby_incidents.csv");
   const dead2024 = rows.filter(r => r["Incident Year"] === "2024");
