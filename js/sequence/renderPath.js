@@ -50,21 +50,29 @@ function otherText(node) {
 
 /** Perpendicular first, either side, then straight out and straight in.
     Angle is the path's own, measured from the centre of the frame. */
+// The side of the path both labels sit on: the distance while the path is
+// travelling, then the count once it lands. The count used to try the
+// other side, and then straight out and in, whenever its first spot was
+// taken, so the reading could jump across the line at the moment it
+// changed from kilometres to deaths. It stays on this side now and moves
+// further out along it instead.
+const LABEL_SIDE = Math.PI / 2;
+const STEP_OUT = 6;           // px further out per try
+const MAX_STEPS = 10;
+
 function placeLabel(node, own, angle) {
   const box = halfBox(node);
-  const dirs = [angle + Math.PI / 2, angle - Math.PI / 2, angle, angle + Math.PI]
-    .map(unit);
+  const u = unit(angle + LABEL_SIDE);
   const taken = otherText(node);
   // The own mark is cleared by the distance itself, so testing it again here
   // would only risk failing on the rounding.
   const discs = Array.from(liveMarks).filter(m => m !== own);
 
-  let fallback = null;
-  for (const u of dirs) {
-    const c = pushOut(own, u, own.r * LABEL_MARK_CLEAR, box, LABEL_GAP);
+  const fallback = pushOut(own, u, own.r * LABEL_MARK_CLEAR, box, LABEL_GAP);
+  for (let k = 0; k <= MAX_STEPS; k++) {
+    const c = pushOut(own, u, own.r * LABEL_MARK_CLEAR + k * STEP_OUT, box, LABEL_GAP);
     const b = boxAt(c, box);
-    if (!fallback) fallback = c;
-    if (!inFrame(b)) continue;
+    if (!inFrame(b)) break;          // further out only leaves the frame sooner
     if (taken.some(t => overlaps(b, t, LABEL_GAP))) continue;
     if (discs.some(m => overlapsDisc(b, m, m.r * LABEL_MARK_CLEAR + LABEL_GAP))) continue;
     return c;
@@ -133,7 +141,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   if (showLabel) {
     label = labelStyle(layer.append("text")).text(`${RADIUS_KM.toFixed(2)} km`);
     const box = halfBox(label.node());
-    const u = unit(d.angle + Math.PI / 2);
+    const u = unit(d.angle + LABEL_SIDE);
     const at = pushOut({ x: 0, y: 0 }, u, LABEL_OFFSET, box, LABEL_GAP);
     offset = { dx: at.x, dy: at.y };
   }
