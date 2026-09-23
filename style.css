@@ -1178,26 +1178,31 @@ svg {
   border: 0.55cqw solid #C0272D;
 }
 
-/* A live marker: a red ring goes out from the town and fades, over and
-   over, the way a map marks something still happening. */
-.epilogue-marker::after {
-  content: "";
+/* A live marker: a soft red glow swells out from the town and fades, over
+   and over, the way a map marks something still happening. It was a hard
+   ring with a tinted fill, which round the white dot read as a target. It
+   is its own element under the marker, so it never tints the dot. */
+.epilogue-pulse {
   position: absolute;
-  inset: -0.55cqw;
+  left: 50%;
+  top: 50%;
+  width: 2.2cqw;
+  height: 2.2cqw;
+  margin: -1.1cqw 0 0 -1.1cqw;
   border-radius: 50%;
-  border: 0.6cqw solid #E0343B;
-  background: rgba(224, 52, 59, 0.22);
+  background: radial-gradient(circle, rgba(224, 52, 59, 0.75) 0%,
+    rgba(224, 52, 59, 0.35) 45%, rgba(224, 52, 59, 0) 70%);
   animation: epilogue-pulse 3s cubic-bezier(0.25, 0.5, 0.35, 1) infinite;
 }
 
 @keyframes epilogue-pulse {
   0%   { transform: scale(1); opacity: 1; }
-  80%  { transform: scale(3.8); opacity: 0; }
-  100% { transform: scale(3.8); opacity: 0; }
+  85%  { transform: scale(5); opacity: 0; }
+  100% { transform: scale(5); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .epilogue-marker::after { animation: none; opacity: 0; }
+  .epilogue-pulse { animation: none; opacity: 0; }
 }
 
 .epilogue-place {
