@@ -344,8 +344,9 @@ export async function drawArrivalsField(sectionSelector, canvasSelector) {
       countEl.style.color = countColour(gone);
     }
 
-    // The note says which field it is, and changes once, half way down.
-    const state = gone < 0.5 ? "all" : "dead";
+    // The note says which field it is, and changes once, when the count has
+    // come all the way down to the 206 it names.
+    const state = count > people.length ? "all" : "dead";
     if (noteEl && state !== captionState) {
       captionState = state;
       noteEl.textContent = state === "all"
