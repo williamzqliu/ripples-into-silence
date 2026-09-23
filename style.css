@@ -1323,11 +1323,11 @@ svg {
 /* Rows of four, three and four on an eight column grid, each disc two
    columns wide, the middle row set between the others (yearDiscs.js places
    them). The three rows, discs and figures, fit one screen under the nav:
-   the figures and the gaps take 270px with the worst year's note, and the
-   discs share what is left less a little air, up to 200px: 153px at 815
-   tall, 200 from 955. */
+   the figures and the gaps take 286px with the worst year's note, and the
+   discs share what is left less a little air, up to 200px: 148px at 815
+   tall, 200 from 970. */
 .year-discs {
-  --disc: min(100%, 200px, max(100px, calc((100vh - var(--nav-h) - 290px) / 3)));
+  --disc: min(100%, 200px, max(100px, calc((100vh - var(--nav-h) - 306px) / 3)));
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   column-gap: clamp(16px, calc(16px + (100vw - 1024px) * 0.04), 32px);
@@ -1369,7 +1369,7 @@ svg {
 }
 
 .year-disc__figures {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.55);
 }
