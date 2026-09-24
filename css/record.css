@@ -11,6 +11,13 @@
      its own clock and holds when the section is under half the screen, so
      the length only has to be enough to stop in. */
   min-height: 150vh;
+
+  /* No top padding: the frame starts at the section's top edge, so it is
+     pinned under the nav the moment the section reaches it. The 4em every
+     section has put the frame 64px lower than where it pins, and the nav
+     landing there, or a reader stopping as the nav reached the top, had the
+     year bar 40px under the bottom of a 768 screen. */
+  padding-top: 0;
 }
 
 /* ---------- the animated sequence ---------- */
