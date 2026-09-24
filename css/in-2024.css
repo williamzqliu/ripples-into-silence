@@ -57,25 +57,29 @@
 
 .arrivals__count {
   font-family: 'EB Garamond', Georgia, serif;
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1;
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
-  /* One line, always: the count and the longer sentence come to about 880px
-     and the narrowest content box is 944. */
-  white-space: nowrap;
 }
 
 /* The sentence opens on the count, set large, in the colour of the dots it
-   counts; the rest of the sentence runs on at reading size. */
+   counts, and runs on into the line below. */
 .arrivals__num {
-  font-size: 48px;
+  font-size: 56px;
   font-variant-numeric: lining-nums tabular-nums;
   color: #FBC900;
-  margin-right: 0.1em;        /* a word space at 20px sits tight on a 48px figure */
+  margin-right: 0.12em;       /* a word space at 24px sat tight on a 56px figure */
 }
 
+/* One line, always: the longer of the two is 640px at this size and the
+   narrowest content box is 944. */
 .arrivals__note {
+  margin: 10px 0 0;
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.9);
   transition: opacity 0.15s ease;  /* NOTE_FADE_MS in js/scenes/in2024.js */
 }
 
