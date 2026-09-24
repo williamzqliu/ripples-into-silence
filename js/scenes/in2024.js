@@ -357,9 +357,9 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
       const first = captionState === null;
       captionState = state;
       const text = state === "all"
-        ? "Everyone who set out for Lampedusa in 2024 and reached this water. " +
+        ? "people set out for Lampedusa in 2024 and reached this water. " +
           "One dot is one person."
-        : "The 206 who died or went missing before reaching the island.";
+        : "people died or went missing before reaching the island.";
       // Out, swap, in; on the first draw the markup already says it.
       clearTimeout(noteTimer);
       if (first) noteEl.textContent = text;

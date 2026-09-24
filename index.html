@@ -199,9 +199,11 @@
     <div class="arrivals">
       <div class="arrivals__sticky">
         <div class="arrivals__caption">
-          <p class="arrivals__count"><span class="arrivals__num">46,203</span> people</p>
-          <p class="arrivals__note">Everyone who set out for Lampedusa in 2024 and reached
-            this water. One dot is one person.</p>
+          <!-- One sentence that opens on the count. in2024.js runs the number and
+               swaps the rest of the sentence once the count reaches 206. -->
+          <p class="arrivals__count"><span class="arrivals__num">46,203</span>
+            <span class="arrivals__note">people set out for Lampedusa in 2024 and reached this
+              water. One dot is one person.</span></p>
         </div>
         <canvas id="arrivals-canvas"></canvas>
       </div>
