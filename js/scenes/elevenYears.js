@@ -247,6 +247,8 @@ function disc(holder, rows, year, r) {
   // large one can still be reached. The mark under the pointer goes yellow.
   for (const m of [...marks].sort((a, b) => b.r - a.r)) {
     svg.append("circle")
+      .attr("data-record-id", m.d.id)
+      .attr("data-mark-radius", m.r)
       .attr("cx", m.x).attr("cy", m.y).attr("r", m.r + 4 * u)
       .attr("fill", "transparent")
       .style("cursor", "pointer")

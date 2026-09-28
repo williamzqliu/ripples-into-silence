@@ -69,7 +69,6 @@
         <a href="#sequence" class="nav-link">The Record</a>
         <a href="#context" class="nav-link">Why Lampedusa</a>
         <a href="#eleven-years" class="nav-link">12 Years</a>
-        <a href="#year-2024" class="nav-link">In 2025</a>
         <a href="#epilogue" class="nav-link">Epilogue</a>
       </div>
     </div>
@@ -135,38 +134,29 @@
         <h2 class="fade-step">12 Years</h2>
         <p class="fade-step">Each disc uses the same distance and size scales. Recorded losses fluctuate from year to year, but the annual average in 2022–2025 is higher than in 2014–2021. This describes the records in this sample, not the probability of dying on a crossing.</p>
         <p class="data-note">Radius represents the supplied coordinate’s distance from the reference point. Mark size represents recorded deaths and disappearances. Direction and movement are not actual routes. Hover over a mark for its date and location description.</p>
-        <div id="year-discs"></div>
+      </div>
+      <div class="people-track">
+        <div class="people-stage page-width">
+          <div id="year-discs"></div>
+          <div class="people-caption">
+            <h2><span data-people-count>833</span> people</h2>
+            <p>Each dot represents one person recorded dead or missing, 2014–2025.</p>
+          </div>
+          <canvas id="people-canvas" aria-hidden="true"></canvas>
+          <p class="people-note">Grouped by the cause reported for each record, including missing people. Multiple causes are kept together.</p>
+          <p class="people-accessible"></p>
+        </div>
       </div>
     </section>
-
-
-  <section id="year-2024" class="section">
-    <div class="page-width">
-      <h2 class="fade-step">In 2025</h2>
-      <p class="fade-step">In 2025, <span data-latest-people>125</span> people were recorded dead or missing across <span data-latest-records>11</span> records in this sample. Each dot below represents one person. Scrolling brings the whole count into view, then separates the recorded dead and missing.</p>
-    </div>
-    <div class="arrivals">
-      <div class="arrivals__sticky">
-        <div class="arrivals__caption">
-
-          <p class="arrivals__count"><span class="arrivals__num">125</span> people</p>
-          <p class="arrivals__note">recorded dead or missing in the 2025 sample. One dot represents one person.</p>
-        </div>
-        <canvas id="arrivals-canvas"></canvas>
-      </div>
-    </div>
-  </section>
 
 
   <section id="epilogue" class="section epilogue">
     <div class="epilogue-wrapper">
       <div class="epilogue-text">
-        <p class="epilogue-line">A new life is the hope behind the journey.</p>
-        <p class="epilogue-line">These records show part of its human cost.</p>
-        <p class="epilogue-line">Some people disappeared at sea. Others died after arrival.</p>
-        <p class="epilogue-line">Reaching land did not always end the danger.</p>
-        <p class="epilogue-line">The numbers change each year.<br>The losses continue.</p>
-        <p class="epilogue-line">They deserve attention beyond the moment they enter a record.</p>
+        <p class="epilogue-line">People make these journeys hoping to build a life somewhere new.</p>
+        <p class="epilogue-line">These records include people who disappeared at sea and people who died after reaching land.</p>
+        <p class="epilogue-line">Across twelve years, <span data-total-people>833</span> people were recorded dead or missing in the area shown here.</p>
+        <p class="epilogue-line">The records cannot tell us everything about their lives.<br>But they show that the losses continued.</p>
       </div>
       <div class="epilogue-image">
 

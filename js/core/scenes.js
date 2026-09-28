@@ -18,7 +18,7 @@
 export const FADE_FROM = 0.65;
 export const FADE_TO = 0.25;
 
-const SCENE_IDS = ["ripple-bg-wrapper", "sequence", "context", "eleven-years", "year-2024", "epilogue"];
+const SCENE_IDS = ["ripple-bg-wrapper", "sequence", "context", "eleven-years", "epilogue"];
 
 let scenes = [];
 let currentScene = -1;

@@ -16,3 +16,17 @@ const root=process.cwd();
  if(recordTooltip({...paths[0],location:'<script>'}).includes('<script>'))throw Error('Unsafe tooltip');
  console.log('PASS: unique sample totals, chronological order, finite geometry, latest-year count, discrepancy note and tooltip escaping');
 })();
+
+(async () => {
+  const { execFileSync } = require('child_process');
+  const rows = JSON.parse(execFileSync('python', ['-c', 'import csv,json;print(json.dumps(list(csv.DictReader(open("data/lampedusa_nearby_incidents.csv")))))'], {encoding:'utf8'}));
+  const { expandPeople, CAUSES } = await import('file://' + process.cwd() + '/js/data/people.js');
+  const people = expandPeople(rows);
+  const expected = [689,56,35,29,15,7,2];
+  if (people.length !== 833) throw Error('Person count changed');
+  CAUSES.forEach((c,i) => { if (people.filter(p=>p.cause===c.key).length !== expected[i]) throw Error('Cause total: '+c.key); });
+  for (const row of rows) {
+    if (people.filter(p=>p.recordId===row['Main ID']).length !== Number(row['Total Number of Dead and Missing'])) throw Error('Lost record identity');
+  }
+  console.log('PASS: 833 people, seven mutually exclusive cause groups, and all 95 source-record mappings');
+})();
