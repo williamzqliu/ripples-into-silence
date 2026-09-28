@@ -66,6 +66,12 @@ const PLAY_AT = 0.9;
 const FILL_STAGGER = 90;       // ms from one year's records to the next's
 const pending = new Set();     // cells not yet opened
 const unfilled = new Set();    // opened, records not yet flown in
+// Until the reader moves the page, whatever is on screen is where the page
+// opened: a reload or a link that lands on the discs. Waiting for the pin
+// there left the discs empty until the reader happened to scroll to it, so
+// those fill at once. Discs the reader scrolls to still wait for the pin.
+let landed = true;
+const moved = () => { landed = false; };
 
 function checkDiscs() {
   const vh = window.innerHeight;
@@ -87,7 +93,7 @@ function checkDiscs() {
       unfilled.add(node);
     }
   }
-  if (!pinned || !unfilled.size) return;
+  if (!(pinned || landed) || !unfilled.size) return;
   [...unfilled].forEach((node, k) => node.__fill(k * FILL_STAGGER));
   unfilled.clear();
 }
@@ -103,6 +109,8 @@ export function settleDiscs() {
   }
 }
 export function initElevenYears() {
+  for (const type of ["wheel", "touchmove", "keydown", "pointerdown"])
+    window.addEventListener(type, moved, { passive: true, once: true });
   window.addEventListener("scroll", checkDiscs, { passive: true });
   window.addEventListener("resize", checkDiscs);
   window.addEventListener("scenechange", checkDiscs);
@@ -276,7 +284,8 @@ function disc(holder, rows, year, r, pulse = false) {
     });
 
   // Hover targets, over everything, smallest last so a small mark inside a
-  // large one can still be reached. The mark under the pointer goes yellow.
+  // large one can still be reached. The mark under the pointer goes yellow,
+  // and in the opened disc the others dim so the one being read stands out.
   for (const m of [...marks].sort((a, b) => b.r - a.r)) {
     svg.append("circle")
       .attr("data-record-id", m.d.id)
@@ -284,9 +293,9 @@ function disc(holder, rows, year, r, pulse = false) {
       .attr("cx", m.x).attr("cy", m.y).attr("r", m.r + 4 * u)
       .attr("fill", "transparent")
       .style("cursor", "pointer")
-      .on("mouseenter", () => m.g.classed("is-hot", true))
+      .on("mouseenter", () => { m.g.classed("is-hot", true); svg.classed("has-hot", big); })
       .on("mousemove", (event) => showTip(event, m.d))
-      .on("mouseleave", () => { m.g.classed("is-hot", false); hideTip(); });
+      .on("mouseleave", () => { m.g.classed("is-hot", false); svg.classed("has-hot", false); hideTip(); });
   }
 
   // Lampedusa, the same cross the sequence marks it with.

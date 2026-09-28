@@ -82,6 +82,10 @@
 
 .year-disc__mark.is-hot .year-disc__core { fill: #FBC900; fill-opacity: 1; }
 
+/* In the opened disc, the marks not under the pointer step back. */
+.disc-lightbox .year-disc__mark { transition: opacity 0.2s ease; }
+.disc-lightbox .has-hot .year-disc__mark:not(.is-hot) { opacity: 0.35; }
+
 /* The latest year's frame ripples out, two rings and a long rest, slower
    and softer than the island's pulse in the epilogue: each ring takes
    about 2s to spread and fade, the second follows 0.65s later, and the

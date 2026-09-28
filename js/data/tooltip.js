@@ -16,15 +16,21 @@ export function recordTooltip(d) {
     `<div class="tip-place">${PIN}<span>${escape(d.location)}</span></div>`;
 }
 
-// Shows the shared tooltip beside the pointer, kept inside the window. A long
-// source note near the right or bottom edge flips it to the other side of
-// the pointer rather than running off screen.
+// Shows the shared tooltip beside the pointer, kept inside the window. It
+// keeps clear of the pointer and of the mark it describes: set 12px off the
+// pointer it sat on large marks, the one being read half hidden under it.
+// Near the right edge it flips to the other side of both.
+const GAP = 20;               // px from the pointer
+const MARK_GAP = 10;          // px from the edge of the hovered mark
 export function showTooltip(event, html) {
   const tip = document.getElementById("tooltip");
   tip.innerHTML = html;
   const w = tip.offsetWidth, h = tip.offsetHeight, m = 8;
-  let x = event.clientX + 12, y = event.clientY - 20;
-  if (x + w > innerWidth - m) x = event.clientX - w - 12;
+  const mark = event.target?.getBoundingClientRect?.();
+  const right = Math.max(event.clientX + GAP, mark ? mark.right + MARK_GAP : 0);
+  const left = Math.min(event.clientX - GAP, mark ? mark.left - MARK_GAP : Infinity) - w;
+  let x = right + w > innerWidth - m ? left : right;
+  let y = event.clientY - 18;
   y = Math.min(Math.max(y, m), innerHeight - h - m);
   tip.style.left = `${Math.max(m, x) + scrollX}px`;
   tip.style.top = `${y + scrollY}px`;

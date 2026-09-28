@@ -230,8 +230,10 @@ svg {
   position: absolute;
   z-index: var(--z-tooltip);
   padding: 7px 10px;
-  border-radius: 4px;
-  background: rgba(5, 14, 35, 0.94);
+  /* A step lighter and bluer than both grounds it sits on, the record's
+     #0F1A32 and the lightbox's near-black. Square and flat, like the rest
+     of the page. At the old near-black it read as a hole in the page. */
+  background: rgba(31, 50, 88, 0.97);
   color: rgba(255, 255, 255, 0.95);
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 14px;
