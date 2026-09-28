@@ -1,59 +1,17 @@
-// js/scenes/in2024.js
-//
-// 2024, at one dot per person. 45,997 people reached Lampedusa and 206 did
-// not, so the field holds 46,203 dots and the 206 are 0.45 per cent of it.
-//
-// It opens close up, on a few hundred people, each a dot large enough to be
-// one person, and one of them white. Scrolling draws back until the whole
-// field is on screen and the count has climbed to 46,203, and by then the
-// white ones cannot be picked out, which is the point: the arrivals are what
-// gets counted. It used to open on the whole field, 46,203 dots two pixels
-// across, which read as a sheet of yellow cloth. Scrolling on fades the
-// 45,997 away and the 206 stay behind, then sort themselves by what killed
-// them.
-//
-// One dot is one person the whole way down. Nothing is rescaled, so the
-// second half is the same field with most of it taken out, not a second
-// chart drawn at a different rate.
+import { LABEL_FONT } from "../config.js";
 
-import { ARRIVALS_2024, LABEL_FONT } from "../config.js";
-
-// Each cause is a block of its own, labelled where it stands. They used to
-// share one block, told apart by four shapes, a disc, a half disc, a bowtie
-// and a ring, read off a legend underneath: a code to learn for 26 of the
-// 206, and the half discs ran on in the drowned's last row. The labels say
-// what the record says, in IOM's categories: "Vehicle accident / death
-// linked to hazardous transport", "Harsh environmental conditions / lack of
-// adequate shelter, food, water", "Sickness / lack of access to adequate
-// healthcare".
 const CAUSES = [
-  { key: "Drowning", label: "drowned" },
-  { key: "Vehicle accident", label: "died in hazardous transport" },
-  { key: "Harsh environmental", label: "died of exposure, hunger or thirst" },
-  { key: "Sickness", label: "died of sickness, without care" },
+  { key: "dead", label: "recorded dead" },
+  { key: "missing", label: "recorded missing" },
 ];
 
 const DEAD_COLOUR = "#FFFFFF";
 const ARRIVED_COLOUR = "#FBC900";
 
-// The close-up: dots this far apart, about 11px across, a few hundred in
-// view and one or two of them white.
-const CLOSE_PITCH = 34;
+const CLOSE_PITCH = 180;
 
-// Close up, the frame's edges cut through dots, and a row of half dots
-// along the top and the bottom read as a mistake. The edges fade out
-// instead, over this share of the frame's shorter side, narrowing as the
-// view draws back, to none by the time the whole field, which fits, is on
-// screen. At 48px, a row and a half, the fade dimmed the outer two rows
-// evenly and the field read as a raised platform with bevelled edges; this
-// wide and eased, it reads as the field going on into the dark.
 const FEATHER = 0.2;
 
-// The scroll through the track, 0 to 1: the close-up holds, draws back, the
-// whole field holds, the arrivals fade, the 206 sort, the labels come in.
-// On a 340vh track, 2.4 screens of scroll: the draw back takes 0.4 of a
-// screen, a third of what it first had, and everything after it the same
-// scroll as before.
 const ZOOM_FROM_AT = 0.042;
 const ZOOM_TO_AT = 0.208;
 const FADE_FROM_AT = 0.317;
@@ -62,7 +20,6 @@ const MOVE_FROM_AT = 0.502;
 const MOVE_TO_AT = 0.875;
 const LABELS_AT = 0.827;
 
-// Deterministic, so the same person is in the same place on every load.
 function mulberry32(a) {
   return function () {
     a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -72,17 +29,6 @@ function mulberry32(a) {
   };
 }
 
-function shortCause(raw) {
-  const s = (raw || "").toLowerCase();
-  if (s.startsWith("drowning")) return "Drowning";
-  if (s.startsWith("vehicle")) return "Vehicle accident";
-  if (s.startsWith("harsh")) return "Harsh environmental";
-  if (s.startsWith("sickness")) return "Sickness";
-  return "Drowning";
-}
-
-// Driven by the dots' own track, not the whole 2024 section, so the
-// heading above it does not move where the fade happens.
 export function initIn2024() {
   drawArrivalsField("#year-2024 .arrivals", "#arrivals-canvas");
 }
@@ -92,13 +38,8 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
   const canvas = document.querySelector(canvasSelector);
   if (!section || !canvas) return;
 
-  // The heading counts what is actually on screen: up to 46,203 as the view
-  // draws back, then down to 206 as the arrivals fade, on the same curve, so
-  // the number and the field always agree.
   const countEl = section.querySelector(".arrivals__num");
-  // And it is the colour of what it counts: the arrivals' yellow, turning to
-  // the white of the 206 as they are left alone in the field.
-  const countColour = d3.interpolateRgb(ARRIVED_COLOUR, DEAD_COLOUR);
+  const countColour = () => DEAD_COLOUR;
   const noteEl = section.querySelector(".arrivals__note");
   let shownCount = null;
   let captionState = null;
@@ -106,19 +47,19 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
   const NOTE_FADE_MS = 150;       // the note's transition in style.css
 
   const rows = await d3.csv("./data/lampedusa_nearby_incidents.csv");
-  const dead2024 = rows.filter(r => r["Incident Year"] === "2024");
+  const latestRows = rows.filter(r => r["Incident Year"] === "2025");
 
-  // One entry per person, carrying the incident it belongs to.
   const people = [];
-  for (const r of dead2024) {
-    const n = +r["Total Number of Dead and Missing"] || 0;
-    const cause = shortCause(r["Cause of Death"]);
-    for (let i = 0; i < n; i++) people.push({ cause, date: r["Incident Date"] });
+  for (const r of latestRows) {
+    for (const [key, field] of [["dead", "Number of Dead"], ["missing", "Minimum Estimated Number of Missing"]]) {
+      const n = +r[field] || 0;
+      for (let i = 0; i < n; i++) people.push({ cause: key, date: r["Incident Date"] });
+    }
   }
   people.sort((a, b) =>
     CAUSES.findIndex(c => c.key === a.cause) - CAUSES.findIndex(c => c.key === b.cause));
 
-  const total = ARRIVALS_2024 + people.length;
+  const total = people.length;
   const ctx = canvas.getContext("2d");
 
   let field = null;        // { pitch, cols, rows, deadIndex: Int32Array, offscreen }
@@ -133,17 +74,13 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
 
-    // A pitch that fits every person in the frame, then the grid that follows.
-    const pitch = Math.sqrt((w * h) / total);
-    const cols = Math.max(1, Math.floor(w / pitch));
+    const cols = Math.max(1, Math.ceil(Math.sqrt(total * w / h)));
     const rowsN = Math.ceil(total / cols);
+    const pitch = Math.min(w / cols, h / rowsN);
     const dotR = Math.max(0.6, pitch * 0.31);
     const originX = (w - cols * pitch) / 2 + pitch / 2;
     const originY = (h - rowsN * pitch) / 2 + pitch / 2;
 
-    // Which cells in the field are the 206: drawn at random, from a fixed
-    // seed. They used to be one to each run of 224 cells, and a row of the
-    // field is about 224 cells long, so close up they stood in a column.
     const rnd = mulberry32(20241231);
     const cells = new Int32Array(total);
     for (let c = 0; c < total; c++) cells[c] = c;
@@ -156,7 +93,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
     const isDead = new Uint8Array(total);
     deadCells.forEach(c => { isDead[c] = 1; });
 
-    // The close-up is centred on the white dot nearest the middle.
     const mid = { x: w / 2, y: h / 2 };
     let anchor = null, best = Infinity;
     for (const c of deadCells) {
@@ -170,7 +106,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
       y: originY + Math.floor(c / cols) * pitch,
     });
 
-    // The 45,997 never move, so they are painted once and then only faded.
     const off = document.createElement("canvas");
     off.width = canvas.width;
     off.height = canvas.height;
@@ -185,19 +120,13 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
       octx.fill();
     }
 
-    // Where the 206 end up: a block per cause, one under the next, on the
-    // left edge the heading and the text above are set on, each with its
-    // label over its top left corner.
     const markR = Math.max(3.5, Math.min(7, w / 150));
     const gap = markR * 3.1;
     const labelH = 30;                   // label line to the block's first row
     const blockGap = gap * 2.4;          // last row to the next label, well over
-                                         // the label to its own row, so each
-                                         // label reads with the block below it
     const gridCols = Math.max(10, Math.min(30, Math.floor((w * 0.55) / gap)));
     const gx = markR;
 
-    // Laid out from 0, then the whole stack, source line and all, centred.
     const blocks = [];
     let y = 0;
     for (const cause of CAUSES) {
@@ -230,7 +159,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
   const ease = t => t * t * (3 - 2 * t);
   const clamp01 = v => Math.max(0, Math.min(1, v));
 
-  // Fade what is drawn to nothing at the frame's edges, px wide.
   function featherEdges(w, h, px) {
     if (px < 0.5) return;
     ctx.save();
@@ -250,10 +178,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
     ctx.restore();
   }
 
-  // Every dot inside the view at zoom z, drawn as one path, and how many
-  // people that is. Near the end of the draw back, where the view holds
-  // most of the field and a path of forty thousand arcs takes 18ms, the
-  // bitmap is scaled up instead, and the dots are only counted.
   const BITMAP_BELOW = 1.4;
   function drawZoomed(z, w, h) {
     const paint = z >= BITMAP_BELOW;
@@ -300,8 +224,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    // The view draws back from the close-up to the whole field, at a steady
-    // rate in scale rather than in size, so it does not rush at the end.
     const zoomT = ease(clamp01((progress - ZOOM_FROM_AT) / (ZOOM_TO_AT - ZOOM_FROM_AT)));
     const z = Math.pow(field.zoomFrom, 1 - zoomT);
     const zoomed = z > 1.0005;
@@ -309,9 +231,8 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
       ? [field.anchor.x + (x - field.anchor.x) * z, field.anchor.y + (y - field.anchor.y) * z]
       : [x, y];
 
-    // The arrivals hold, then go.
     const gone = ease(clamp01((progress - FADE_FROM_AT) / (FADE_TO_AT - FADE_FROM_AT)));
-    const fade = 1 - gone;
+    const fade = 1;
     let seen = total;
     if (zoomed) seen = drawZoomed(z, w, h);
     else if (fade > 0.002) {
@@ -323,7 +244,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    // The 206 travel to their places and grow into their marks.
     const move = ease(clamp01((progress - MOVE_FROM_AT) / (MOVE_TO_AT - MOVE_FROM_AT)));
     const r = zoomed ? field.dotR * z : field.dotR + (field.markR - field.dotR) * move;
 
@@ -342,25 +262,18 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
 
     labels(ctx, ease(clamp01((progress - LABELS_AT) / (1 - LABELS_AT))));
 
-    const count = zoomed ? seen
-      : Math.round(total - (total - people.length) * gone);
+    const count = people.length;
     if (countEl && count !== shownCount) {
       shownCount = count;
       countEl.textContent = count.toLocaleString("en-US");
       countEl.style.color = countColour(gone);
     }
 
-    // The note says which field it is, and changes once, when the count has
-    // come all the way down to the 206 it names.
     const state = count > people.length ? "all" : "dead";
     if (noteEl && state !== captionState) {
       const first = captionState === null;
       captionState = state;
-      const text = state === "all"
-        ? "set out for Lampedusa in 2024 and reached this water. " +
-          "One dot is one person."
-        : "died or went missing before reaching the island.";
-      // Out, swap, in; on the first draw the markup already says it.
+      const text = "recorded dead or missing in the 2025 sample. One dot represents one person.";
       clearTimeout(noteTimer);
       if (first) noteEl.textContent = text;
       else {
@@ -373,7 +286,6 @@ async function drawArrivalsField(sectionSelector, canvasSelector) {
     }
   }
 
-  // The number in white, what happened in the text's white after it.
   function labels(c, alpha) {
     if (alpha < 0.01) return;
     c.save();

@@ -17,8 +17,7 @@ import { loadAndProcessData } from "../../data/incidents.js";
 import { whenOnScene, wait } from "./onScene.js";
 import { RADIUS_HOLD } from "../../config.js";
 import {
-    initYearProgressBar,
-    startLinearProgressBar
+    initYearProgressBar
 } from "./yearProgressBar.js";
 
 import { showIsland } from "./showIsland.js";
@@ -31,6 +30,7 @@ export async function runSceneIntro() {
     // the counters fading in and the first path, which put a network wait in
     // the middle of the choreography.
     const {
+        paths,
         allYears,
         yearEventCounts,
         firstBatch,
@@ -59,9 +59,10 @@ export async function runSceneIntro() {
     // 6. and then the incidents themselves
     await whenOnScene();
     initYearProgressBar(allYears);
-    startLinearProgressBar();
+
 
     drawPaths({
+        paths,
         allYears,
         yearEventCounts,
         firstBatch,

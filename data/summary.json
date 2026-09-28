@@ -1,0 +1,104 @@
+{
+  "source_sha256": "06d05c3e2327aadd230ef5aebd8be9f0b505fba285a4645aedadd20bf56f2db2",
+  "source_date_min": "2014-01-02",
+  "source_date_max": "2025-12-31",
+  "reference_point": [
+    35.5086,
+    12.5929
+  ],
+  "radius_km": 50,
+  "records": 95,
+  "total": 833,
+  "years": [
+    {
+      "year": 2014,
+      "records": 1,
+      "dead": 3,
+      "missing": 0,
+      "total": 3
+    },
+    {
+      "year": 2015,
+      "records": 1,
+      "dead": 4,
+      "missing": 0,
+      "total": 4
+    },
+    {
+      "year": 2016,
+      "records": 2,
+      "dead": 8,
+      "missing": 28,
+      "total": 36
+    },
+    {
+      "year": 2017,
+      "records": 2,
+      "dead": 1,
+      "missing": 82,
+      "total": 83
+    },
+    {
+      "year": 2018,
+      "records": 1,
+      "dead": 0,
+      "missing": 1,
+      "total": 1
+    },
+    {
+      "year": 2019,
+      "records": 2,
+      "dead": 30,
+      "missing": 24,
+      "total": 54
+    },
+    {
+      "year": 2020,
+      "records": 3,
+      "dead": 7,
+      "missing": 16,
+      "total": 23
+    },
+    {
+      "year": 2021,
+      "records": 4,
+      "dead": 9,
+      "missing": 45,
+      "total": 54
+    },
+    {
+      "year": 2022,
+      "records": 16,
+      "dead": 22,
+      "missing": 29,
+      "total": 51
+    },
+    {
+      "year": 2023,
+      "records": 35,
+      "dead": 24,
+      "missing": 164,
+      "total": 188
+    },
+    {
+      "year": 2024,
+      "records": 17,
+      "dead": 24,
+      "missing": 187,
+      "total": 211
+    },
+    {
+      "year": 2025,
+      "records": 11,
+      "dead": 67,
+      "missing": 58,
+      "total": 125
+    }
+  ],
+  "flagged_ids": [
+    "2015.MMP00361",
+    "2021.MMP00112",
+    "2024.MMP0241",
+    "2023.MMP0333"
+  ]
+}

@@ -15,6 +15,8 @@ export function launchPathWithStats({
     speed = 1,
     showLabel = false
 }) {
+    updateIncidentCount();
+    updateDeathCount(d);
     renderPath({
         d,
         gradId,
@@ -23,8 +25,7 @@ export function launchPathWithStats({
         speed,
         showLabel,
         onEnd: () => {
-            updateIncidentCount();
-            updateDeathCount(d);
+
 
             if (onComplete) onComplete();
         }

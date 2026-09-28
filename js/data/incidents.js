@@ -18,10 +18,16 @@ export async function loadAndProcessData(csvPath = "./data/lampedusa_nearby_inci
       d["Distance_to_Lampedusa_km"]
     )
     .map(d => ({
+      id: d["Main ID"],
+      date: d["Incident Date"],
+      location: d["Location of Incident"],
+      note: d.Location_note,
+      confirmedDead: d["Number of Dead"],
+      missing: d["Minimum Estimated Number of Missing"],
       year: +d["Incident Year"],
       dead: +d["Total Number of Dead and Missing"],
       distance: +d["Distance_to_Lampedusa_km"]
-    }));
+    })).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
 
   const rScale = d3.scaleSqrt()
     .domain(d3.extent(events, d => d.dead))

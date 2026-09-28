@@ -1,3 +1,4 @@
+import { recordTooltip } from "../data/tooltip.js";
 // js/scenes/elevenYears.js
 //
 // Eleven years, one disc each, every disc the same fifty kilometre circle as
@@ -28,7 +29,7 @@ import { reducedMotion as REDUCED } from "../core/motion.js";
 // Rows, top to bottom. On an eight column grid each disc spans two, and a
 // shorter row is inset by one column a disc short, which sets it between
 // the discs of the row above.
-const ROWS = [4, 3, 4];
+const ROWS = [4, 4, 4];
 const GRID_COLUMNS = 8;
 
 // Drawing units. The small discs are drawn at a radius of 100 and the open
@@ -45,7 +46,7 @@ const MIN_MARK = 2.6;
 const MIN_TEXT_PX = 14;
 const RING_LABEL_UNITS = 15;
 
-const WORST_NOTE = "The most lives lost in any year";
+const WORST_NOTE = "Highest recorded total in this sample";
 
 // Each disc plays the main sequence in miniature as it comes on screen: the
 // circle opens out of the cross, then the year's incidents come in one by
@@ -162,8 +163,7 @@ function cell(grid, year, rows, column, isWorst) {
 
 function showTip(event, d) {
   d3.select("#tooltip")
-    .html(`${d.year}<br>${d.distance.toFixed(1)} km from Lampedusa` +
-          `<br>${d.dead} dead or missing`)
+    .html(recordTooltip(d))
     .style("left", `${event.pageX + 10}px`)
     .style("top", `${event.pageY - 20}px`)
     .style("opacity", 1);
@@ -183,7 +183,7 @@ function disc(holder, rows, year, r) {
     .attr("viewBox", `0 0 ${size} ${size}`)
     .attr("role", "img")
     .attr("aria-label",
-      `${year}: ${rows.length} incidents within ${RADIUS_KM} kilometres of Lampedusa, ` +
+      `${year}: ${rows.length} records with coordinates within ${RADIUS_KM} kilometres of the reference point, ` +
       `${d3.sum(rows, d => d.dead)} people dead or missing.`);
 
   const c = size / 2;
@@ -350,7 +350,7 @@ function buildLightbox() {
   text.append("p").attr("class", "disc-lightbox__figures");
   text.append("p").attr("class", "disc-lightbox__note");
   text.append("p").attr("class", "disc-lightbox__key")
-    .text("How far out a mark sits is how far from Lampedusa the incident was; " +
+    .text("Radius shows the distance of the recorded coordinate from the reference point; " +
           "its size is how many people were lost. Point at a mark for its figures.");
   box.append("button")
     .attr("class", "disc-lightbox__close")

@@ -40,3 +40,11 @@ window.addEventListener("load", () => {
   requestAnimationFrame(() => window.dispatchEvent(new Event("scroll")));
   setTimeout(() => window.dispatchEvent(new Event("scroll")), 300);
 });
+
+// Summary numbers are generated from the same snapshot as every scene.
+fetch("./data/summary.json").then(r => { if (!r.ok) throw new Error("Summary unavailable"); return r.json(); }).then(s => {
+  const latest = s.years.at(-1);
+  for (const [key, value] of Object.entries({ "total-records": s.records, "total-people": s.total, "latest-records": latest.records, "latest-people": latest.total })) {
+    document.querySelectorAll(`[data-${key}]`).forEach(el => { el.textContent = value.toLocaleString("en-US"); });
+  }
+}).catch(console.error);

@@ -7,8 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="./assets/favicon.ico" type="image/x-icon" />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
-  <!-- In cascade order: what every scene shares, then the scenes in the
-       order they come. -->
+
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/nav.css" />
   <link rel="stylesheet" href="css/opening.css" />
@@ -20,7 +19,7 @@
 </head>
 
 <body>
-  <!-- shown when the window is too small for the piece -->
+
   <div class="minsize">
     <div>
       <p>This piece is made for a desktop browser.</p>
@@ -29,11 +28,7 @@
   </div>
   <div id="ripple-background"></div>
 
-  <!-- The island outline, held here and cloned into the drawing frame when
-       the opening plays. It used to be a fixed, full-screen layer: the
-       island shrank at the centre of the viewport and the cross it was
-       shrinking into appeared at the centre of the frame, which is not the
-       same point on the screen. -->
+
   <div id="island-asset" aria-hidden="true">
     <div>
       <svg viewBox="0 0 149 51" xmlns="http://www.w3.org/2000/svg">
@@ -44,63 +39,47 @@
     </div>
   </div>
   <div id="ripple-bg-wrapper">
-    <!-- 1. cover -->
+
     <section id="cover" class="fullscreen cover">
       <div class="cover-content">
         <h1>Ripples into Silence</h1>
-        <h2>Lives That Vanished Within Sight of Lampedusa</h2>
+        <h2>The Human Cost of Migration Around Lampedusa</h2>
       </div>
     </section>
 
-    <!-- 2. intro -->
+
     <section id="intro" class="section intro">
       <div class="content">
-        <p class="intro-step">
-          The central Mediterranean has been a crossing point and a graveyard for years.<br>
-          Each journey begins with hope, but not all end in safety.
-        </p>
-        <p class="intro-step">
-          Near the island of Lampedusa, the sea carries thousands of untold stories.<br>
-          In 2013, one tragedy alone claimed over 360 lives just offshore.
-        </p>
-        <p class="intro-step">
-          More than a decade has passed since that day.<br>
-          Yet boats still arrive — and others still vanish.
-        </p>
-        <p class="intro-step">
-          Some disappear far from help.<br>
-          Others make it close, within sight of land, before fading like ripples on the sea.
-        </p>
-        <p class="intro-step final">
-          What can these scattered traces tell us?<br>
-          And what stories lie just beneath the surface?
-        </p>
+        <p class="intro-step">People cross the Mediterranean hoping to build a life somewhere new.</p>
+        <p class="intro-step">For many, Lampedusa is part of that journey.<br>But what does the journey cost?</p>
+        <p class="intro-step">The records include people who disappeared at sea,<br>and people who died after reaching the island.</p>
+        <p class="intro-step">From 2014 to 2025, deaths and disappearances continued to be recorded around Lampedusa.</p>
+        <p class="intro-step final">Follow the record through time.<br>Each mark carries a count of people.</p>
       </div>
     </section>
   </div>
 
-  <!-- 3. nav -->
+
   <nav id="main-nav" class="nav">
     <div class="nav-inner">
-      <a href="#cover" class="nav-link nav-title">RIPPLES INTO SILENCE</a> <!-- title -->
+      <a href="#cover" class="nav-link nav-title">RIPPLES INTO SILENCE</a>
       <div class="nav-content">
-        <!-- One link per section, named for what it holds. -->
+
         <a href="#intro" class="nav-link">Intro</a>
         <a href="#sequence" class="nav-link">The Record</a>
         <a href="#context" class="nav-link">Why Lampedusa</a>
-        <a href="#eleven-years" class="nav-link">11 Years</a>
-        <a href="#year-2024" class="nav-link">In 2024</a>
+        <a href="#eleven-years" class="nav-link">12 Years</a>
+        <a href="#year-2024" class="nav-link">In 2025</a>
         <a href="#epilogue" class="nav-link">Epilogue</a>
       </div>
     </div>
   </nav>
 
-  <!-- 4. the sequence: the island, the fifty kilometre circle, and the
-       ninety-four incidents arriving in it -->
+
   <section id="sequence" class="section viz">
     <div class="layout">
       <div id="left">
-        <div class="label">TOTAL INCIDENTS</div>
+        <div class="label">RECORDS SHOWN</div>
         <div id="incident-count">0</div>
       </div>
       <div id="viz"></div>
@@ -109,10 +88,9 @@
         <div id="death-count">0</div>
       </div>
 
-      <!-- Inside .layout, which is the part that sticks. Out here it was
-           anchored to the section instead, so it climbed up the screen and
-           across the circle while the animation stayed pinned. -->
+
       <div class="year-progress-wrapper">
+        <p class="record-key">Recorded coordinates, not reconstructed routes. The opening three records pause for reading.</p>
         <div class="year-progress-bar" id="year-progress-bar">
           <div id="year-progress-fill"></div>
         </div>
@@ -121,49 +99,29 @@
     </div>
   </section>
 
-  <!-- 5. context: the distance, the island, the corridor -->
+
   <section id="context" class="section scrolly-section">
     <div class="scrolly-container">
-      <!-- text -->
+
       <div class="scrolly-text">
-        <div class="scrolly-step" data-img="img-distance"> <!-- first -->
-          <h2>Only 50 Kilometers Away</h2>
-          <p>
-            From 2014 to 2024, 94 incidents were recorded in the waters around Lampedusa. 703 people died
-            or went missing. Every one of them had come within fifty kilometers of land.
-          </p>
+        <div class="scrolly-step" data-img="img-distance">
+          <h2>A 50-Kilometre Frame</h2>
+          <p>The sample contains <span data-total-records>95</span> records from 2014 to 2025, with <span data-total-people>833</span> people recorded dead or missing. Each supplied coordinate falls within 50 km of a fixed reference point on Lampedusa.</p>
+          <p class="data-note">Coordinates may locate an incident, rescue, recovery or arrival. Some conflict with the location description. The original coordinates are retained; individual notes appear on hover.</p>
         </div>
 
-        <div class="scrolly-step" data-img="img-130"> <!-- second -->
+        <div class="scrolly-step" data-img="img-130">
           <h2>Why Lampedusa?</h2>
-          <p>
-            Lampedusa may be small, but it is Italy's southernmost point—a remote island closer to Africa than to the
-            European mainland. Just 130 kilometers from Tunisia, it lies at the very edge of Europe's southern border.
-            For anyone crossing the central Mediterranean, it is usually the first land within reach.
-            That is why the route exists.
-          </p>
+          <p>Lampedusa provides a fixed point from which to read these records. The sample includes journeys from Tunisia and Libya, rescues at sea, and deaths recorded after arrival.</p>
         </div>
 
-        <div class="scrolly-step" data-img="img-corridor"> <!-- third -->
-          <h2>The Tunisian Corridor: A Deadly Shortcut</h2>
-          <p>
-            The route from Sfax, Tunisia to Lampedusa is used so heavily that it now has a name:
-            the Tunisian Corridor. It is one of the shortest crossings in the central Mediterranean,
-            and one of the deadliest.
-            Over the past decade this stretch of water has taken hundreds of lives.
-            Not because of distance, but because of the lack of rescue, infrastructure, and safe alternatives.
-
-            This is not one disaster.
-            It is a record that stays quiet for years and then does not.
-            What follows is the toll it has taken, from 2014 to 2024.
-          </p>
+        <div class="scrolly-step" data-img="img-corridor">
+          <h2>One Crossing Among Many</h2>
+          <p>Sfax appears as a departure point in many records. This diagram shows geographic context, not reconstructed journeys. The sample also includes departures elsewhere and records whose exact location is uncertain.</p>
         </div>
       </div>
 
-      <!-- One image per step, stacked, so a change of step is a crossfade:
-           the new one fades in over the old one fading out. It used to be a
-           single element whose src was swapped. The diagrams repeat what
-           the paragraphs say, so they are hidden from screen readers. -->
+
       <div class="scrolly-graphic" aria-hidden="true">
         <img class="scrolly-img" data-for="img-distance" src="./assets/diagrams/img-distance.svg" alt="" />
         <img class="scrolly-img" data-for="img-130" src="./assets/diagrams/img-130.svg" alt="" />
@@ -171,67 +129,47 @@
       </div>
     </div>
   </section>
-  <!-- 6. eleven years: one disc a year -->
+
   <section id="eleven-years" class="section">
       <div class="page-width">
-        <h2 class="fade-step">11 Years</h2>
-        <p class="fade-step">Every disc is the same fifty kilometers of water, read the same way as the
-          sequence above: how far out a mark sits is how far out the incident was, and its
-          size is how many people were lost. For eight of these years the record holds a
-          handful of incidents. Then 2022 holds seventeen, 2023 holds thirty-nine, and 2024
-          holds nineteen that killed more people than any year before it.</p>
+        <h2 class="fade-step">12 Years</h2>
+        <p class="fade-step">Each disc uses the same distance and size scales. Recorded losses fluctuate from year to year, but the annual average in 2022–2025 is higher than in 2014–2021. This describes the records in this sample, not the probability of dying on a crossing.</p>
+        <p class="data-note">Radius represents the supplied coordinate’s distance from the reference point. Mark size represents recorded deaths and disappearances. Direction and movement are not actual routes. Hover over a mark for its date and location description.</p>
         <div id="year-discs"></div>
       </div>
     </section>
 
-  <!-- 7. 2024: the year told on its own, then at one dot per person. Its
-       heading and text used to sit at the foot of Eleven Years, and the dots
-       were a section of their own. The dots' track is tall and the canvas
-       is stuck to the top of it, so scrolling through the track is what
-       fades the arrivals out and sorts the 206. -->
+
   <section id="year-2024" class="section">
     <div class="page-width">
-      <h2 class="fade-step">In 2024</h2>
-      <p class="fade-step">45,997 people reached Lampedusa in 2024, on 1,095 boats, according to the
-        Italian Red Cross, which runs the reception center on the island. In the same
-        water that year, 206 did not.</p>
+      <h2 class="fade-step">In 2025</h2>
+      <p class="fade-step">In 2025, <span data-latest-people>125</span> people were recorded dead or missing across <span data-latest-records>11</span> records in this sample. Each dot below represents one person. Scrolling brings the whole count into view, then separates the recorded dead and missing.</p>
     </div>
     <div class="arrivals">
       <div class="arrivals__sticky">
         <div class="arrivals__caption">
-          <!-- One sentence that opens on the count and runs on to the next line.
-               in2024.js runs the number and swaps the second line once the
-               count reaches 206. -->
-          <p class="arrivals__count"><span class="arrivals__num">46,203</span> people</p>
-          <p class="arrivals__note">set out for Lampedusa in 2024 and reached this water. One dot
-            is one person.</p>
+
+          <p class="arrivals__count"><span class="arrivals__num">125</span> people</p>
+          <p class="arrivals__note">recorded dead or missing in the 2025 sample. One dot represents one person.</p>
         </div>
         <canvas id="arrivals-canvas"></canvas>
       </div>
     </div>
   </section>
 
-  <!-- 8. epilogue -->
+
   <section id="epilogue" class="section epilogue">
     <div class="epilogue-wrapper">
       <div class="epilogue-text">
-        <p class="epilogue-line">On clear days, Lampedusa is visible from far out at sea.</p>
-        <p class="epilogue-line">A silhouette on the horizon. A hope.</p>
-        <p class="epilogue-line">They could see the island.<br>They could see Europe.</p>
-        <p class="epilogue-line">But seeing is not reaching.</p>
-        <p class="epilogue-line">If 200 people died in a single plane crash, we would demand answers. We would
-          ask what could have prevented it.</p>
-        <p class="epilogue-line">In 2024, 206 people died or went missing on 19 migrant boats. In the same
-          year, 45,997 others reached Lampedusa safely. Against that larger number, 206 can begin to seem
-          small.</p>
-        <p class="epilogue-line">Most made it.</p>
-        <p class="epilogue-line">But 206 did not.</p>
+        <p class="epilogue-line">A new life is the hope behind the journey.</p>
+        <p class="epilogue-line">These records show part of its human cost.</p>
+        <p class="epilogue-line">Some people disappeared at sea. Others died after arrival.</p>
+        <p class="epilogue-line">Reaching land did not always end the danger.</p>
+        <p class="epilogue-line">The numbers change each year.<br>The losses continue.</p>
+        <p class="epilogue-line">They deserve attention beyond the moment they enter a record.</p>
       </div>
       <div class="epilogue-image">
-        <!-- The marker and its name used to be painted into the file, light
-             grey on a relief brightened to 5.9:1, where they all but
-             disappeared. They are drawn over it now, over the place they
-             were painted out of. -->
+
         <span class="epilogue-figure">
           <img src="./assets/images/lampedusa_relief.png"
             alt="Lampedusa seen from above as a shaded relief, the town marked in red." />
@@ -241,20 +179,16 @@
         </span>
       </div>
     </div>
-    <!-- Every source on the page, in one place. The figures come from two
-         records: the incidents from IOM's, the 2024 arrivals from the Red
-         Cross's. UNHCR used to be listed and nothing on the page uses it.
-         TODO: the InfoMigrants report needs its URL. -->
+
     <footer id="footer-credit">
-      <!-- The entrance is on this wrapper: core/scenes.js sets the scene's
-           opacity on the footer itself, inline, which would override it. -->
+
       <div class="epilogue-line">
         <p class="footer-credit__by">Designed by <a class="footer-credit__name"
           href="https://williamzqliu.com/" target="_blank" rel="noopener">Zhuoqi Liu</a></p>
         <p class="footer-credit__sources">
           Incidents: <a href="https://missingmigrants.iom.int/downloads" target="_blank"
             rel="noopener">Missing Migrants Project</a>, International Organization for Migration<br />
-          2024 arrivals at Lampedusa: Italian Red Cross, reported by InfoMigrants, 13 January 2025
+          Sample: 2014–2025. Source snapshot supplied September 2026; no 2026 events are included.<br><a href="data/lampedusa_nearby_incidents.csv">Download the sample</a> · <a href="data/METHOD.md">Data and method notes</a>
         </p>
       </div>
     </footer>

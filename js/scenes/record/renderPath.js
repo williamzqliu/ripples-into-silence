@@ -1,3 +1,5 @@
+import { recordTooltip } from "../../data/tooltip.js";
+import { isOnScene } from "./onScene.js";
 // js/scenes/record/renderPath.js
 //
 // One incident: a line travelling in from the edge of the fifty kilometre
@@ -178,7 +180,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   hoverCircle
     .on("mousemove", (event) => {
       tooltip
-        .html(`Year: ${d.year}<br>Distance: ${d.distance.toFixed(1)} km<br>Dead/Missing: ${d.dead}`)
+        .html(recordTooltip(d))
         .style("left", `${event.pageX + 10}px`)
         .style("top", `${event.pageY - 20}px`)
         .style("opacity", 1);
@@ -190,6 +192,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
   function animate(now) {
     const elapsed = lastFrame === null ? 1000 / 60 : Math.min(now - lastFrame, MAX_STEP_MS);
     lastFrame = now;
+    if (!isOnScene()) { requestAnimationFrame(animate); return; }
     progress += PROGRESS_PER_MS * speed * elapsed;
 
     if (phase === "forward") {
@@ -255,7 +258,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           // The count is static, so it can be solved properly: clear of the
           // mark it names, clear of the ring labels and of any other mark
           // still on screen, and inside the frame.
-          const count = labelStyle(layer.append("text")).text(`${d.dead} dead`);
+          const count = labelStyle(layer.append("text")).text(`${d.dead} dead or missing`);
           const spot = placeLabel(count.node(), mark, d.angle);
 
           count
