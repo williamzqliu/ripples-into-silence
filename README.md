@@ -1,13 +1,14 @@
 # Ripples into Silence
 
 An interactive scrollytelling piece about migrant deaths and disappearances recorded
-within 50 kilometres of Lampedusa between 2014 and 2024.
+within 50 kilometres of Lampedusa between 2014 and 2025.
 
-As the reader scrolls, each recorded incident travels toward the island and ends as a
-ripple. Ripple size carries the number of people dead or missing; radial position
-carries the incident's recorded distance from the island. The sequence opens slowly,
-then accelerates, so the density of the later years is something the reader watches
-accumulate rather than reads off a chart.
+Each record travels toward the island and ends as a ripple. Ripple size carries the
+number of people dead or missing; radial position carries the record's distance from a
+reference point on the island. The records go out one after another in date order, a
+slot each on a year bar that fills at a steady rate, so the crowded years take longest
+to pass. Twelve annual discs then compare the years, and their marks come apart into
+the 833 people behind them, grouped by the cause reported for each record.
 
 Built for *Mapping Movement: Exploring Migration through Data*.
 
@@ -33,7 +34,7 @@ The piece is made for a desktop browser. Under 1024 by 640 a notice covers the p
 
 ## The scenes
 
-The page is six scenes, one on screen at a time, crossfading as the reader scrolls.
+The page is five scenes, one on screen at a time, crossfading as the reader scrolls.
 Each has one section in `index.html`, one stylesheet and one script:
 
 | Nav | Section | Style | Script |
@@ -41,8 +42,7 @@ Each has one section in `index.html`, one stylesheet and one script:
 | Intro | `#ripple-bg-wrapper` (`#cover`, `#intro`) | `css/opening.css` | `js/scenes/opening/` |
 | The Record | `#sequence` | `css/record.css` | `js/scenes/record/` |
 | Why Lampedusa | `#context` | `css/context.css` | `js/scenes/context.js` |
-| 11 Years | `#eleven-years` | `css/eleven-years.css` | `js/scenes/elevenYears.js` |
-| In 2024 | `#year-2024` | `css/in-2024.css` | `js/scenes/in2024.js` |
+| 12 Years | `#eleven-years` | `css/eleven-years.css`, `css/in-2024.css` | `js/scenes/elevenYears.js`, `js/scenes/in2024.js` |
 | Epilogue | `#epilogue` | `css/epilogue.css` | `js/scenes/epilogue.js` |
 
 What the scenes share lives in `css/base.css`, `css/nav.css` and `js/core/`:
@@ -74,26 +74,32 @@ js/
   main.js                     entry point
   config.js                   the record's tunables: geometry, pacing, ripples, labels
   core/                       scenes.js, reveal.js, nav.js, motion.js
-  data/incidents.js           loads and scales the CSV, shared by the record and 11 Years
+  data/
+    incidents.js              loads and scales the CSV, shared by the record and 12 Years
+    people.js                 one entry per person, and the cause groups
+    tooltip.js                the hover panel shared by every mark
   scenes/
     opening/                  the intro reveal and the ripple field behind it
     record/                   the animated sequence, one module per job
       index.js                  when it starts
       controller.js             runs it in order: island, circle, radius, UI, paths
-      drawPaths.js              release schedule: slow first, then accelerating
-      renderPath.js             one incident: travel, ripple, label, tooltip
+      drawPaths.js              the schedule: the eased-in legend, then a slot per record
+      renderPath.js             one record: travel, ripple, label, tooltip
       onScene.js                holds it while under half of it is on screen
       …                         the frame, circle, cross, radius line, year bar, counts
     context.js                the three pinned steps and their diagrams
-    elevenYears.js            a disc a year, and any year opened large
-    in2024.js                 one dot per person, and the 206
+    elevenYears.js            a disc a year (twelve), and any year opened large
+    in2024.js                 the discs' marks become 833 people, by way of the island,
+                              grouped by cause
     epilogue.js               the last screen's lines and the island
 assets/
   fonts/                      EB Garamond, variable woff2, with its licence
   diagrams/                   the three Why Lampedusa diagrams, from Figma
   images/                     the epilogue's relief of the island
   favicon.ico
-data/                         the filtered incident extract
+data/                         the source snapshot, the sample, its summary and METHOD.md
+scripts/build_data.py         rebuilds the sample and summary from the snapshot
+tests/data.cjs                checks totals, order, groups and record identity
 ```
 
 Timings and sizes that belong to one scene are constants at the top of that scene's
@@ -102,49 +108,47 @@ script, with what they do and why they are what they are. The record's are all i
 
 ## Data
 
-`data/lampedusa_nearby_incidents.csv` is a filtered extract of the
-[Missing Migrants Project](https://missingmigrants.iom.int/downloads) record published by the
-International Organization for Migration, cut to incidents within 50 km of Lampedusa.
+`data/source_snapshot.csv` is the Missing Migrants Project record
+(International Organization for Migration) as supplied in September 2026.
+`python scripts/build_data.py` rebuilds `data/lampedusa_nearby_incidents.csv` and
+`data/summary.json` from it; `node tests/data.cjs` checks the result. `data/METHOD.md`
+has the selection rule, what the fields can and cannot say, and the known conflicts
+between coordinates and location descriptions.
 
 | | |
 | --- | --- |
-| Incidents | 94 |
-| Dead and missing | 703 |
-| Years | 2014 – 2024 |
-| Distance range | 0.0 – 50.0 km |
+| Records (Main IDs) | 95 |
+| Dead and missing | 833 (199 dead, 634 missing) |
+| Years | 2014 – 2025, no 2026 events |
+| Selection | supplied coordinates within 50 km of 35.5086, 12.5929 |
 
-The heaviest years are 2023 (39 incidents) and 2024 (19 incidents, 206 dead and
-missing). `Distance_to_Lampedusa_km` was computed from each incident's coordinates and
-kept as a column, because it ended up driving the layout rather than only the filter.
-
-The one figure not from that record is the 45,997 people who reached Lampedusa in 2024,
-from the Italian Red Cross as reported by InfoMigrants on 13 January 2025
-(`ARRIVALS_2024` in `js/config.js`). Both sources are credited at the foot of the page.
-
-The script that produced the extract is not in this repository.
+The heaviest years are 2024 (211 dead and missing, 17 records) and 2023 (188, 35
+records). A Main ID is a record, not a boat: 19 of the 95 combine two or three
+incident IDs.
 
 ## Pacing the record
 
-In `js/config.js`:
+The schedule is in `js/scenes/record/drawPaths.js`:
 
 | Constant | Value | Meaning |
 | --- | --- | --- |
-| `FIRST_DELAY` | 3000 ms | before the first incident |
-| `INITIAL_INCIDENTS` | 3 | how many are released slowly |
-| `INITIAL_DELAY` | 6000 ms | gap between those first few |
-| `MIN_GAP` | 400 ms | floor on the gap once it has accelerated |
-| `MAX_CURRENT` | 5 | paths allowed in flight at once |
-| `LAUNCHING_SPEED` | 0.04 | path progress per frame at 60Hz |
+| `PLAY_MS` | 76000 ms | the whole bar, 2014 to the end of 2025 |
+| `OPENING` | 5 | records that go out slowly, one at a time |
+| `LEGEND` | 5 | of those, the ones that carry their distance and count |
+| `OPENING_PX_PER_MS` | 0.06 to 0.22 | their speed on screen, easing in |
+| `OPENING_GAPS` | 4400 to 1600 ms | the least time between their bursts |
 
-The delays count time with the record on screen, not wall time: scroll away and the
-sequence holds where it is.
+Each opening record waits for everything the one before it did, its ripple and its
+count, to finish. After them every record takes one even slot, and a year never gets
+less of the bar than its label needs. Each path is sent early by its own travel time,
+so it bursts as the fill reaches its slot, and a year's label lights as its first
+record bursts. The clock counts time with the record on screen, not wall time:
+scroll away and the sequence holds where it is.
 
 `renderPath.js` advances a path by elapsed milliseconds, not by frames, so the speed
-does not depend on the display: a fixed step per `requestAnimationFrame` took about
-417 ms on a 60Hz screen and 208 ms on a 120Hz one. `LAUNCHING_SPEED` is still the
-per-frame figure the piece was tuned with, read against the 60Hz it was tuned on.
-Steps are capped at 50 ms so a backgrounded tab does not jump a path forward when it
-returns.
+does not depend on the display. `LAUNCHING_SPEED` in `js/config.js` is the per-frame
+figure the piece was tuned with, read against the 60Hz it was tuned on. Steps are
+capped so a backgrounded tab does not jump a path forward when it returns.
 
 ## Credits
 

@@ -12,13 +12,11 @@ import { drawCanvas } from "./drawCanvas.js";
 import { drawCircle } from "./drawCircle.js";
 import { drawRadiusLine } from "./drawRadiusLine.js";
 import { fadeInUI } from "./fadeUI.js";
-import { drawPaths } from "./drawPaths.js";
+import { drawPaths, planRecord } from "./drawPaths.js";
 import { loadAndProcessData } from "../../data/incidents.js";
 import { whenOnScene, wait } from "./onScene.js";
 import { RADIUS_HOLD } from "../../config.js";
-import {
-    initYearProgressBar
-} from "./yearProgressBar.js";
+import { initYearLabels, placeYearLabels } from "./yearProgressBar.js";
 
 import { showIsland } from "./showIsland.js";
 
@@ -29,13 +27,7 @@ export async function runSceneIntro() {
     // The record, read before anything is drawn rather than awaited between
     // the counters fading in and the first path, which put a network wait in
     // the middle of the choreography.
-    const {
-        paths,
-        allYears,
-        yearEventCounts,
-        firstBatch,
-        remainingBuckets
-    } = await loadAndProcessData();
+    const { paths, allYears } = await loadAndProcessData();
 
     // 2. the island, its name, and the shrink that lands it on the cross.
     //    Drawn in the frame, so it ends where the circle is about to begin.
@@ -52,20 +44,14 @@ export async function runSceneIntro() {
     drawRadiusLine();
     await wait(RADIUS_HOLD);
 
-    // 5. the counters and the year bar
+    // 5. the counters and the year bar, its labels in place first so they
+    //    fade in with it rather than appearing after it
     await whenOnScene();
+    const plan = planRecord(paths, allYears, initYearLabels(allYears));
+    placeYearLabels(plan.bounds);
     await fadeInUI();
 
     // 6. and then the incidents themselves
     await whenOnScene();
-    initYearProgressBar(allYears);
-
-
-    drawPaths({
-        paths,
-        allYears,
-        yearEventCounts,
-        firstBatch,
-        remainingBuckets
-    });
+    drawPaths(plan);
 }

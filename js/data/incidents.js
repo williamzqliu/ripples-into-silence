@@ -1,11 +1,10 @@
 // js/data/incidents.js
 
 import {
+  cx, cy, LAUNCH_RADIUS, DISTANCE_RINGS_KM, RING_LABEL_GAP,
+  RING_LABEL_W, RING_LABEL_H, RING_LABEL_CLEAR,
   SCALE_DEAD_MIN, SCALE_DEAD_MAX,
-  RADIUS_KM, radiusFractionFor,
-  ANGLE_BUCKETS, GOLDEN_ANGLE, INITIAL_INCIDENTS,
-  FEATURED_DEAD, FEATURED_DISTANCE,
-  FEATURED_ANGLE_MIN_DEG, FEATURED_ANGLE_MAX_DEG
+  RADIUS_KM, radiusFractionFor, GOLDEN_ANGLE
 } from "../config.js";
 
 export async function loadAndProcessData(csvPath = "./data/lampedusa_nearby_incidents.csv") {
@@ -52,44 +51,30 @@ export async function loadAndProcessData(csvPath = "./data/lampedusa_nearby_inci
   // the sector buckets and the label nudges all read it as a bearing.
   .forEach((d, k) => { d.angle = (k * GOLDEN_ANGLE) % (2 * Math.PI); });
 
-  const yearEventCounts = {};
-  paths.forEach(p => {
-    yearEventCounts[p.year] = (yearEventCounts[p.year] || 0) + 1;
+  // The ring labels sit at the top of their rings, and four marks landed on
+  // them, the 82-person record of May 2017 eight pixels into "10 km". Each
+  // is turned, a degree at a time, just far enough to clear its label. Its
+  // distance does not change; only the direction, which carries nothing.
+  const labels = [RADIUS_KM, ...DISTANCE_RINGS_KM].map(km => {
+    const r = LAUNCH_RADIUS * radiusFractionFor(km);
+    return { x: cx - RING_LABEL_W / 2, y: cy - r - RING_LABEL_GAP - RING_LABEL_H, w: RING_LABEL_W, h: RING_LABEL_H };
   });
-
-  const allYears = Object.keys(yearEventCounts)
-    .sort((a, b) => a - b)
-    .map(Number);
-
-  // The opening is chosen for legibility: small enough to read at a glance
-  // and near enough that the path does not take all day to arrive.
-  const initialPool = paths.filter(p =>
-    p.dead > 1 && p.dead <= FEATURED_DEAD && p.disappearRatio < FEATURED_DISTANCE
-  );
-
-  // Launched from the lower half of the circle, where the travelling label
-  // has room beside the path.
-  const firstBatch = initialPool
-    .filter(d => {
-      const angleDeg = d.angle * 180 / Math.PI;
-      return angleDeg >= FEATURED_ANGLE_MIN_DEG && angleDeg <= FEATURED_ANGLE_MAX_DEG;
-    })
-    .slice(0, INITIAL_INCIDENTS);
-
-  const remainingPaths = paths.filter(p => !firstBatch.includes(p));
-
-  const buckets = Array.from({ length: ANGLE_BUCKETS }, () => []);
-  remainingPaths.forEach(p => {
-    const angleNorm = (p.angle % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-    const sector = Math.floor((angleNorm / (2 * Math.PI)) * ANGLE_BUCKETS);
-    buckets[sector].push(p);
-  });
-
-  return {
-    paths,
-    allYears,
-    yearEventCounts,
-    firstBatch,
-    remainingBuckets: buckets
+  const clearance = (d, angle) => {
+    const R = LAUNCH_RADIUS * d.disappearRatio;
+    const x = cx + Math.cos(angle) * R, y = cy + Math.sin(angle) * R;
+    return Math.min(...labels.map(b => Math.hypot(x - Math.max(b.x, Math.min(x, b.x + b.w)),
+      y - Math.max(b.y, Math.min(y, b.y + b.h))) - d.radius));
   };
+  const STEP = Math.PI / 180;
+  for (const d of paths) {
+    if (clearance(d, d.angle) >= RING_LABEL_CLEAR) continue;
+    const away = d.angle < 1.5 * Math.PI ? -1 : 1;     // away from the top
+    let a = d.angle;
+    for (let k = 0; k < 45 && clearance(d, a) < RING_LABEL_CLEAR; k++) a += away * STEP;
+    d.angle = a;
+  }
+
+  const allYears = [...new Set(paths.map(p => p.year))].sort((a, b) => a - b);
+
+  return { paths, allYears };
 }

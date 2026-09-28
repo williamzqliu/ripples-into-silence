@@ -96,7 +96,10 @@
   box-sizing: border-box;
   border-radius: 50%;
   background: #FFFFFF;
-  border: 0.55cqw solid #C0272D;
+  /* The ring as an inset shadow rather than a border: a border is rounded
+     to whole pixels before the figure's scale, so its width on screen could
+     not be set exactly. This is 3px at the full 500px figure. */
+  box-shadow: inset 0 0 0 0.4cqw #C0272D;
 }
 
 /* A live marker: thin red rings go out from the town and fade, over
@@ -114,7 +117,7 @@
 
 /* Two rings close together, then a rest: bong bong, bong bong, like a
    heartbeat, rather than an even train of them. Each ring goes out in the
-   first 1.5s of a 2.8s cycle and waits out the rest; the second leaves
+   first 1.5s of a 2.5s cycle and waits out the rest; the second leaves
    0.28s after the first. */
 .epilogue-pulse::before,
 .epilogue-pulse::after {
@@ -123,9 +126,9 @@
   inset: 0;
   box-sizing: border-box;
   border-radius: 50%;
-  border: 0.4cqw solid #C0272D;
+  box-shadow: inset 0 0 0 0.2667cqw #C0272D;   /* 2px */
   opacity: 0;
-  animation: epilogue-pulse 2.8s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  animation: epilogue-pulse 2.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
 }
 
 .epilogue-pulse::after {
@@ -134,7 +137,7 @@
 
 @keyframes epilogue-pulse {
   0%   { transform: scale(1); opacity: 0.9; }
-  54%  { transform: scale(3.2); opacity: 0; }
+  60%  { transform: scale(3.2); opacity: 0; }   /* 1.5s of the 2.5 */
   100% { transform: scale(3.2); opacity: 0; }
 }
 
@@ -200,7 +203,7 @@
 
 .footer-credit__sources {
   font-family: 'EB Garamond', Georgia, serif;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.4);
 }

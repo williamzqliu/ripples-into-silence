@@ -7,6 +7,7 @@ import {
   CROSS_LINE_STROKE,
   CROSS_COLOUR
 } from "../../config.js";
+import { showTooltip } from "../../data/tooltip.js";
 
 // The cross at the centre is Lampedusa. It grows as the island outline
 // comes down onto it: same centre, same duration, so the two read as one
@@ -53,11 +54,7 @@ function drawCross(duration = 900) {
     .attr("fill", "transparent")
     .style("cursor", "pointer")
     .on("mousemove", (event) => {
-      tooltip
-        .html("Lampedusa")
-        .style("left", `${event.pageX + 10}px`)
-        .style("top", `${event.pageY - 20}px`)
-        .style("opacity", 1);
+      showTooltip(event, "Lampedusa");
     })
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);

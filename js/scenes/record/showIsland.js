@@ -20,7 +20,7 @@
 import {
   cx, cy,
   ISLAND_WIDTH, ISLAND_FADE_IN, ISLAND_HOLD,
-  NAME_FADE_OUT, NAME_OFFSET, ISLAND_SHRINK
+  NAME_FADE_OUT, NAME_LINGER, NAME_OFFSET, ISLAND_SHRINK
 } from "../../config.js";
 
 import { drawCross } from "./drawCross.js";
@@ -62,9 +62,10 @@ export function showIsland() {
     island.transition().duration(ISLAND_FADE_IN).attr("opacity", 1);
     name.transition().duration(ISLAND_FADE_IN).attr("opacity", 1);
 
-    // The name goes first, so the shrink has the frame to itself.
+    // The name goes first, so the shrink has most of the frame to itself.
+    // It lingers a tenth of a second past its old cue, into the shrink.
     name.transition()
-      .delay(ISLAND_FADE_IN + ISLAND_HOLD)
+      .delay(ISLAND_FADE_IN + ISLAND_HOLD + NAME_LINGER)
       .duration(NAME_FADE_OUT)
       .attr("opacity", 0)
       .remove();

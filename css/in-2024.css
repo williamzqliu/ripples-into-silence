@@ -1,16 +1,85 @@
-/* The annual discs and people remain in one sticky scene. */
-.people-track { height: 400vh; position: relative; margin-top: 32px; }
-.people-stage { position: sticky; top: var(--nav-h); height: calc(100vh - var(--nav-h)); box-sizing: border-box; }
-.people-stage #year-discs { position: absolute; inset: 12px 24px 36px; }
-.people-stage .year-discs { margin-top: 0; height: 100%; align-content: space-evenly; row-gap: 8px; }
-.people-stage .year-disc__plot { width: min(170px, max(65px, calc((100vh - var(--nav-h) - 330px) / 3))); }
-.people-stage .year-disc__note { font-size: 12px; max-width: 170px; }
-.people-caption { position: absolute; left: 24px; right: 24px; top: 18px; opacity: 0; pointer-events: none; }
-.people-caption h2 { margin: 0 0 8px; }
-.people-caption p { font-size: 17px; margin: 0; }
-#people-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.people-note { position: absolute; left: 24px; right: 24px; bottom: 12px; font-size: 13px; line-height: 1.4; color: rgba(255,255,255,.65); opacity: 0; pointer-events: none; }
-.people-accessible { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-#eleven-years .people-caption h2 { font-size: 42px; line-height: 1.15; margin: 0 0 8px; }
-#eleven-years .people-caption p { font-size: 17px; line-height: 1.4; max-width: none; }
-#eleven-years .people-note { font-size: 13px; line-height: 1.4; max-width: none; color: rgba(255,255,255,.65); }
+/* in-2024.css
+
+   12 Years, second half: the discs and the 833 people share one pinned
+   stage (js/scenes/in2024.js). The file keeps its name from when this was
+   the "In 2024" scene. */
+
+/* The scroll the stage is pinned for: the discs, the people drawing into
+   the island and coming apart into their groups, and the groups held for
+   reading. */
+.people-track {
+  height: 540vh;
+  position: relative;
+  margin-top: 32px;
+}
+
+.people-stage {
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  box-sizing: border-box;
+}
+
+/* The twelve discs fill the stage under the nav. */
+.people-stage #year-discs {
+  position: absolute;
+  inset: 12px 24px 36px;
+}
+
+.people-stage .year-discs {
+  margin-top: 0;
+  height: 100%;
+  align-content: space-evenly;
+  row-gap: 8px;
+}
+
+.people-stage .year-disc__plot {
+  width: min(170px, max(65px, calc((100vh - var(--nav-h) - 330px) / 3)));
+}
+
+/* Once the canvas has taken the white marks over, the SVG's own are hidden,
+   so the two are never drawn over each other. */
+#year-discs.is-handed .year-disc__mark { visibility: hidden; }
+
+#people-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* The caption above the groups and the note below them. The script sets
+   their `top` and their opacity, so they sit with the groups however large
+   the dots come out. */
+.people-caption,
+.people-note {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Set as 12 Years' own title and paragraph (base.css), but read as one
+   sentence, "833 people / who never got to live…", so the two sit close. */
+#eleven-years .people-caption h2 { margin-bottom: 2px; line-height: 1.1; }
+#eleven-years .people-caption p { margin: 0; line-height: 1.35; }
+
+#eleven-years .people-note {
+  font-size: 15px;
+  line-height: 1.4;
+  max-width: 40em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* The groups as text, for a screen reader: the canvas has none. */
+.people-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

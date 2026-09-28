@@ -37,10 +37,6 @@ export function pushOut(from, u, clear, box, gap) {
   return { x: from.x + u.x * dist, y: from.y + u.y * dist };
 }
 
-export function boxAt(c, box) {
-  return { x: c.x - box.w, y: c.y - box.h, width: box.w * 2, height: box.h * 2 };
-}
-
 export function inFrame(b, pad = 2) {
   return b.x >= pad && b.y >= pad &&
     b.x + b.width <= FRAME_WIDTH - pad && b.y + b.height <= FRAME_HEIGHT - pad;

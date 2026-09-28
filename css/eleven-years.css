@@ -12,7 +12,7 @@
 /* Rows of four, three and four on an eight column grid, each disc two
    columns wide, the middle row set between the others (js/scenes/elevenYears.js places
    them). The three rows, discs and figures, fit one screen under the nav:
-   the figures and the gaps take 286px with the worst year's note, and the
+   the figures and the gaps take about 270px, and the
    discs share what is left less a little air, up to 200px: 148px at 815
    tall, 200 from 970. */
 .year-discs {
@@ -71,43 +71,46 @@
 }
 
 .year-disc:hover .year-disc__frame,
-.year-disc:focus-visible .year-disc__frame,
-.year-disc--worst:hover .year-disc__frame {
+.year-disc:focus-visible .year-disc__frame {
   stroke: #FBC900;
 }
 
 .year-disc:hover .year-disc__year,
-.year-disc:focus-visible .year-disc__year,
-.year-disc--worst:hover .year-disc__year {
+.year-disc:focus-visible .year-disc__year {
   color: #FBC900;
 }
 
 .year-disc__mark.is-hot .year-disc__core { fill: #FBC900; fill-opacity: 1; }
 
-/* The year the most people were lost: a solid, brighter frame, its year in
-   full white, and a line under its figures. Not larger, and not yellow,
-   which is kept for what the pointer is on. */
-.year-disc--worst .year-disc__frame,
-.disc-lightbox--worst .year-disc__frame {
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-dasharray: none;
+/* The latest year's frame ripples out, two rings and a long rest, slower
+   and softer than the island's pulse in the epilogue: each ring takes
+   about 2s to spread and fade, the second follows 0.65s later, and the
+   pair comes round every 4s. */
+.year-disc__ripple {
+  stroke: rgba(255, 255, 255, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.year-disc--worst .year-disc__year { color: #FFFFFF; }
-
-.year-disc__note {
-  margin-top: 2px;
-  font-size: 15px;
-  line-height: 1.35;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.85);
+.year-disc__ripple.is-on {
+  animation: year-disc-ripple 4s cubic-bezier(0.33, 0, 0.35, 1) infinite;
 }
 
-.disc-lightbox__note {
-  font-size: var(--fs-body);
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.9);
-  margin: -0.8em 0 1.2em;
+.year-disc__ripple.is-on + .year-disc__ripple.is-on {
+  animation-delay: 0.65s;
+}
+
+@keyframes year-disc-ripple {
+  0%   { transform: scale(1); opacity: 0; }
+  8%   { transform: scale(1); opacity: 0.4; }     /* fades in on the frame, not yet moving */
+  52%  { transform: scale(1.25); opacity: 0; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .year-disc__ripple.is-on { animation: none; }
 }
 
 /* ---------- one year, opened large ---------- */

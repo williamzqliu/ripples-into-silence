@@ -45,9 +45,13 @@
      also counted the rise under a scene that was still fading in, the
      first paragraph was never fully seen at all. --steps is set from
      scenes/context.js, from the markup. */
-  --step-scroll: 24vh;
+  --step-scroll: 34vh;
   --steps: 3;
-  min-height: calc(var(--g) + var(--steps) * var(--step-scroll));
+  /* Held still at each end, about two wheel notches, so the first diagram
+     is fully up before a reader can scroll back out, and the last before
+     they scroll on. scenes/context.js reads it. */
+  --edge-hold: 200px;
+  min-height: calc(var(--g) + var(--steps) * var(--step-scroll) + 2 * var(--edge-hold));
 
   display: flex;
   width: 100%;
@@ -147,9 +151,8 @@
   left: 50%;
   width: var(--g);
   height: var(--g);
-  /* --fx and --fy move the drawing's own centre onto the frame's, as a
-     fraction of the frame. Set by scenes/context.js, measured from each SVG. */
-  translate: calc(-50% + var(--fx, 0) * var(--g)) calc(-50% + var(--fy, 0) * var(--g));
+  /* All three in the same place, as drawn: Lampedusa does not move. */
+  translate: -50% -50%;
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.8s ease;
@@ -159,6 +162,11 @@
 .scrolly-img.visible {
   opacity: 1;
   transition: opacity 0.6s ease 0.4s;
+}
+
+/* Not the step's diagram, and the pair is moving: gone without a fade. */
+.scrolly-img.cut {
+  transition: none;
 }
 
 /* Still a tenth of a second behind its paragraph. */

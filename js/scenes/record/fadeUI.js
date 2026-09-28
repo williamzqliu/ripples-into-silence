@@ -16,6 +16,9 @@ export function fadeInUI() {
             "#year-progress-bar", "#year-pop-labels",
         ].join(", "))
             .transition().duration(FADE).style("opacity", 1);
+        // The key under the bar follows once the bar is up.
+        d3.select(".record-key")
+            .transition().delay(FADE + 200).duration(FADE).style("opacity", 1);
 
         setTimeout(resolve, FADE);
     });

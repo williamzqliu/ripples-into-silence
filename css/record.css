@@ -46,11 +46,9 @@
   margin: 0 auto;
 }
 
-/* The insets give way on narrower windows, down to nothing at 1024, so
-   the room goes to the drawing rather than to empty gutters. 35 at full
-   width leaves the drawing exactly its 650: at 55 there were only 610px
-   between the counters, and the fixed 650 drawing had been hanging 20px
-   into each of them. */
+/* The counters sit on the nav's own edges: the left one under the start of
+   "Ripples into Silence", the right one under the end of "Epilogue", and
+   raised to the top of the frame. */
 #left {
   width: 200px;
   flex-shrink: 0;
@@ -58,8 +56,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-top: 55px;
-  margin-left: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
+  margin-top: 0;
 }
 
 #right {
@@ -69,8 +66,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  margin-top: 55px;
-  margin-right: clamp(0px, calc((100vw - 1024px) * 0.2), 35px);
+  margin-top: 0;
 }
 
 /* The SVG is a fixed 650 square and .layout is 90vh with its items at
@@ -128,6 +124,9 @@
 #incident-count,
 #death-count {
   font-size: 48px;
+  /* Set solid, so the figure sits close under its label: at the page's
+     line height it hung 33px below it. */
+  line-height: 1;
   /* Bebas Neue ships a single weight, so `bold` was asking the browser to
      smear the outlines rather than load a heavier cut. */
   font-weight: 400;
@@ -144,7 +143,7 @@
 /* ---- year bar wrapper, against the bottom of the animation ---- */
 .year-progress-wrapper {
   position: absolute;
-  bottom: 24px;
+  bottom: 34px;     /* the key sits in the 34 below the bar */
   left: var(--page-pad);
   right: var(--page-pad);
   height: 32px;
@@ -182,11 +181,6 @@
   opacity: 0.7;
 }
 
-#year-progress-fill.fade-out {
-  transition: opacity 1s ease;
-  opacity: 0;
-}
-
 /* ---- year labels ---- */
 #year-pop-labels {
   position: absolute;
@@ -201,8 +195,7 @@
 }
 
 .year-pop {
-  position: absolute;
-  transform: translateX(-50%);
+  position: absolute;   /* its left edge on its year's start: yearProgressBar.js */
   font-size: 17px;
   font-family: 'Bebas Neue', sans-serif;
   /* One weight in the face, so `bold` only asked for a smear. */
@@ -211,11 +204,6 @@
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
-}
-
-.year-pop.hidden {
-  opacity: 0;
-  visibility: hidden;
 }
 
 .year-pop.inactive {

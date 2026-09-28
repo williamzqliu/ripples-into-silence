@@ -22,6 +22,9 @@ import { FADE_FROM, FADE_TO } from "../core/scenes.js";
 // the pair is mostly off the top and the fade only finishes it.
 const LEAVE_AT = 0.2;
 
+// The first step's share of the pinned run, against the others' 1.
+const FIRST_SHARE = 0.45;
+
 let steps = [];
 let imgs = [];
 let graphic = null;
@@ -65,7 +68,23 @@ function update() {
   else if (u > run + 0.5) {                          // come unstuck
     active = frame.bottom < vh * LEAVE_AT ? n : n - 1;
   }
-  else active = Math.min(n - 1, Math.floor(u / (run / n)));
+  else {
+    // The pinned run, shared by weight. The first step also has the scene's
+    // fade-in, so it takes a smaller share of the pinned part. The last
+    // keeps a full one: cut short, the pair came unstuck while the
+    // diagram before it was still fading out, and at speed that diagram
+    // was seen sliding up the screen.
+    // The held stretch at each end goes to the first and the last step.
+    const hold = Math.min(run / 4, parseFloat(getComputedStyle(container).getPropertyValue("--edge-hold")) || 0);
+    const weights = steps.map((_, i) => (i === 0 ? FIRST_SHARE : 1));
+    const total = weights.reduce((s, w) => s + w, 0);
+    let at = hold;
+    active = n - 1;
+    for (let i = 0; i < n; i++) {
+      at += (run - 2 * hold) * weights[i] / total;
+      if (u < at) { active = i; break; }
+    }
+  }
 
   if (active !== lastActive) {
     const fromBlank = !(lastActive >= 0 && lastActive < n);
@@ -84,48 +103,19 @@ function update() {
     step.classList.toggle("past", i < active);
   });
   const id = steps[active] ? steps[active].dataset.img : null;
-  imgs.forEach(img => img.classList.toggle("visible", img.dataset.for === id));
+  // A diagram still fading out when the pair starts to move goes at once:
+  // left to its fade, a quick scroll saw it slide up the screen.
+  const moving = Math.abs(frame.top - stickyTop) > 0.5;
+  imgs.forEach(img => {
+    img.classList.toggle("visible", img.dataset.for === id);
+    img.classList.toggle("cut", moving && img.dataset.for !== id);
+  });
 }
 
-// The diagrams share a 700 by 700 frame, but not where they are drawn in
-// it: the 130km and corridor drawings sit in its lower half, centred
-// about 130 units below the middle, so they hung low beside a centred
-// paragraph. Each is measured once from its own SVG and moved so its drawn
-// centre is the frame's, which survives a re-export from Figma.
-async function centreDiagram(img) {
-  try {
-    const text = await (await fetch(img.getAttribute("src"))).text();
-    const holder = document.createElement("div");
-    holder.style.cssText = "position:absolute;left:-10000px;top:0;visibility:hidden";
-    holder.innerHTML = text;
-    document.body.appendChild(holder);
-    const svg = holder.querySelector("svg");
-    const vb = svg.viewBox.baseVal;
-    svg.setAttribute("width", vb.width);
-    svg.setAttribute("height", vb.height);
-
-    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-    svg.querySelectorAll("path, circle, ellipse, rect, line, polygon, polyline, text").forEach(el => {
-      const fill = el.getAttribute("fill");
-      const stroke = el.getAttribute("stroke");
-      if (fill === "none" && (!stroke || stroke === "none")) return;
-      const b = el.getBBox();
-      // A rect the size of the frame is a background, not part of the drawing.
-      if (el.tagName === "rect" && b.width >= vb.width - 10 && b.height >= vb.height - 10) return;
-      x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y);
-      x1 = Math.max(x1, b.x + b.width); y1 = Math.max(y1, b.y + b.height);
-    });
-    holder.remove();
-    if (!isFinite(x0)) return;
-
-    const fx = (vb.x + vb.width / 2 - (x0 + x1) / 2) / vb.width;
-    const fy = (vb.y + vb.height / 2 - (y0 + y1) / 2) / vb.height;
-    img.style.setProperty("--fx", fx.toFixed(4));
-    img.style.setProperty("--fy", fy.toFixed(4));
-  } catch (err) {
-    // Left where Figma put it. Off-centre is better than missing.
-  }
-}
+// The three diagrams share one 700 by 700 frame, drawn so that Lampedusa
+// and its name are in the same place in each, and they are shown exactly as
+// drawn. Each used to be moved so its own drawing was centred, which put
+// the island somewhere different at every step.
 
 // Where the nav's link lands, in scroll px: the moment the text and the
 // diagram pin, with the scene fully up. The first step, whole, and where it
@@ -150,5 +140,4 @@ export function initContext() {
   window.addEventListener("scroll", update, { passive: true });
   window.addEventListener("resize", update);
   update();
-  imgs.forEach(centreDiagram);
 }

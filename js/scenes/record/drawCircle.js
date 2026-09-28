@@ -78,14 +78,11 @@ function drawDistanceRings() {
 // guesswork. Bigger, brighter, clear of the stroke, and painted over a
 // hairline of the page colour so no dash runs through a letter.
 //
-// They stay at the top of their own rings. Walking them round to somewhere
-// no mark ever lands was tried and thrown away: twenty-three of the
-// ninety-four incidents land within thirty pixels of the ten kilometre
-// ring, which is the densest water in the figure, and there is no angle on
-// it that stays clear. Rotating the whole ruler off the vertical saves two
-// touches out of three and costs the alignment that makes the three numbers
-// read as one scale. So the marks draw over the labels where they meet: the
-// marks are the record, these are the ruler beside it.
+// They stay at the top of their own rings, one above the other, so the
+// three numbers read as one scale. Walking them round to somewhere no mark
+// lands was tried and thrown away: the water near the ten kilometre ring
+// is the densest in the figure. The few marks that landed on a label are
+// turned a few degrees off it instead (data/incidents.js).
 function ringLabel(svg, r, km, delay) {
   const text = svg.append("text")
     .attr("text-anchor", "middle")

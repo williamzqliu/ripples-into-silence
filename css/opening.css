@@ -62,18 +62,20 @@
   color: white;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 2px;
+  margin-right: -2px;  /* the spacing after the last letter, so it centres on its ink */
   opacity: 0;
   transform: translateY(20px);
   animation: fadeInUp 1.5s ease forwards;
 }
 
 .cover-content h2 {
-  font-size: 28px;
+  font-size: 30px;
   margin-top: 0px;     /* sits against the title above */
   color: white;
   opacity: 0;
   font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: 0.65px;
+  letter-spacing: 0.08em;
+  margin-right: -0.08em;
   transform: translateY(20px);
   animation: fadeInUp 1.5s ease forwards;
   animation-delay: 0.1s;
@@ -96,7 +98,13 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  padding: 100px 0 340px;
+  /* The first paragraph, two lines, sits at the middle of the screen when
+     the intro's top is at the top, which is where the nav's Intro link
+     lands; each after it is a set share of the screen further on, so each
+     is read at the same height. The steps were a fixed 400px plus their
+     margins apart, and the link landed with the first one 150px down and
+     the second already showing. */
+  padding: calc(50vh - 34px) 0 40vh;
 }
 
 #intro .content {
@@ -110,11 +118,11 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  text-align: left;
+  text-align: center;
   color: white;
   font-family: 'EB Garamond', Georgia, serif;
   padding: 0 40px;
-  gap: 400px;
+  gap: 55vh;
   height: 100%;
 }
 
@@ -139,8 +147,7 @@
 
 /* each intro paragraph starts here */
 .intro-step {
-  margin-top: 50px;
-  margin-bottom: 90px;
+  margin: 0;
   opacity: 0;
   transform: translateY(40px);
   transition: all 0.8s ease;

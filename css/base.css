@@ -136,7 +136,6 @@ svg {
 /* Section titles and the prose under them, for the sections that open on
    a heading. */
 #eleven-years h2,
-#year-2024 h2,
 .scrolly-step h2 {
   font-size: var(--fs-section-title);
   margin-bottom: 0.6em;
@@ -148,8 +147,7 @@ svg {
 
 /* 90% white as a colour rather than as opacity: an id's opacity outranks
    the fade-step classes, so the paragraph would never have faded in. */
-#eleven-years p,
-#year-2024 > .page-width p {
+#eleven-years p {
   font-size: var(--fs-body);
   max-width: var(--measure-body);
   color: rgba(255, 255, 255, 0.9);
@@ -192,7 +190,6 @@ svg {
    own background is the ripple field. */
 #sequence,
 #eleven-years,
-#year-2024,
 #epilogue {
   background-color: #0F1A32; /* the page background */
   z-index: var(--z-section);
@@ -244,6 +241,18 @@ svg {
   transition: opacity 0.2s ease;
 }
 
-.data-note, .record-key { font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.65); }
-#tooltip { max-width: 360px; white-space: normal; line-height: 1.45; }
-.record-key { position: absolute; bottom: 48px; width: 100%; margin: 0; text-align: center; }
+#tooltip { max-width: 320px; white-space: normal; line-height: 1.45; padding: 10px 12px 11px; }
+#tooltip .tip-count { font-size: 17px; font-weight: 600; color: #fff; }
+#tooltip .tip-meta,
+#tooltip .tip-place { font-size: 14px; color: rgba(255,255,255,.9); margin-top: 5px; }
+#tooltip .tip-place { color: rgba(255,255,255,.75); }
+/* The pin hangs in its own column, so a place that runs to two lines
+   wraps under the text rather than under the pin. */
+#tooltip .tip-place { display: flex; gap: 6px; align-items: flex-start; }
+/* margin: 0, against the page's `svg { margin: 0 auto }`, which in this
+   row centred the pin and pushed a short place to the far edge. */
+#tooltip .tip-pin { flex: none; width: 10px; height: 13px; margin: 3px 0 0; }
+/* Under the year bar, set like the credits' sources. */
+.record-key { position: absolute; top: calc(100% + 6px); width: 100%; margin: 0; text-align: center;
+  font-size: 13px; line-height: 1.6; color: rgba(255,255,255,.4);
+  opacity: 0; /* js/scenes/record/fadeUI.js brings it in after the bar */ }

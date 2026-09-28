@@ -43,18 +43,17 @@
     <section id="cover" class="fullscreen cover">
       <div class="cover-content">
         <h1>Ripples into Silence</h1>
-        <h2>The Human Cost of Migration Around Lampedusa</h2>
+        <h2>Lives Lost Around Lampedusa</h2>
       </div>
     </section>
 
 
     <section id="intro" class="section intro">
       <div class="content">
-        <p class="intro-step">People cross the Mediterranean hoping to build a life somewhere new.</p>
-        <p class="intro-step">For many, Lampedusa is part of that journey.<br>But what does the journey cost?</p>
-        <p class="intro-step">The records include people who disappeared at sea,<br>and people who died after reaching the island.</p>
-        <p class="intro-step">From 2014 to 2025, deaths and disappearances continued to be recorded around Lampedusa.</p>
-        <p class="intro-step final">Follow the record through time.<br>Each mark carries a count of people.</p>
+        <p class="intro-step">Around Lampedusa, deaths and disappearances<br>have been recorded for more than a decade.</p>
+        <p class="intro-step">The numbers rise and fall from year to year.</p>
+        <p class="intro-step">Each record marks an incident, sometimes involving several people.</p>
+        <p class="intro-step final">What emerges when we follow these records through time?</p>
       </div>
     </section>
   </div>
@@ -78,7 +77,7 @@
   <section id="sequence" class="section viz">
     <div class="layout">
       <div id="left">
-        <div class="label">RECORDS SHOWN</div>
+        <div class="label">RECORDS</div>
         <div id="incident-count">0</div>
       </div>
       <div id="viz"></div>
@@ -89,7 +88,7 @@
 
 
       <div class="year-progress-wrapper">
-        <p class="record-key">Recorded coordinates, not reconstructed routes. The opening three records pause for reading.</p>
+        <p class="record-key">Only the distance from Lampedusa is to scale. Directions and paths are illustrative.</p>
         <div class="year-progress-bar" id="year-progress-bar">
           <div id="year-progress-fill"></div>
         </div>
@@ -104,27 +103,26 @@
 
       <div class="scrolly-text">
         <div class="scrolly-step" data-img="img-distance">
-          <h2>A 50-Kilometre Frame</h2>
-          <p>The sample contains <span data-total-records>95</span> records from 2014 to 2025, with <span data-total-people>833</span> people recorded dead or missing. Each supplied coordinate falls within 50 km of a fixed reference point on Lampedusa.</p>
-          <p class="data-note">Coordinates may locate an incident, rescue, recovery or arrival. Some conflict with the location description. The original coordinates are retained; individual notes appear on hover.</p>
+          <h2>Only 50 Kilometers Away</h2>
+          <p>From 2014 to 2025, records located within 50 kilometers of Lampedusa counted <span data-total-people>833</span> people dead or missing. Some disappeared at sea. Others died after reaching land. Being close to the island did not always mean reaching safety.</p>
         </div>
 
         <div class="scrolly-step" data-img="img-130">
           <h2>Why Lampedusa?</h2>
-          <p>Lampedusa provides a fixed point from which to read these records. The sample includes journeys from Tunisia and Libya, rescues at sea, and deaths recorded after arrival.</p>
+          <p>Lampedusa lies about 190 kilometers from Sfax, Tunisia, and 205 kilometers from Sicily. Though closer to North Africa, it is part of Italy. For people seeking safety or a new life, the island offers a relatively short crossing to European soil.</p>
         </div>
 
         <div class="scrolly-step" data-img="img-corridor">
-          <h2>One Crossing Among Many</h2>
-          <p>Sfax appears as a departure point in many records. This diagram shows geographic context, not reconstructed journeys. The sample also includes departures elsewhere and records whose exact location is uncertain.</p>
+          <h2>A Route Toward Europe</h2>
+          <p>For people leaving Tunisia, Lampedusa can be a first arrival point, with hopes of continuing farther into Europe. But even this relatively short crossing carries dangers. Boats can capsize, and exposure or a lack of essential care can turn the journey fatal.</p>
         </div>
       </div>
 
 
       <div class="scrolly-graphic" aria-hidden="true">
-        <img class="scrolly-img" data-for="img-distance" src="./assets/diagrams/img-distance.svg" alt="" />
-        <img class="scrolly-img" data-for="img-130" src="./assets/diagrams/img-130.svg" alt="" />
-        <img class="scrolly-img" data-for="img-corridor" src="./assets/diagrams/img-corridor.svg" alt="" />
+        <img class="scrolly-img" data-for="img-distance" src="./assets/diagrams/img-1.svg" alt="" />
+        <img class="scrolly-img" data-for="img-130" src="./assets/diagrams/img-2.svg" alt="" />
+        <img class="scrolly-img" data-for="img-corridor" src="./assets/diagrams/img-3.svg" alt="" />
       </div>
     </div>
   </section>
@@ -132,18 +130,17 @@
   <section id="eleven-years" class="section">
       <div class="page-width">
         <h2 class="fade-step">12 Years</h2>
-        <p class="fade-step">Each disc uses the same distance and size scales. Recorded losses fluctuate from year to year, but the annual average in 2022–2025 is higher than in 2014–2021. This describes the records in this sample, not the probability of dying on a crossing.</p>
-        <p class="data-note">Radius represents the supplied coordinate’s distance from the reference point. Mark size represents recorded deaths and disappearances. Direction and movement are not actual routes. Hover over a mark for its date and location description.</p>
+        <p class="fade-step">The losses rise and fall, with a heavier toll in recent years. More people were recorded dead or missing in 2024 than in any other year shown here. The number fell in 2025, but remained higher than in any year before 2022.</p>
       </div>
       <div class="people-track">
         <div class="people-stage page-width">
           <div id="year-discs"></div>
           <div class="people-caption">
             <h2><span data-people-count>833</span> people</h2>
-            <p>Each dot represents one person recorded dead or missing, 2014–2025.</p>
+            <p>who never got to live the lives they had hoped for.</p>
           </div>
           <canvas id="people-canvas" aria-hidden="true"></canvas>
-          <p class="people-note">Grouped by the cause reported for each record, including missing people. Multiple causes are kept together.</p>
+          <p class="people-note">Each circle represents one person recorded dead or missing. Groups reflect the cause reported for each record; records with multiple causes are grouped together.</p>
           <p class="people-accessible"></p>
         </div>
       </div>
@@ -154,9 +151,9 @@
     <div class="epilogue-wrapper">
       <div class="epilogue-text">
         <p class="epilogue-line">People make these journeys hoping to build a life somewhere new.</p>
-        <p class="epilogue-line">These records include people who disappeared at sea and people who died after reaching land.</p>
-        <p class="epilogue-line">Across twelve years, <span data-total-people>833</span> people were recorded dead or missing in the area shown here.</p>
-        <p class="epilogue-line">The records cannot tell us everything about their lives.<br>But they show that the losses continued.</p>
+        <p class="epilogue-line">Some disappeared at sea. Some died after reaching land.</p>
+        <p class="epilogue-line">The records cannot tell us everything about their lives.</p>
+        <p class="epilogue-line">But across twelve years, they show that the losses continued.</p>
       </div>
       <div class="epilogue-image">
 

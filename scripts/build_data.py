@@ -27,12 +27,14 @@ selected.sort(key=lambda r:(r['Incident Date'],r['Main ID']))
 for r in selected:
  vals=[int(r[k] or 0) for k in ['Number of Dead','Minimum Estimated Number of Missing','Total Number of Dead and Missing']]
  assert min(vals)>=0 and vals[0]+vals[1]==vals[2], r['Main ID']
-with (ROOT/'data/lampedusa_nearby_incidents.csv').open('w',newline='') as f:
+with (ROOT/'data/lampedusa_nearby_incidents.csv').open('w',newline='',encoding='utf-8') as f:
  w=csv.DictWriter(f,fieldnames=list(selected[0]),lineterminator="\n");w.writeheader();w.writerows(selected)
 years=[]
 for year in range(2014,2026):
  subset=[r for r in selected if int(r['Incident Year'])==year]
  years.append(dict(year=year,records=len(subset),dead=sum(int(r['Number of Dead'] or 0) for r in subset),missing=sum(int(r['Minimum Estimated Number of Missing'] or 0) for r in subset),total=sum(int(r['Total Number of Dead and Missing']) for r in subset)))
-summary=dict(source_sha256=hashlib.sha256(SOURCE.read_bytes()).hexdigest(),source_date_min=min(r['Incident Date'] for r in rows),source_date_max=max(r['Incident Date'] for r in rows),reference_point=CENTER,radius_km=50,records=len(selected),total=sum(y['total'] for y in years),years=years,flagged_ids=list(NOTES))
-(ROOT/'data/summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+# Hashed with LF line endings, as committed, so a Windows checkout with
+# autocrlf reproduces the same hash.
+summary=dict(source_sha256=hashlib.sha256(SOURCE.read_bytes().replace(b'\r\n',b'\n')).hexdigest(),source_date_min=min(r['Incident Date'] for r in rows),source_date_max=max(r['Incident Date'] for r in rows),reference_point=CENTER,radius_km=50,records=len(selected),total=sum(y['total'] for y in years),years=years,flagged_ids=list(NOTES))
+(ROOT/'data/summary.json').write_text(json.dumps(summary,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(summary,indent=2))

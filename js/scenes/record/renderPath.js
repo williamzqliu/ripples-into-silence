@@ -1,10 +1,12 @@
-import { recordTooltip } from "../../data/tooltip.js";
-import { isOnScene } from "./onScene.js";
 // js/scenes/record/renderPath.js
 //
-// One incident: a line travelling in from the edge of the fifty kilometre
+// One record: a line travelling in from the edge of the fifty kilometre
 // circle, stopping at the radius its recorded distance puts it at, and
-// leaving a ripple sized by the number of people lost.
+// leaving a ripple sized by the number of people lost. The legend's paths
+// also carry their distance as they travel, then their count.
+
+import { recordTooltip, showTooltip } from "../../data/tooltip.js";
+import { isOnScene } from "./onScene.js";
 
 import {
   cx, cy,
@@ -14,23 +16,15 @@ import {
   RIPPLE_OUTER_OPA_ORG, RIPPLE_SHOWING,
   RIPPLE_OUTER_FADING_DURATION, RIPPLE_OUTER_ENLARGE,
   RIPPLE_INNER_OPACITY_STEPS, RIPPLE_BLUR_MAX,
-  LABEL_FONT, LABEL_SIZE, LABEL_OFFSET, LABEL_GAP, LABEL_MARK_CLEAR,
-  LABEL_FADE, LABEL_HOLD
+  LABEL_FONT, LABEL_SIZE, LABEL_GAP, LABEL_MARK_CLEAR,
+  LABEL_DELAY, LABEL_FADE, LABEL_HOLD, LABEL_OWN_CLEAR
 } from "../../config.js";
 
 import {
-  unit, halfBox, pushOut, boxAt, inFrame, overlaps, overlapsDisc
+  halfBox, inFrame, overlaps, overlapsDisc
 } from "./labelGeometry.js";
 
 // ---------------------------------------------------------------- placing
-//
-// The old rule put the centre of the label a fixed twenty-six pixels
-// perpendicular to the path, with three hand-set nudges for the angle bands
-// where that was not enough. It was not enough because twenty-six pixels is
-// measured to the centre of a box sixty pixels wide: whenever the
-// perpendicular ran horizontally, half the label was still lying on top of
-// whatever it was meant to be clearing. Hence "206 dead" sitting inside its
-// own mark. labelGeometry holds the rule that replaces it.
 
 // Every mark whose disc is still solid on screen. A count has to clear the
 // mark it names, and it has to clear the two or three that landed just
@@ -50,42 +44,46 @@ function otherText(node) {
     .map(t => t.getBBox());
 }
 
-/** Perpendicular first, either side, then straight out and straight in.
-    Angle is the path's own, measured from the centre of the frame. */
-// The side of the path both labels sit on: the distance while the path is
-// travelling, then the count once it lands. The count used to try the
-// other side, and then straight out and in, whenever its first spot was
-// taken, so the reading could jump across the line at the moment it
-// changed from kilometres to deaths. It stays on this side now and moves
-// further out along it instead.
-const LABEL_SIDE = Math.PI / 2;
-const STEP_OUT = 6;           // px further out per try
-const MAX_STEPS = 10;
+// Level with the end of the path, on the side away from the line, so the
+// reading sits beside the point it names; then level on the other side;
+// then straight above it, then straight below. The first of those that
+// covers nothing wins: not the line itself, not Lampedusa's cross, not
+// other text, not a mark still on screen, and not the frame's edge. The
+// near edge of the text is what is placed, so the distance and the count
+// that replaces it start at the same point whatever their lengths.
+const CROSS_CLEAR = 12;       // px kept clear round the cross
 
-function placeLabel(node, own, angle) {
-  const box = halfBox(node);
-  const u = unit(angle + LABEL_SIDE);
-  const taken = otherText(node);
-  // The own mark is cleared by the distance itself, so testing it again here
-  // would only risk failing on the rounding.
-  const discs = Array.from(liveMarks).filter(m => m !== own);
+function spots(at, clear, box, angle) {
+  const g = LABEL_GAP, w = box.w * 2, h = box.h * 2;
+  const away = Math.cos(angle) > 0 ? -1 : 1;
+  const level = s => ({
+    anchor: s > 0 ? "start" : "end", x: at.x + s * (clear + g), y: at.y,
+    rect: { x: s > 0 ? at.x + clear + g : at.x - clear - g - w, y: at.y - box.h, width: w, height: h },
+  });
+  const upright = s => ({
+    anchor: "middle", x: at.x, y: at.y + s * (clear + g + box.h),
+    rect: { x: at.x - box.w, y: s < 0 ? at.y - clear - g - h : at.y + clear + g, width: w, height: h },
+  });
+  return [level(away), level(-away), upright(-1), upright(1)];
+}
 
-  const fallback = pushOut(own, u, own.r * LABEL_MARK_CLEAR, box, LABEL_GAP);
-  for (let k = 0; k <= MAX_STEPS; k++) {
-    const c = pushOut(own, u, own.r * LABEL_MARK_CLEAR + k * STEP_OUT, box, LABEL_GAP);
-    const b = boxAt(c, box);
-    if (!inFrame(b)) break;          // further out only leaves the frame sooner
-    if (taken.some(t => overlaps(b, t, LABEL_GAP))) continue;
-    if (discs.some(m => overlapsDisc(b, m, m.r * LABEL_MARK_CLEAR + LABEL_GAP))) continue;
-    return c;
+function crosses(line, r, pad = 2) {
+  for (let k = 0; k <= 40; k++) {
+    const x = line.x1 + (line.x2 - line.x1) * k / 40, y = line.y1 + (line.y2 - line.y1) * k / 40;
+    if (x > r.x - pad && x < r.x + r.width + pad && y > r.y - pad && y < r.y + r.height + pad) return true;
   }
+  return false;
+}
 
-  // Nowhere clean. Keep it on the canvas and let it land where it lands:
-  // an overlap that can be read past beats a label cropped by the frame.
-  return {
-    x: Math.min(Math.max(fallback.x, box.w + 2), FRAME_WIDTH - box.w - 2),
-    y: Math.min(Math.max(fallback.y, box.h + 2), FRAME_HEIGHT - box.h - 2),
-  };
+function chooseSpot(node, at, clear, box, angle, line, own) {
+  const taken = otherText(node);
+  const discs = Array.from(liveMarks).filter(m => m !== own);
+  const all = spots(at, clear, box, angle);
+  return all.find(s => inFrame(s.rect) &&
+    !(line && crosses(line, s.rect)) &&
+    !overlapsDisc(s.rect, { x: cx, y: cy }, CROSS_CLEAR) &&
+    !taken.some(t => overlaps(s.rect, t, LABEL_GAP)) &&
+    !discs.some(m => overlapsDisc(s.rect, m, m.r * LABEL_MARK_CLEAR + LABEL_GAP))) || all[0];
 }
 
 function ringOpacity(dead) {
@@ -113,7 +111,13 @@ function labelStyle(selection) {
     .style("font-variant-numeric", "tabular-nums lining-nums");
 }
 
-export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 1, onEnd }) {
+/** How long a path takes from launch to its ripple, travel and collapse,
+    so the clock can launch it early enough to land on its date. */
+export function travelMs(speed = 1, tail = 1) {
+  return (1 + 1 / tail) / ((LAUNCHING_SPEED * 60) / 1000 * speed);
+}
+
+export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 1, tail = 1, onLand }) {
   const fullR = LAUNCH_RADIUS;
   const visibleR = fullR * d.disappearRatio;
 
@@ -137,23 +141,28 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
     .attr("stroke-linecap", "round")
     .attr("opacity", 0.9);
 
-  // Perpendicular to its own path, clear of the line by the width of the
-  // text. Worked out once at launch: the label travels with the head, and
-  // re-solving it every frame would have it twitching from side to side.
-  let label, offset = { dx: 0, dy: 0 };
+  // Worked out once at launch, for where the path will end, and sized for
+  // the count that will replace the distance there, the longer of the two.
+  // The label travels with the head at the same offset: re-solving it every
+  // frame would have it twitching from side to side.
+  let label, spot = null, offset = { dx: 0, dy: 0 };
+  // Clear of the mark's own disc, not of the burst that spreads from it,
+  // which is fading by the time the count is read: the burst's reach threw
+  // the label a long way off the point it names.
+  const clearR = d.radius * LABEL_OWN_CLEAR;
+  const countText = `${d.dead} dead or missing`;
   if (showLabel) {
-    label = labelStyle(layer.append("text")).text(`${RADIUS_KM.toFixed(2)} km`);
-    const box = halfBox(label.node());
-    const u = unit(d.angle + LABEL_SIDE);
-    const at = pushOut({ x: 0, y: 0 }, u, LABEL_OFFSET, box, LABEL_GAP);
-    offset = { dx: at.x, dy: at.y };
+    label = labelStyle(layer.append("text")).text(countText);
+    spot = chooseSpot(label.node(), { x: xEnd, y: yEnd }, clearR, halfBox(label.node()), d.angle,
+      { x1: xStart, y1: yStart, x2: xEnd, y2: yEnd }, null);
+    label.text(`${RADIUS_KM.toFixed(2)} km`).attr("text-anchor", spot.anchor);
+    offset = { dx: spot.x - xEnd, dy: spot.y - yEnd };
   }
 
   let progress = 0;
   let phase = "forward";
   let flashDrawn = false;
-  let labelFadedIn = false;
-  let fadeInTimer = null;
+  let age = 0;                // ms on screen, for the label's fade-in
 
   // Progress is advanced by elapsed time, not by a fixed step per frame.
   // The fixed step tied the animation to the display's refresh rate, so the
@@ -179,11 +188,7 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
 
   hoverCircle
     .on("mousemove", (event) => {
-      tooltip
-        .html(recordTooltip(d))
-        .style("left", `${event.pageX + 10}px`)
-        .style("top", `${event.pageY - 20}px`)
-        .style("opacity", 1);
+      showTooltip(event, recordTooltip(d));
     })
     .on("mouseleave", () => {
       tooltip.style("opacity", 0);
@@ -193,7 +198,8 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
     const elapsed = lastFrame === null ? 1000 / 60 : Math.min(now - lastFrame, MAX_STEP_MS);
     lastFrame = now;
     if (!isOnScene()) { requestAnimationFrame(animate); return; }
-    progress += PROGRESS_PER_MS * speed * elapsed;
+    // `tail` quickens the collapse on its own, for the slow opening paths.
+    progress += PROGRESS_PER_MS * speed * (phase === "shrink" ? tail : 1) * elapsed;
 
     if (phase === "forward") {
       const t = Math.min(progress, 1);
@@ -210,18 +216,11 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           .attr("x", xCurrent + offset.dx)
           .attr("y", yCurrent + offset.dy);
 
-        // Once, not once per frame: the flag used to be declared inside this
-        // branch, so every frame scheduled another fade-in.
-        // Held so the handover below can cancel it. A fast path lands before
-        // this fires, and the fade-in it then schedules interrupts the
-        // fade-out, leaving the distance label on screen for good with the
-        // count sitting underneath it.
-        if (!labelFadedIn) {
-          labelFadedIn = true;
-          fadeInTimer = setTimeout(() => {
-            label.transition().duration(200).style("opacity", 1);
-          }, 200);
-        }
+        // As the original did it: a beat after launch, then quickly up.
+        // Counted in frames on screen, so it holds with the path.
+        age += elapsed;
+        const a = Math.min(Math.max((age - LABEL_DELAY) / LABEL_FADE, 0), 1);
+        label.style("opacity", a * a * (3 - 2 * a));
       }
 
       if (t >= 1) {
@@ -243,29 +242,38 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
       if (t >= 1 && !flashDrawn) {
         flashDrawn = true;
 
-        // Registered whether or not this path carries a label: ninety-one of
-        // the ninety-four do not, and their discs are in the way just the
-        // same. The ripple below takes it off again when it has faded.
+        // Registered whether or not this path carries a label: most do not,
+        // and their discs are in the way just the same. The ripple below
+        // takes it off again when it has faded.
         const mark = { x: xEnd, y: yEnd, r: d.radius };
         liveMarks.add(mark);
 
         // The distance label hands over to the count of people lost.
         if (showLabel) {
-          clearTimeout(fadeInTimer);
           label.classed("leaving", true)
-            .transition().duration(LABEL_FADE).style("opacity", 0).remove();
+            .transition().duration(LABEL_FADE)
+            .style("opacity", 0).remove();
 
           // The count is static, so it can be solved properly: clear of the
           // mark it names, clear of the ring labels and of any other mark
           // still on screen, and inside the frame.
-          const count = labelStyle(layer.append("text")).text(`${d.dead} dead or missing`);
-          const spot = placeLabel(count.node(), mark, d.angle);
+          const count = labelStyle(layer.append("text")).text(countText);
+          // Where the distance was, unless something has landed there since.
+          const taken = otherText(count.node());
+          const stillClear = !taken.some(t => overlaps(spot.rect, t, LABEL_GAP)) &&
+            ![...liveMarks].some(m => m !== mark && overlapsDisc(spot.rect, m, m.r * LABEL_MARK_CLEAR + LABEL_GAP));
+          const at = stillClear ? spot :
+            chooseSpot(count.node(), mark, clearR, halfBox(count.node()), d.angle, null, mark);
 
+          // Crossfaded with the distance, in the same place, as the mark bursts.
           count
-            .attr("x", spot.x)
-            .attr("y", spot.y)
-            .transition().duration(LABEL_FADE).style("opacity", 1)
-            .transition().delay(LABEL_HOLD).duration(LABEL_FADE).style("opacity", 0)
+            .attr("text-anchor", at.anchor)
+            .attr("x", at.x)
+            .attr("y", at.y)
+            .transition().duration(LABEL_FADE)
+            .style("opacity", 1)
+            .transition().delay(LABEL_HOLD).duration(LABEL_FADE)
+            .style("opacity", 0)
             .remove();
         }
 
@@ -295,6 +303,9 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           .transition()
           .delay(RIPPLE_SHOWING)
           .duration(RIPPLE_OUTER_FADING_DURATION)
+          // The counters count up while the burst spreads out and leaves
+          // its ring, over the same time.
+          .on("start", () => { if (onLand) onLand(); })
           .attr("r", d.radius * RIPPLE_OUTER_ENLARGE)
           .attr("opacity", 0)
           .tween("blur", () => t =>
@@ -304,11 +315,6 @@ export function renderPath({ d, gradId, defs, layer, showLabel = false, speed = 
           .remove();
 
         path.remove();
-
-        setTimeout(() => {
-          if (onEnd) onEnd();
-        }, 500);
-
         return;
       }
     }

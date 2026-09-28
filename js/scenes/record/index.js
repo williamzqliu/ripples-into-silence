@@ -1,7 +1,7 @@
 // js/scenes/record/index.js
 //
-// The Record: the island, the fifty kilometre circle, and the ninety-four
-// incidents arriving in it. controller.js runs the sequence; this decides
+// The Record: the island, the fifty kilometre circle, and the ninety-five
+// records arriving in it. controller.js runs the sequence; this decides
 // when it starts.
 //
 // It starts the moment the nav reaches the top, which is when the section
@@ -31,7 +31,10 @@ export function initRecord() {
 
   function check() {
     if (started || !armed) return;
-    if (nav.getBoundingClientRect().top <= 0 && isOnScene()) {
+    // Within a pixel: the section's top is fractional, so a nav jump or a
+    // #sequence link lands with the nav a third of a pixel down, and a
+    // strict zero left the record blank until the reader scrolled again.
+    if (nav.getBoundingClientRect().top <= 1 && isOnScene()) {
       started = true;
       runSceneIntro().catch(err => {
         console.error("The opening did not finish:", err);

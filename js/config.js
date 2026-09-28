@@ -67,23 +67,16 @@ export const DISTANCE_RING_STROKE = 1.5;
 // outer one can afford: the fifty kilometre circle leaves twenty-five
 // pixels of frame above it and the label is eighteen tall.
 export const RING_LABEL_GAP = 5;
-
-// Paths are released in a shuffled round robin over this many angular
-// sectors, so consecutive incidents arrive from different directions.
-export const ANGLE_BUCKETS = 20;
+// The ring label's box, near enough, for keeping marks off it (see
+// data/incidents.js), and the daylight a mark keeps from it.
+export const RING_LABEL_W = 36;
+export const RING_LABEL_H = 18;
+export const RING_LABEL_CLEAR = 4;
 
 // Angle carries nothing, so it is free to be chosen for legibility. Walking
 // the golden angle down the radius order puts marks at a similar distance
 // 137.5 degrees apart. See data/incidents.js.
 export const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-
-// The first few paths are picked to be legible rather than representative:
-// small enough to read, near enough to arrive quickly, and launched from the
-// lower half of the circle where the label has room.
-export const FEATURED_DEAD = 8;
-export const FEATURED_DISTANCE = 0.4;
-export const FEATURED_ANGLE_MIN_DEG = 100;
-export const FEATURED_ANGLE_MAX_DEG = 260;
 
 // ----------------------------------------------------------------- opening
 //
@@ -95,6 +88,7 @@ export const ISLAND_WIDTH = 300;      // the outline, in frame units
 export const NAME_OFFSET = 78;        // the name, below the middle
 export const ISLAND_FADE_IN = 800;
 export const ISLAND_HOLD = 1300;      // before the name goes
+export const NAME_LINGER = 100;       // the name stays this much longer; the shrink does not wait
 export const NAME_FADE_OUT = 600;
 export const ISLAND_SHRINK = 900;     // onto the cross, which grows in step
 
@@ -109,18 +103,9 @@ export const RING_STAGGER = 220;
 export const RADIUS_HOLD = 3200;
 
 // ------------------------------------------------------------------ pacing
-
-export const INITIAL_INCIDENTS = 3;   // released slowly, one at a time
-// Three seconds with the bar already running. The piece was tuned with
-// this: at 1.2 seconds every incident went out ahead of the bar, which is
-// what put the years out of step with it.
-export const FIRST_DELAY = 3000;      // ms before the first one
-export const INITIAL_DELAY = 6000;    // ms between those first few
-export const INITIAL_SPEED = 0.25;    // and they travel slowly as well
-
-export const MAX_CURRENT = 5;         // paths allowed in flight at once
-export const MIN_GAP = 400;           // floor on the gap once accelerated
-export const LAUNCH_INTERVAL = 50;    // how often the scheduler looks
+//
+// The schedule itself, when each record goes out and how the opening eases
+// in, is in scenes/record/drawPaths.js, with the reasons for it.
 
 // Path progress per frame at 60Hz. renderPath turns this into progress per
 // millisecond, so the tuning survives on a display of any refresh rate.
@@ -153,10 +138,8 @@ export const RIPPLE_INNER_OPACITY_STEPS = [
 
 export const LABEL_FONT = "'EB Garamond', Georgia, serif";
 export const LABEL_SIZE = 15;         // the km readout and the death count
-// How far the near edge of the label sits from the thing it is clearing:
-// the path it belongs to, the mark it names, or another label. Measured to
-// the edge of the text, not to its centre. See placeLabel in renderPath.
-export const LABEL_OFFSET = 14;
+// Daylight between a label's near edge and whatever it is clearing: the
+// mark it names, the line, or other text. See chooseSpot in renderPath.
 export const LABEL_GAP = 8;
 
 // The disc keeps growing and fading after the label appears, out to three
@@ -166,8 +149,14 @@ export const LABEL_GAP = 8;
 // as solid while the label is up.
 export const LABEL_MARK_CLEAR = 1.8;
 
-export const LABEL_FADE = 300;        // ms, in and out
-export const LABEL_HOLD = 800;        // ms the death count stays up
+// The original's timing: the distance comes up a beat after launch, and
+// as the mark bursts it crossfades with the count in the same place. The
+// count is held long enough to read.
+export const LABEL_DELAY = 200;       // ms after launch before the distance shows
+export const LABEL_FADE = 300;        // ms, every fade in and out
+export const LABEL_HOLD = 1800;       // ms the death count stays up
+// How far a label keeps from the mark it names, in the mark's radii.
+export const LABEL_OWN_CLEAR = 1.15;
 
 // ------------------------------------------------------- background field
 
@@ -179,15 +168,3 @@ export const LABEL_HOLD = 800;        // ms the death count stays up
 export const BG_MAX_LIVE = 90;
 export const BG_TICK_MIN = 300;   // ms between batches
 export const BG_TICK_MAX = 800;
-
-// --------------------------------------------------------------- arrivals
-
-// The only figure on this page that is not in the incident record. The
-// Missing Migrants extract counts boats where somebody died; it has no way
-// of counting the boats that arrived. 45,997 people landed at Lampedusa in
-// 2024, on 1,095 boats, per the Italian Red Cross, which runs the reception
-// centre there. For scale, UNHCR puts sea arrivals for the whole of Italy
-// that year at 66,617.
-// Credited in the footer, with the incident record.
-export const ARRIVALS_2024 = 45997;
-

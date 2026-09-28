@@ -1,22 +1,21 @@
-import { recordTooltip } from "../data/tooltip.js";
 // js/scenes/elevenYears.js
 //
-// Eleven years, one disc each, every disc the same fifty kilometre circle as
+// Twelve years, one disc each, every disc the same fifty kilometre circle as
 // the main sequence and read off the same two rules: how far out a mark sits
 // is how far out the incident was, how big it is is how many people were
 // lost. Put side by side that makes the years comparable at a glance, which
 // a line of totals cannot do.
 //
-// This replaces a chart whose eleven-year series was written into the source
-// by hand and matched the data in one year out of eleven.
+// This replaces a chart whose yearly series was written into the source by
+// hand and matched the data in one year out of eleven. (The file keeps the
+// name it had when the record ran to eleven years.)
 //
-// The discs are all one size, in rows of four, three and four, the middle row
-// set between the others. 2024 used to be drawn large between two columns of
-// small ones, which read as more incidents when 2023 holds twice as many. It
-// is the same size now, and marked for what it does hold: the most lives
-// lost in any year, in a solid frame with a line under its figures. Any year
-// can be opened large, with its rings and a figure for every mark.
+// The discs are all one size, three rows of four, every frame drawn alike. The latest year's frame
+// sends out a slow ripple, the island's pulse in the epilogue, because the
+// record is not closed: the losses go on past its end. Any year can be
+// opened large, with its rings and a figure for every mark.
 
+import { recordTooltip, showTooltip } from "../data/tooltip.js";
 import {
   RADIUS_KM, radiusFractionFor,
   GOLDEN_ANGLE, CROSS_COLOUR,
@@ -26,9 +25,8 @@ import {
 import { loadAndProcessData } from "../data/incidents.js";
 import { reducedMotion as REDUCED } from "../core/motion.js";
 
-// Rows, top to bottom. On an eight column grid each disc spans two, and a
-// shorter row is inset by one column a disc short, which sets it between
-// the discs of the row above.
+// Rows, top to bottom. On an eight column grid each disc spans two; a
+// shorter row would be inset by a column for each disc it is short.
 const ROWS = [4, 4, 4];
 const GRID_COLUMNS = 8;
 
@@ -46,7 +44,6 @@ const MIN_MARK = 2.6;
 const MIN_TEXT_PX = 14;
 const RING_LABEL_UNITS = 15;
 
-const WORST_NOTE = "Highest recorded total in this sample";
 
 // Each disc plays the main sequence in miniature as it comes on screen: the
 // circle opens out of the cross, then the year's incidents come in one by
@@ -59,20 +56,50 @@ const TAIL_MS = 260;
 const RUN_MS = 1100;           // the spread of launch times across one disc
 const STEP_MAX_MS = 110;       // and the longest gap between two of them
 
-// Each disc plays once, when its top comes above this line: the same kind
-// of scroll check every other entrance on the page uses.
+// Two steps. As a cell comes above this line it floats in and its disc
+// opens, the frame and the cross, empty. The records fly in once the whole
+// grid is pinned, all twelve together, a year a beat after the one before.
+// They used to fly in row by row as the rows scrolled up, so the first row
+// had finished before the last was on screen and no reader saw the twelve
+// years fill side by side.
 const PLAY_AT = 0.9;
-const pending = new Set();
+const FILL_STAGGER = 90;       // ms from one year's records to the next's
+const pending = new Set();     // cells not yet opened
+const unfilled = new Set();    // opened, records not yet flown in
 
 function checkDiscs() {
   const vh = window.innerHeight;
+  const track = document.querySelector(".people-track");
+  const stage = document.querySelector(".people-stage");
+  const pinned = track && stage &&
+    track.getBoundingClientRect().top <= (parseFloat(getComputedStyle(stage).top) || 0) + 1;
   for (const node of pending) {
     if (node.closest('.scene--away')) continue;   // wait for its scene
     const r = node.getBoundingClientRect();
-    if (r.top < vh * PLAY_AT && r.bottom > 0) {
+    if ((r.top < vh * PLAY_AT && r.bottom > 0) || pinned) {
       pending.delete(node);
-      node.__play();
+      // The cell's float-in goes with its disc. Left to core/reveal.js,
+      // whose stagger lowers the line for each later cell, the last row
+      // never came up on a short screen, where the grid is pinned and
+      // does not rise any further.
+      node.classList.add("visible");
+      node.__open();
+      unfilled.add(node);
     }
+  }
+  if (!pinned || !unfilled.size) return;
+  [...unfilled].forEach((node, k) => node.__fill(k * FILL_STAGGER));
+  unfilled.clear();
+}
+
+// Every disc still waiting, drawn at once in its final state. The people
+// scene calls this as it takes the marks over, so a reader who arrives
+// past the discs does not see marks appear from nowhere on the way back.
+export function settleDiscs() {
+  for (const node of [...pending, ...unfilled]) {
+    pending.delete(node); unfilled.delete(node);
+    node.classList.add("visible");
+    node.__settle();
   }
 }
 export function initElevenYears() {
@@ -101,8 +128,7 @@ async function drawYearDiscs(containerId) {
       .forEach((d, k) => { d.discAngle = (k * GOLDEN_ANGLE) % (2 * Math.PI); });
   }
 
-  // The year the most people were lost, found rather than written in.
-  const worst = d3.greatest(years, y => d3.sum(byYear.get(y), d => d.dead));
+  const latest = years.at(-1);
 
   const grid = root.append("div").attr("class", "year-discs");
 
@@ -113,7 +139,7 @@ async function drawYearDiscs(containerId) {
     const inset = (GRID_COLUMNS / 2 - count);
     for (let k = 0; k < count; k++, i++) {
       const y = years[i];
-      cell(grid, y, byYear.get(y), 1 + inset + k * 2, y === worst);
+      cell(grid, y, byYear.get(y), 1 + inset + k * 2, y === latest);
     }
     row++;
   }
@@ -126,19 +152,16 @@ async function drawYearDiscs(containerId) {
 
 function figures(rows) {
   const dead = d3.sum(rows, d => d.dead);
-  return `${rows.length} ${rows.length === 1 ? "incident" : "incidents"}<br />` +
+  return `${rows.length} ${rows.length === 1 ? "record" : "records"}<br />` +
     `${dead} dead or missing`;
 }
 
-function note(isWorst) {
-  return isWorst ? `<div class="year-disc__note">${WORST_NOTE}</div>` : "";
-}
 
 // One year: the disc, with its year and figures under it. The whole cell
 // opens the year large.
-function cell(grid, year, rows, column, isWorst) {
+function cell(grid, year, rows, column, isLatest) {
   const box = grid.append("div")
-    .attr("class", `year-disc fade-step${isWorst ? " year-disc--worst" : ""}`)
+    .attr("class", "year-disc fade-step")
     .style("grid-column", `${column} / span 2`)
     .attr("role", "button")
     .attr("tabindex", 0)
@@ -147,14 +170,17 @@ function cell(grid, year, rows, column, isWorst) {
   const holder = box.append("div").attr("class", "year-disc__plot");
   box.append("div").attr("class", "year-disc__label").html(`
     <div class="year-disc__year">${year}</div>
-    <div class="year-disc__figures">${figures(rows)}</div>${note(isWorst)}`);
+    <div class="year-disc__figures">${figures(rows)}</div>`);
 
-  const play = disc(holder, rows, year, SMALL_R);
+  const play = disc(holder, rows, year, SMALL_R, isLatest);
   const node = box.node();
   if (REDUCED) play(true);
-  else { node.__play = () => play(false); pending.add(node); }
+  node.__open = () => play.open(REDUCED);
+  node.__fill = wait => play.fill(REDUCED, wait);
+  node.__settle = () => play(true);
+  pending.add(node);
 
-  const open = () => openYear(year, rows, node, isWorst);
+  const open = () => openYear(year, rows, node);
   box.on("click", open)
     .on("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
@@ -162,11 +188,7 @@ function cell(grid, year, rows, column, isWorst) {
 }
 
 function showTip(event, d) {
-  d3.select("#tooltip")
-    .html(recordTooltip(d))
-    .style("left", `${event.pageX + 10}px`)
-    .style("top", `${event.pageY - 20}px`)
-    .style("opacity", 1);
+  showTooltip(event, recordTooltip(d));
 }
 
 function hideTip() {
@@ -175,7 +197,7 @@ function hideTip() {
 
 // One disc, drawn at radius r in its own units. The large one also carries
 // the sequence's 25 and 10 kilometre rings, and a label on each.
-function disc(holder, rows, year, r) {
+function disc(holder, rows, year, r, pulse = false) {
   const big = r === LARGE_R;
   const pad = big ? 24 : 3;       // the large one's pad holds the 50 km label
   const size = (r + pad) * 2;
@@ -198,6 +220,16 @@ function disc(holder, rows, year, r) {
     .attr("fill", "none")
     .attr("stroke-width", (big ? 2 : 1.2) * u)
     .attr("stroke-dasharray", big ? "6 6" : "4 5");
+
+  // The latest year's ripple: two rings out from the frame and a rest, the
+  // rhythm of the island's pulse in the epilogue. Switched on once the
+  // frame has opened.
+  const ripples = pulse ? [0, 1].map(() => svg.insert("circle", ".year-disc__frame")
+    .attr("class", "year-disc__ripple")
+    .attr("cx", c).attr("cy", c).attr("r", r)
+    .attr("fill", "none")
+    .attr("stroke-width", 1.2 * u)) : [];
+  const startRipples = () => ripples.forEach(g => g.classed("is-on", true));
 
   const rings = big ? DISTANCE_RINGS_KM.map(km => {
     const rr = r * radiusFractionFor(km);
@@ -284,27 +316,36 @@ function disc(holder, rows, year, r) {
       .remove();
   }
 
-  let played = false;
-  return function play(instant) {
-    if (played) return;
-    played = true;
-
+  // Opening the disc and flying its records in are two steps, so the grid
+  // can open as it scrolls up and fill once it is still. play() does both.
+  let opened = false, openedAt = 0, filled = false;
+  function open(instant) {
+    if (opened) return;
+    opened = true; openedAt = performance.now();
     if (instant) {
       frame.attr("r", r);
       cross.attr("opacity", 0.75);
       rings.forEach(g => g.attr("opacity", 1));
       ringLabels.forEach(t => t.attr("opacity", 1));
-      marks.forEach(m => settle(m, false));
+      startRipples();
       return;
     }
-
-    frame.transition().duration(OPEN_MS).ease(d3.easeCubicOut).attr("r", r);
+    frame.transition().duration(OPEN_MS).ease(d3.easeCubicOut).attr("r", r)
+      .on("end", startRipples);
     cross.transition().duration(OPEN_MS * 0.7).attr("opacity", 0.75);
     rings.forEach((g, k) => g.transition().delay(OPEN_MS * 0.4 + k * 150)
       .duration(OPEN_MS).attr("opacity", 1));
     ringLabels.forEach((t, k) => t.transition().delay(OPEN_MS * 0.4 + k * 150)
       .duration(OPEN_MS).attr("opacity", 1));
+  }
 
+  function fill(instant, wait = 0) {
+    if (filled) return;
+    open(instant);
+    filled = true;
+    if (instant) { marks.forEach(m => settle(m, false)); return; }
+    // Not before the frame they land in has mostly opened.
+    const start = Math.max(wait, openedAt + OPEN_MS * 0.6 - performance.now());
     // In the order they happened, which is the order the rows are in.
     const byDate = marks.slice().sort((a, b) => rows.indexOf(a.d) - rows.indexOf(b.d));
     const step = Math.min(STEP_MAX_MS, RUN_MS / Math.max(1, byDate.length));
@@ -316,7 +357,7 @@ function disc(holder, rows, year, r) {
         .attr("stroke-width", (big ? 1.5 : 0.8) * u)
         .attr("stroke-linecap", "round");
       line.transition()
-        .delay(OPEN_MS * 0.6 + i * step)
+        .delay(start + i * step)
         .duration(FLY_MS).ease(d3.easeCubicIn)
         .attr("x2", m.x).attr("y2", m.y)
         .transition()
@@ -324,7 +365,12 @@ function disc(holder, rows, year, r) {
         .attr("x1", m.x).attr("y1", m.y)
         .on("end", () => { line.remove(); settle(m, true); });
     });
-  };
+  }
+
+  const play = instant => { open(instant); fill(instant); };
+  play.open = open;
+  play.fill = fill;
+  return play;
 }
 
 // ---------- one year, opened large
@@ -350,10 +396,10 @@ function buildLightbox() {
   const text = panel.append("div").attr("class", "disc-lightbox__text");
   text.append("h3").attr("id", "disc-lightbox-year").attr("class", "disc-lightbox__year");
   text.append("p").attr("class", "disc-lightbox__figures");
-  text.append("p").attr("class", "disc-lightbox__note");
   text.append("p").attr("class", "disc-lightbox__key")
-    .text("Radius shows the distance of the recorded coordinate from the reference point; " +
-          "its size is how many people were lost. Point at a mark for its figures.");
+    .text("The farther a mark sits from the centre, the farther from Lampedusa it was recorded. " +
+          "The larger the mark, the more people were recorded dead or missing. " +
+          "Hover over a mark for details.");
   box.append("button")
     .attr("class", "disc-lightbox__close")
     .attr("type", "button")
@@ -388,16 +434,13 @@ function fitRingLabels() {
     .attr("font-size", Math.max(RING_LABEL_UNITS, MIN_TEXT_PX * units));
 }
 
-function openYear(year, rows, from, isWorst) {
+function openYear(year, rows, from) {
   if (!lightbox) lightbox = buildLightbox();
   returnFocus = from;
   hideTip();
 
   lightbox.select(".disc-lightbox__year").text(year);
   lightbox.select(".disc-lightbox__figures").html(figures(rows));
-  lightbox.select(".disc-lightbox__note").text(isWorst ? WORST_NOTE : "")
-    .attr("hidden", isWorst ? null : "");
-  lightbox.classed("disc-lightbox--worst", !!isWorst);
   const plot = lightbox.select(".disc-lightbox__plot").html("");
   const play = disc(plot, rows, year, LARGE_R);
 
