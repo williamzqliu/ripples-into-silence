@@ -209,12 +209,15 @@ function disc(holder, rows, year, r, pulse = false) {
   const big = r === LARGE_R;
   const pad = big ? 24 : 3;       // the large one's pad holds the 50 km label
   const size = (r + pad) * 2;
+  const records = rows.length;
+  const dead = d3.sum(rows, d => d.dead);
   const svg = holder.append("svg")
     .attr("viewBox", `0 0 ${size} ${size}`)
     .attr("role", "img")
     .attr("aria-label",
-      `${year}: ${rows.length} records with coordinates within ${RADIUS_KM} kilometres of the reference point, ` +
-      `${d3.sum(rows, d => d.dead)} people dead or missing.`);
+      `${year}: ${records} ${records === 1 ? "record" : "records"} with coordinates within ` +
+      `${RADIUS_KM} kilometers of the reference point, ` +
+      `${dead} ${dead === 1 ? "person" : "people"} dead or missing.`);
 
   const c = size / 2;
   const scale = r / 300;          // the main sequence draws this at 300px
@@ -406,7 +409,7 @@ function buildLightbox() {
   text.append("h3").attr("id", "disc-lightbox-year").attr("class", "disc-lightbox__year");
   text.append("p").attr("class", "disc-lightbox__figures");
   text.append("p").attr("class", "disc-lightbox__key")
-    .text("The farther a mark sits from the centre, the farther from Lampedusa it was recorded. " +
+    .text("The farther a mark sits from the center, the farther from Lampedusa it was recorded. " +
           "The larger the mark, the more people were recorded dead or missing. " +
           "Hover over a mark for details.");
   box.append("button")
